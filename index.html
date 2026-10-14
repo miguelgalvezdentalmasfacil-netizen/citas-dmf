@@ -202,6 +202,8 @@ textarea.inp{resize:vertical;min-height:80px}
       <input class="inp" id="f-date" type="date" title="Filtrar por fecha específica">
       <select class="inp" id="f-st"></select>
       <select class="inp" id="f-suc"></select>
+      <select class="inp" id="f-tip" title="Filtrar por tipo de cita"></select>
+      <select class="inp" id="f-ori" title="Filtrar por origen"></select>
       <select class="inp hidden" id="f-as"></select>
       <select class="inp" id="f-sort" title="Ordenar lista">
         <option value="cita_asc">📅 Cita: más próximas primero</option>
@@ -221,8 +223,8 @@ textarea.inp{resize:vertical;min-height:80px}
 /* ============ CONFIG ============ */
 const SUCURSALES=['Tijuana','Mexicali Obregón','Mexicali Villa Verde','Ensenada'];
 const TRATAMIENTOS=['Valoración','Limpieza dental','Ortodoncia (brackets)','Alineadores','Endodoncia','Extracción','Resina','Corona','Implante','Blanqueamiento','Prótesis','Otro'];
-const TIPOS=['Cita nueva','Cita de tratamiento','Seguimiento'];
-const ORIGENES=['Facebook','Instagram','WhatsApp','Referido','Paciente anterior','Walk-in','Otro'];
+const TIPOS=['Nueva','Reagenda'];
+const ORIGENES=['Publicidad Externa','Publicidad Interna','Convenio'];
 const ESTATUS=['Pendiente','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
 const USUARIOS=[
@@ -278,14 +280,14 @@ function seed(){
     historial:[{f:new Date(now-(daysAgo||0)*86400000-3600000*2).toISOString(),e:est||'Pendiente'}]
   });
   return [
-    mk('u2',t,'10:00','María López','6641234567','Tijuana','Valoración','Cita nueva','Facebook','Pendiente',2),
-    mk('u2',t,'12:30','Carlos Ruiz','6649876543','Tijuana','Ortodoncia (brackets)','Cita de tratamiento','Referido','Asistió',3),
-    mk('u2',m,'09:30','Ana Torres','6861112233','Mexicali Obregón','Limpieza dental','Cita nueva','Instagram','Pendiente',1),
-    mk('u2',m,'16:00','Luis Herrera','6462223344','Ensenada','Endodoncia','Cita de tratamiento','WhatsApp','Pendiente',1),
-    mk('u3',m,'11:00','Sofía Mendoza','6645556677','Tijuana','Alineadores','Cita nueva','Facebook','Pendiente',0),
-    mk('u2',d3,'11:30','Roberto Gómez','6643334455','Tijuana','Implante','Cita nueva','WhatsApp','Pendiente',1),
-    mk('u3',d5,'15:00','Fernanda Díaz','6867778899','Mexicali Villa Verde','Blanqueamiento','Cita nueva','Instagram','Pendiente',2),
-    mk('u2',d8,'10:00','Alejandro Castro','6468889900','Ensenada','Corona','Cita de tratamiento','Paciente anterior','Pendiente',0)
+    mk('u2',t,'10:00','María López','6641234567','Tijuana','Valoración','Nueva','Publicidad Externa','Pendiente',2),
+    mk('u2',t,'12:30','Carlos Ruiz','6649876543','Tijuana','Ortodoncia (brackets)','Reagenda','Convenio','Asistió',3),
+    mk('u2',m,'09:30','Ana Torres','6861112233','Mexicali Obregón','Limpieza dental','Nueva','Publicidad Externa','Pendiente',1),
+    mk('u2',m,'16:00','Luis Herrera','6462223344','Ensenada','Endodoncia','Reagenda','Publicidad Interna','Pendiente',1),
+    mk('u3',m,'11:00','Sofía Mendoza','6645556677','Tijuana','Alineadores','Nueva','Publicidad Externa','Pendiente',0),
+    mk('u2',d3,'11:30','Roberto Gómez','6643334455','Tijuana','Implante','Nueva','Convenio','Pendiente',1),
+    mk('u3',d5,'15:00','Fernanda Díaz','6867778899','Mexicali Villa Verde','Blanqueamiento','Nueva','Publicidad Interna','Pendiente',2),
+    mk('u2',d8,'10:00','Alejandro Castro','6468889900','Ensenada','Corona','Reagenda','Publicidad Interna','Pendiente',0)
   ];
 }
 function persist(){DB.save(citas)}
@@ -310,6 +312,8 @@ function startApp(){
   $('#b-csv').classList.remove('hidden');
   $('#f-st').innerHTML=opts(ESTATUS,'','Todos los estatus');
   $('#f-suc').innerHTML=opts(SUCURSALES,'','Todas las sucursales');
+  if($('#f-tip')) $('#f-tip').innerHTML=opts(TIPOS,'','Todos los tipos');
+  if($('#f-ori')) $('#f-ori').innerHTML=opts(ORIGENES,'','Todos los orígenes');
   $('#f-as').innerHTML='<option value="">Todos los asesores</option>'+USUARIOS.map(u=>`<option value="${u.id}">${esc(u.nombre)}</option>`).join('');
   render();
 }
@@ -371,10 +375,15 @@ function currentList(){
   const d=$('#f-date')?$('#f-date').value:'';
   const st=$('#f-st')?$('#f-st').value:'';
   const su=$('#f-suc')?$('#f-suc').value:'';
+  const tip=$('#f-tip')?$('#f-tip').value:'';
+  const ori=$('#f-ori')?$('#f-ori').value:'';
   const as=$('#f-as')?$('#f-as').value:'';
   if(q)l=l.filter(c=>c.paciente.toLowerCase().includes(q)||c.telefono.includes(q));
   if(d)l=l.filter(c=>c.fecha===d);if(st)l=l.filter(c=>c.estatus===st);
-  if(su)l=l.filter(c=>c.sucursal===su);if(as)l=l.filter(c=>c.asesorId===as);
+  if(su)l=l.filter(c=>c.sucursal===su);
+  if(tip)l=l.filter(c=>c.tipo===tip);
+  if(ori)l=l.filter(c=>c.origen===ori);
+  if(as)l=l.filter(c=>c.asesorId===as);
 
   const sortMode=$('#f-sort')?$('#f-sort').value:'cita_asc';
   return l.sort((a,b)=>{
@@ -452,7 +461,7 @@ function rowHTML(c){
     </div>
     <div class="what">
       <b>${esc(c.tratamiento)}</b>
-      <span class="m">${esc(c.sucursal)}${user.rol==='admin'?' · '+esc(nameOf(c.asesorId)):''}${view==='todas'?'':' · '+esc(c.tipo)}</span>
+      <span class="m">${esc(c.sucursal)} · <b>${esc(c.tipo||'Nueva')}</b> · ${esc(c.origen||'—')}${user.rol==='admin'?' · '+esc(nameOf(c.asesorId)):''}</span>
     </div>
     <div class="st">
       <span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>
@@ -470,7 +479,7 @@ function openModal(h){const m=$('#modal');m.innerHTML=`<div class="modal">${h}</
 function closeModal(){$('#modal').classList.add('hidden');$('#modal').innerHTML=''}
 
 function citaForm(id){
-  const c=citas.find(x=>x.id===id)||{fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',tipo:'Cita nueva',origen:'',notas:'',asesorId:user.id};
+  const c=citas.find(x=>x.id===id)||{fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',tipo:'Nueva',origen:'',notas:'',asesorId:user.id};
   const admin=user.rol==='admin';
   openModal(`
     <h2>${id?'Editar cita':'Nueva cita'}</h2><div class="sub nocap">Captura la información del paciente.</div>
@@ -545,7 +554,7 @@ function saveStatus(id){
     const f=$('#s-fec').value,h=$('#s-hor').value;
     if(!f||!h){$('#s-err').textContent='Indica la nueva fecha y hora.';return}
     if(c.estatus!=='Reagendó'){
-      citas.push({...c,id:uid(),fecha:f,hora:h,estatus:'Pendiente',motivo:'',notas:(c.notas?c.notas+' · ':'')+'Reagendada desde '+fmtShort(c.fecha)+' '+c.hora,creadoEl:now,creadoPor:user.id,historial:[{f:now,e:'Pendiente'}]});
+      citas.push({...c,id:uid(),fecha:f,hora:h,tipo:'Reagenda',estatus:'Pendiente',motivo:'',notas:(c.notas?c.notas+' · ':'')+'Reagendada desde '+fmtShort(c.fecha)+' '+c.hora,creadoEl:now,creadoPor:user.id,historial:[{f:now,e:'Pendiente'}]});
     }
   }
   c.estatus=stSel;c.motivo=stSel==='Asistió'||stSel==='Pendiente'?'':mot;
@@ -580,7 +589,7 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='Enter'&&!$('#login').classList.contains('hidden'))doLogin()});
-['f-q','f-date','f-st','f-suc','f-as','f-sort'].forEach(i=>{
+['f-q','f-date','f-st','f-suc','f-as','f-sort','f-tip','f-ori'].forEach(i=>{
   const el=$('#'+i);
   if(el) el.addEventListener('input',render);
 });
@@ -601,6 +610,20 @@ $('#b-theme').onclick=()=>{const d=document.documentElement.dataset.theme==='dar
     citas.forEach(c=>{
       if(!c.creadoEl){
         c.creadoEl=(c.historial&&c.historial[0]&&c.historial[0].f)||(c.fecha?c.fecha+'T10:00:00.000Z':new Date().toISOString());
+        upd=true;
+      }
+      if(c.tipo==='Cita nueva'||c.tipo==='Cita de tratamiento'||c.tipo==='Seguimiento'){
+        c.tipo=(c.tipo==='Cita nueva'?'Nueva':'Reagenda');
+        upd=true;
+      }else if(!c.tipo){
+        c.tipo='Nueva';
+        upd=true;
+      }
+      if(['Facebook','Instagram','WhatsApp','Otro'].includes(c.origen)){
+        c.origen='Publicidad Externa';
+        upd=true;
+      }else if(['Referido','Paciente anterior','Walk-in'].includes(c.origen)){
+        c.origen='Publicidad Interna';
         upd=true;
       }
     });
