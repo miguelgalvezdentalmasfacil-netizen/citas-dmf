@@ -80,6 +80,42 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .stat b{display:block;font-size:30px;font-weight:300;letter-spacing:-1px;margin-top:6px}
 .stat b.ok{color:var(--ok)} .stat b.bad{color:var(--bad)}
 
+/* Period Navigation (Semana / Mes) */
+.period-nav-container{margin-bottom:20px}
+.period-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-radius:var(--radius-md);flex-wrap:wrap}
+.nav-arrows{display:flex;gap:8px;align-items:center}
+.nav-arrows .btn.active{background:var(--btn-bg);color:var(--btn-text)}
+.period-center{text-align:center;flex:1 1 240px}
+.period-label{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
+.period-icon{font-size:18px}
+.period-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.pill-curr{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--ok-bg);color:var(--ok);margin-left:4px}
+.period-picker{display:flex;align-items:center;gap:8px}
+.period-picker-label{font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap}
+.period-picker .inp{padding:8px 12px;font-size:13px;width:auto;min-width:240px}
+
+/* Advisor Attendance Stats Table (Semana) */
+.advisor-box{margin-bottom:24px;overflow:hidden}
+.advisor-box-head{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.advisor-box-head h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.advisor-box-head .sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-dmf{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+.table-dmf th{padding:12px 18px;background:var(--hover);color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.5px;border-bottom:1px solid var(--border-dark);white-space:nowrap}
+.table-dmf td{padding:14px 18px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--text-main)}
+.table-dmf tr:hover td{background:var(--hover)}
+.table-dmf tfoot tr td{background:var(--hover);font-weight:600;border-top:2px solid var(--border-dark);border-bottom:0}
+.table-dmf .num{text-align:center;font-weight:500}
+.table-dmf .rate-col{font-weight:600}
+.user-highlight{background:rgba(16,185,129,.06)}
+.badge-count{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600}
+.badge-count.ok{background:var(--ok-bg);color:var(--ok)}
+.badge-count.bad{background:var(--bad-bg);color:var(--bad)}
+.badge-count.pend{background:rgba(245,158,11,.15);color:#D97706}
+.badge-count.zero{background:var(--border-dark);color:var(--text-light);opacity:.6}
+.progress-mini{width:56px;height:6px;background:var(--border-dark);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+.progress-mini-bar{height:100%;background:var(--ok);border-radius:3px}
+
 /* Filters */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .filters>*{flex:1 1 150px}
@@ -145,6 +181,11 @@ textarea.inp{resize:vertical;min-height:80px}
   .row .time{grid-area:t;font-size:19px}.row .who{grid-area:w}.row .what{grid-area:x}.row .st{grid-area:s;text-align:right}.row .act{grid-area:a;justify-content:flex-start;margin-top:8px}
   .alert-banner{flex-direction:column;align-items:stretch}
   .alert-actions .btn{width:100%}
+  .period-nav{flex-direction:column;align-items:stretch;text-align:center}
+  .nav-arrows{justify-content:center}
+  .nav-arrows .btn{flex:1}
+  .period-picker{flex-direction:column;align-items:stretch}
+  .period-picker .inp{width:100%}
 }
 @media (max-width:520px){
   .pill-date{display:none}
@@ -197,6 +238,7 @@ textarea.inp{resize:vertical;min-height:80px}
       </div>
       <button class="btn out sm hidden" id="b-csv" data-act="csv">Exportar CSV</button>
     </div>
+    <div id="period-nav-box" class="period-nav-container"></div>
     <div class="filters hidden" id="filters">
       <input class="inp" id="f-q" placeholder="Buscar paciente o teléfono">
       <input class="inp" id="f-date" type="date" title="Filtrar por fecha específica">
@@ -213,6 +255,7 @@ textarea.inp{resize:vertical;min-height:80px}
       </select>
     </div>
     <div class="stats" id="stats"></div>
+    <div id="advisor-stats-box"></div>
     <div id="content"></div>
   </main>
 </div>
@@ -249,14 +292,18 @@ const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);r
 const fmtLong=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
 const fmtShort=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
 const fmtReg=s=>{if(!s)return'—';const d=new Date(s);return isNaN(d.getTime())?'—':d.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
-const getWeekRange=s=>{const d=new Date(s+'T12:00:00');const day=d.getDay();const diff=(day===0?-6:1-day);const mon=new Date(d);mon.setDate(d.getDate()+diff);const sun=new Date(mon);sun.setDate(mon.getDate()+6);return [iso(mon),iso(sun)]};
+const getDmfWeekRange=s=>{const d=new Date(s+'T12:00:00');const day=d.getDay();const diff=(day-4+7)%7;const thu=new Date(d);thu.setDate(d.getDate()-diff);const wed=new Date(thu);wed.setDate(thu.getDate()+6);return [iso(thu),iso(wed)]};
+const getWeekRange=getDmfWeekRange;
 const getMonthRange=s=>{const d=new Date(s+'T12:00:00');const y=d.getFullYear(),m=d.getMonth();const first=new Date(y,m,1);const last=new Date(y,m+1,0);return [iso(first),iso(last)]};
+const addMonths=(s,n)=>{const d=new Date(s+'T12:00:00');d.setMonth(d.getMonth()+n);return iso(d)};
 const uid=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const nameOf=id=>(USUARIOS.find(u=>u.id===id)||{}).nombre||'—';
 const opts=(arr,sel,ph)=>(ph?`<option value="">${ph}</option>`:'')+arr.map(a=>`<option ${a===sel?'selected':''}>${esc(a)}</option>`).join('');
 const pillCls=e=>e==='Asistió'?'ok':e==='No asistió'?'bad':e==='Pendiente'?'pend':'';
 
 let citas=[],user=null,view='hoy';
+let selectedWeekRef=iso(new Date());
+let selectedMonthRef=iso(new Date());
 
 function seed(){
   const t=iso(new Date()),m=addDays(t,1),d3=addDays(t,3),d5=addDays(t,5),d8=addDays(t,8);
@@ -365,7 +412,7 @@ function renderAviso(){
 function mine(){return user.rol==='admin'?citas:citas.filter(c=>c.asesorId===user.id)}
 function currentList(){
   const t=iso(new Date());let l=mine();
-  const [wStart,wEnd]=getWeekRange(t), [mStart,mEnd]=getMonthRange(t);
+  const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef), [mStart,mEnd]=getMonthRange(selectedMonthRef);
   if(view==='hoy')l=l.filter(c=>c.fecha===t);
   else if(view==='manana')l=l.filter(c=>c.fecha===addDays(t,1));
   else if(view==='semana')l=l.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
@@ -393,19 +440,207 @@ function currentList(){
     return(a.fecha+a.hora).localeCompare(b.fecha+b.hora);
   });
 }
+
+function renderPeriodNav(){
+  const box=$('#period-nav-box');
+  if(!box)return;
+  const today=iso(new Date());
+
+  if(view==='semana'){
+    const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
+    const [currStart]=getDmfWeekRange(today);
+    const isCurr=(wStart===currStart);
+
+    let optsHtml='';
+    for(let i=-8;i<=6;i++){
+      const refDate=addDays(currStart,i*7);
+      const [sThu,sWed]=getDmfWeekRange(refDate);
+      const isSel=(sThu===wStart);
+      const isThisWeek=(sThu===currStart);
+      const label=`Semana: Jue ${fmtShort(sThu)} al Mié ${fmtShort(sWed)}${isThisWeek?' (Actual)':''}`;
+      optsHtml+=`<option value="${sThu}" ${isSel?'selected':''}>${label}</option>`;
+    }
+
+    box.innerHTML=`
+      <div class="period-nav card">
+        <div class="nav-arrows">
+          <button class="btn out sm" id="b-week-prev" title="Semana anterior">◀ Anterior</button>
+          <button class="btn out sm ${isCurr?'active':''}" id="b-week-curr" title="Ir a la semana actual">Semana actual</button>
+          <button class="btn out sm" id="b-week-next" title="Semana siguiente">Siguiente ▶</button>
+        </div>
+        <div class="period-center">
+          <div class="period-label">
+            <span class="period-icon">📅</span>
+            <span>Semana DMF: <b>Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}</b></span>
+            ${isCurr?'<span class="pill-curr">En curso</span>':''}
+          </div>
+          <div class="period-sub">Ciclo operativo semanal de Jueves a Miércoles</div>
+        </div>
+        <div class="period-picker">
+          <label class="period-picker-label" for="sel-week-dropdown">Ir a semana:</label>
+          <select class="inp sm" id="sel-week-dropdown">${optsHtml}</select>
+        </div>
+      </div>`;
+
+    $('#b-week-prev').onclick=()=>{selectedWeekRef=addDays(selectedWeekRef,-7);render()};
+    $('#b-week-next').onclick=()=>{selectedWeekRef=addDays(selectedWeekRef,7);render()};
+    $('#b-week-curr').onclick=()=>{selectedWeekRef=iso(new Date());render()};
+    $('#sel-week-dropdown').onchange=e=>{selectedWeekRef=e.target.value;render()};
+    return;
+  }
+
+  if(view==='mes'){
+    const [mStart,mEnd]=getMonthRange(selectedMonthRef);
+    const [currStart]=getMonthRange(today);
+    const isCurr=(mStart===currStart);
+    const mDate=new Date(selectedMonthRef+'T12:00:00');
+    const mName=mDate.toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+
+    box.innerHTML=`
+      <div class="period-nav card">
+        <div class="nav-arrows">
+          <button class="btn out sm" id="b-month-prev" title="Mes anterior">◀ Anterior</button>
+          <button class="btn out sm ${isCurr?'active':''}" id="b-month-curr" title="Ir al mes actual">Mes actual</button>
+          <button class="btn out sm" id="b-month-next" title="Mes siguiente">Siguiente ▶</button>
+        </div>
+        <div class="period-center">
+          <div class="period-label">
+            <span class="period-icon">📆</span>
+            <span style="text-transform:capitalize"><b>${mName}</b></span>
+            ${isCurr?'<span class="pill-curr">En curso</span>':''}
+          </div>
+          <div class="period-sub">Del ${fmtShort(mStart)} al ${fmtShort(mEnd)}</div>
+        </div>
+        <div class="period-picker">
+          <label class="period-picker-label" for="sel-month-input">Ir a mes:</label>
+          <input type="month" class="inp sm" id="sel-month-input" value="${selectedMonthRef.slice(0,7)}">
+        </div>
+      </div>`;
+
+    $('#b-month-prev').onclick=()=>{selectedMonthRef=addMonths(selectedMonthRef,-1);render()};
+    $('#b-month-next').onclick=()=>{selectedMonthRef=addMonths(selectedMonthRef,1);render()};
+    $('#b-month-curr').onclick=()=>{selectedMonthRef=iso(new Date());render()};
+    $('#sel-month-input').onchange=e=>{if(e.target.value){selectedMonthRef=e.target.value+'-01';render()}};
+    return;
+  }
+
+  box.innerHTML='';
+}
+
+function renderAdvisorStats(){
+  const box=$('#advisor-stats-box');
+  if(!box)return;
+  if(view!=='semana'){
+    box.innerHTML='';
+    return;
+  }
+  const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
+  const weekCitas=citas.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
+
+  const advisorList=USUARIOS.filter(u=>u.rol==='asesor'||weekCitas.some(c=>c.asesorId===u.id));
+  if(!advisorList.length) advisorList.push(...USUARIOS);
+
+  let sumTot=0, sumAsis=0, sumNo=0, sumPend=0, sumOtr=0;
+
+  const rows=advisorList.map(u=>{
+    const uCitas=weekCitas.filter(c=>c.asesorId===u.id);
+    const tot=uCitas.length;
+    const asis=uCitas.filter(c=>c.estatus==='Asistió').length;
+    const no=uCitas.filter(c=>c.estatus==='No asistió').length;
+    const pend=uCitas.filter(c=>c.estatus==='Pendiente').length;
+    const otr=uCitas.filter(c=>c.estatus==='Reagendó'||c.estatus==='Canceló').length;
+
+    sumTot+=tot; sumAsis+=asis; sumNo+=no; sumPend+=pend; sumOtr+=otr;
+
+    const concl=asis+no;
+    const pctVal=concl>0?Math.round((asis/concl)*100):null;
+    const pctTxt=pctVal!==null?`${pctVal}%`:(tot>0?'—':'—');
+    const isMe=(user&&user.id===u.id);
+
+    return `
+      <tr class="${isMe?'user-highlight':''}">
+        <td>
+          <b>${esc(u.nombre)}</b>
+          ${u.rol==='admin'?' <span class="badge" style="font-size:10px">Gerente</span>':''}
+          ${isMe?' <span class="pill-curr">Tú</span>':''}
+        </td>
+        <td class="num"><b>${tot}</b></td>
+        <td class="num"><span class="badge-count ${asis>0?'ok':'zero'}">${asis}</span></td>
+        <td class="num"><span class="badge-count ${no>0?'bad':'zero'}">${no}</span></td>
+        <td class="num"><span class="badge-count ${pend>0?'pend':'zero'}">${pend}</span></td>
+        <td class="num"><span class="badge-count ${otr>0?'':'zero'}">${otr}</span></td>
+        <td class="num rate-col">
+          ${pctVal!==null?`<div class="progress-mini"><div class="progress-mini-bar" style="width:${pctVal}%"></div></div>`:''}
+          <b>${pctTxt}</b>
+        </td>
+      </tr>`;
+  }).join('');
+
+  const conclTotal=sumAsis+sumNo;
+  const totalPctVal=conclTotal>0?Math.round((sumAsis/conclTotal)*100):null;
+  const totalPctTxt=totalPctVal!==null?`${totalPctVal}%`:'—';
+
+  box.innerHTML=`
+    <div class="card advisor-box">
+      <div class="advisor-box-head">
+        <div>
+          <h3>📊 Reporte de Asistencia por Asesor · Semana Jueves a Miércoles</h3>
+          <div class="sub">Ciclo del <b>Jueves ${fmtShort(wStart)}</b> al <b>Miércoles ${fmtShort(wEnd)}</b> · Cálculo semanal de pacientes que asistieron por cada asesor.</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="table-dmf">
+          <thead>
+            <tr>
+              <th>Asesor</th>
+              <th class="num">Citas Agendadas</th>
+              <th class="num">Pacientes Asistieron</th>
+              <th class="num">No Asistieron</th>
+              <th class="num">Pendientes</th>
+              <th class="num">Reagendó / Canceló</th>
+              <th class="num">% Asistencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td><b>TOTAL CLÍNICA</b></td>
+              <td class="num"><b>${sumTot}</b></td>
+              <td class="num"><span class="badge-count ${sumAsis>0?'ok':'zero'}"><b>${sumAsis}</b></span></td>
+              <td class="num"><span class="badge-count ${sumNo>0?'bad':'zero'}"><b>${sumNo}</b></span></td>
+              <td class="num"><span class="badge-count ${sumPend>0?'pend':'zero'}"><b>${sumPend}</b></span></td>
+              <td class="num"><span class="badge-count ${sumOtr>0?'':'zero'}"><b>${sumOtr}</b></span></td>
+              <td class="num rate-col">
+                ${totalPctVal!==null?`<div class="progress-mini"><div class="progress-mini-bar" style="width:${totalPctVal}%"></div></div>`:''}
+                <b>${totalPctTxt}</b>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>`;
+}
+
 function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   $('#filters').classList.toggle('hidden',view==='hoy'||view==='manana');
   updateBadges();
   renderAviso();
+  renderPeriodNav();
+  renderAdvisorStats();
   const t=iso(new Date());
-  const [wStart,wEnd]=getWeekRange(t), [mStart,mEnd]=getMonthRange(t);
-  const mName=new Date(t+'T12:00:00').toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+  const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
+  const [mStart,mEnd]=getMonthRange(selectedMonthRef);
+  const mName=new Date(selectedMonthRef+'T12:00:00').toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+  const isCurrWeek=(wStart===getDmfWeekRange(t)[0]);
+  const isCurrMonth=(mStart===getMonthRange(t)[0]);
   const titles={
     hoy:['Citas de hoy',fmtLong(t)],
     manana:['Citas de mañana',fmtLong(addDays(t,1))],
-    semana:['Citas de esta semana',`${fmtShort(wStart)} al ${fmtShort(wEnd)}`],
-    mes:['Citas de este mes',mName],
+    semana:[isCurrWeek?'Citas de esta semana (Jue–Mié)':'Citas de la semana (Jue–Mié)',`Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}`],
+    mes:[isCurrMonth?'Citas de este mes':'Citas del mes',mName],
     todas:['Todas las citas','Historial completo']
   };
   $('#h-title').textContent=titles[view][0];
@@ -566,7 +801,15 @@ function exportCSV(){
   const l=currentList(),h=['Fecha Cita','Hora Cita','Fecha Registro','Paciente','Teléfono','Sucursal','Tratamiento','Tipo','Origen','Asesor','Estatus','Motivo','Notas'];
   const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
   const csv=[h.map(q).join(',')].concat(l.map(c=>[c.fecha,c.hora,c.creadoEl?fmtReg(c.creadoEl):'',c.paciente,c.telefono,c.sucursal,c.tratamiento,c.tipo,c.origen,nameOf(c.asesorId),c.estatus,c.motivo,c.notas].map(q).join(','))).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='citas_'+iso(new Date())+'.csv';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));
+  let fname='citas_'+iso(new Date());
+  if(view==='semana'){
+    const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
+    fname='citas_semana_'+wStart+'_al_'+wEnd;
+  } else if(view==='mes'){
+    fname='citas_mes_'+selectedMonthRef.slice(0,7);
+  }
+  a.download=fname+'.csv';a.click();
 }
 
 /* ============ EVENTS ============ */
@@ -574,7 +817,12 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-act],[data-view]');
   if(e.target.id==='modal')return closeModal();
   if(!t)return;
-  if(t.dataset.view){view=t.dataset.view;return render()}
+  if(t.dataset.view){
+    view=t.dataset.view;
+    if(view==='semana') selectedWeekRef=iso(new Date());
+    if(view==='mes') selectedMonthRef=iso(new Date());
+    return render();
+  }
   const id=t.dataset.id;
   switch(t.dataset.act){
     case'new':citaForm();break;
