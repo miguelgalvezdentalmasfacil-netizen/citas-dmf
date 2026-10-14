@@ -808,9 +808,18 @@ let repConfig={
   fortnightPart:'1',
   dateFrom:iso(new Date()),
   dateTo:iso(new Date()),
-  asesor:'todos',
-  soloAsistio:true
+  asesor:'todos'
 };
+
+function getRepTypeHelpText(){
+  if(repConfig.type==='atendidos'){
+    return '✅ <b>Regla Dental Fácil:</b> En este reporte <u>solo se incluyen pacientes que asistieron</u> a su cita. (Las citas que no asistieron o están pendientes se consultan en Control de Citas).';
+  } else if(repConfig.type==='citas'){
+    return 'ℹ️ Muestra el control de <u>todas las citas agendadas</u> en el período (pendientes, asistió, no asistió, reagendadas, canceladas).';
+  } else {
+    return '📊 Consolida el número de <u>citas agendadas</u> vs <u>pacientes que asistieron</u> con métricas y desglose por asesor.';
+  }
+}
 
 function getReportDateRange(){
   let s='',e='',title='',sub='';
@@ -863,7 +872,9 @@ function getReportDateRange(){
 }
 
 function getReportFilename(){
-  const typeTag=repConfig.type==='atendidos'?'Pacientes_Atendidos':'Citas_Asistencia';
+  let typeTag='Pacientes_Atendidos';
+  if(repConfig.type==='citas') typeTag='Control_Citas';
+  else if(repConfig.type==='ejecutivo') typeTag='Reporte_Ejecutivo';
   const asesorTag=repConfig.asesor==='todos'?'Todos_Asesores':(nameOf(repConfig.asesor).replace(/\s+/g,'_')||'Asesor');
   let periodTag='';
   if(repConfig.period==='semana'){
@@ -911,8 +922,9 @@ function openReportModal(){
         <div>
           <label class="rep-field-label">Tipo de Reporte:</label>
           <div class="seg" id="seg-rep-type" style="width:100%;display:flex">
-            <button class="${repConfig.type==='atendidos'?'on':''}" data-type="atendidos" style="flex:1" title="Plantilla con tabla de pacientes, sucursal, doctor y total">📋 Pacientes Atendidos</button>
-            <button class="${repConfig.type==='ejecutivo'?'on':''}" data-type="ejecutivo" style="flex:1" title="Reporte con métricas, % de asistencia, resumen por asesor y detalle">📊 Citas y Asistencia</button>
+            <button class="${repConfig.type==='atendidos'?'on':''}" data-type="atendidos" style="flex:1" title="Solo pacientes que asistieron a su cita">📋 Pacientes Atendidos</button>
+            <button class="${repConfig.type==='citas'?'on':''}" data-type="citas" style="flex:1" title="Control de todas las citas agendadas y sus estatus">📅 Control de Citas</button>
+            <button class="${repConfig.type==='ejecutivo'?'on':''}" data-type="ejecutivo" style="flex:1" title="Métricas de asistencia, citas agendadas vs pacientes y resumen por asesor">📊 Reporte Ejecutivo</button>
           </div>
         </div>
         <div>
@@ -936,11 +948,8 @@ function openReportModal(){
 
       <div class="rep-suboptions" id="rep-suboptions-box"></div>
 
-      <div id="rep-filter-extra" style="margin-top:12px;display:${repConfig.type==='atendidos'?'block':'none'}">
-        <label style="display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="rep-check-asistio" ${repConfig.soloAsistio?'checked':''}>
-          <span><b>Solo incluir pacientes que asistieron</b> (Recomendado para el Reporte de Pacientes Atendidos)</span>
-        </label>
+      <div id="rep-type-help" style="margin-top:12px;padding:8px 12px;background:var(--surface);border-left:3px solid #0097a7;border-radius:4px;font-size:12px;color:var(--text-muted)">
+        ${getRepTypeHelpText()}
       </div>
     </div>
 
@@ -1117,8 +1126,8 @@ function bindReportModalEvents(){
       if(!b)return;
       repConfig.type=b.dataset.type;
       segType.querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',btn.dataset.type===repConfig.type));
-      const filterExtra=$('#rep-filter-extra');
-      if(filterExtra) filterExtra.style.display=(repConfig.type==='atendidos')?'block':'none';
+      const helpBox=$('#rep-type-help');
+      if(helpBox) helpBox.innerHTML=getRepTypeHelpText();
       renderPdfPreview();
     };
   }
@@ -1139,14 +1148,6 @@ function bindReportModalEvents(){
       repConfig.period=b.dataset.p;
       segPeriod.querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',btn.dataset.p===repConfig.period));
       updateReportSuboptions();
-      renderPdfPreview();
-    };
-  }
-
-  const checkAsistio=$('#rep-check-asistio');
-  if(checkAsistio){
-    checkAsistio.onchange=e=>{
-      repConfig.soloAsistio=e.target.checked;
       renderPdfPreview();
     };
   }
@@ -1174,14 +1175,13 @@ function renderPdfPreview(){
   }
 
   if(repConfig.type==='atendidos'){
-    if(repConfig.soloAsistio){
-      list=list.filter(c=>c.estatus==='Asistió');
-    }
+    // Estricto: son pacientes SOLO cuando asistieron a su cita
+    list=list.filter(c=>c.estatus==='Asistió');
     list.sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
 
     let rowsHtml='';
     if(!list.length){
-      rowsHtml=`<tr><td colspan="5" style="text-align:center;padding:36px;color:#94a3b8;font-style:italic">No hay pacientes registrados en este período.</td></tr>`;
+      rowsHtml=`<tr><td colspan="5" style="text-align:center;padding:36px;color:#94a3b8;font-style:italic">No hay pacientes atendidos registrados en este período.</td></tr>`;
     } else {
       rowsHtml=list.map(c=>`
         <tr>
@@ -1227,7 +1227,64 @@ function renderPdfPreview(){
     return;
   }
 
-  // Reporte Ejecutivo
+  if(repConfig.type==='citas'){
+    list.sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+
+    let rowsHtml='';
+    if(!list.length){
+      rowsHtml=`<tr><td colspan="7" style="text-align:center;padding:36px;color:#94a3b8;font-style:italic">No hay citas registradas en este período.</td></tr>`;
+    } else {
+      rowsHtml=list.map(c=>`
+        <tr>
+          <td class="col-paciente"><b>${esc(c.paciente)}</b></td>
+          <td style="text-align:center;white-space:nowrap">${esc(fmtDateYY(c.fecha))} ${esc(c.hora)}</td>
+          <td style="text-align:center">${esc(c.sucursal)}</td>
+          <td style="text-align:center">${esc(c.tratamiento)}</td>
+          <td class="col-origen" style="text-align:center">${esc(fmtOrigenShort(c.origen))}</td>
+          <td style="text-align:center">${esc(nameOf(c.asesorId))}</td>
+          <td style="text-align:center">
+            <span class="pill ${pillCls(c.estatus)}" style="font-size:11px;padding:3px 8px">${esc(c.estatus)}</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    box.innerHTML=`
+      <div class="dmf-pdf-document">
+        <div class="pdf-header">
+          ${logoSrc?`<img src="${logoSrc}" class="pdf-logo" alt="Dental Fácil">`:''}
+          <div class="pdf-title">REPORTE DE CONTROL DE CITAS</div>
+          <div class="pdf-divider"></div>
+          <div class="pdf-meta-date">${esc(startDate===endDate?fmtDateLongEs(startDate):`Del ${fmtDateLongEs(startDate)} al ${fmtDateLongEs(endDate)}`)}</div>
+          <div class="pdf-meta-sub">${esc(periodSub)} · Asesor: <b>${esc(asesorName)}</b></div>
+        </div>
+
+        <table class="pdf-table">
+          <thead>
+            <tr>
+              <th style="width:26%;text-align:left">PACIENTE</th>
+              <th style="width:16%;text-align:center">FECHA / HORA</th>
+              <th style="width:14%;text-align:center">SUCURSAL</th>
+              <th style="width:16%;text-align:center">TRATAMIENTO</th>
+              <th style="width:10%;text-align:center">ORIGEN</th>
+              <th style="width:10%;text-align:center">ASESOR</th>
+              <th style="width:8%;text-align:center">ESTATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+
+        <div class="pdf-footer-total">
+          TOTAL DE CITAS <span class="pdf-total-number">${list.length}</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Reporte Ejecutivo de Citas y Asistencia
   list.sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
   const tot=list.length;
   const asis=list.filter(c=>c.estatus==='Asistió').length;
@@ -1268,7 +1325,7 @@ function renderPdfPreview(){
       <td style="text-align:center;white-space:nowrap">${esc(fmtDateYY(c.fecha))} ${esc(c.hora)}</td>
       <td style="text-align:center">${esc(c.sucursal)}</td>
       <td style="text-align:center">${esc(c.tratamiento)}</td>
-      <td style="text-align:center">${esc(c.tipo||'Nueva')}</td>
+      <td class="col-origen" style="text-align:center">${esc(fmtOrigenShort(c.origen))}</td>
       <td style="text-align:center">${esc(nameOf(c.asesorId))}</td>
       <td style="text-align:center">
         <span class="pill ${pillCls(c.estatus)}" style="font-size:11px;padding:3px 8px">${esc(c.estatus)}</span>
@@ -1288,9 +1345,9 @@ function renderPdfPreview(){
 
       <div class="pdf-kpi-grid">
         <div class="pdf-kpi"><div class="pdf-kpi-label">Citas Agendadas</div><div class="pdf-kpi-val">${tot}</div></div>
-        <div class="pdf-kpi"><div class="pdf-kpi-label">Asistieron</div><div class="pdf-kpi-val text-ok">${asis}</div></div>
+        <div class="pdf-kpi"><div class="pdf-kpi-label">Pacientes Atendidos</div><div class="pdf-kpi-val text-ok">${asis}</div></div>
         <div class="pdf-kpi"><div class="pdf-kpi-label">No Asistieron</div><div class="pdf-kpi-val text-bad">${no}</div></div>
-        <div class="pdf-kpi"><div class="pdf-kpi-label">Pendientes</div><div class="pdf-kpi-val text-pend">${pend}</div></div>
+        <div class="pdf-kpi"><div class="pdf-kpi-label">Citas Pendientes</div><div class="pdf-kpi-val text-pend">${pend}</div></div>
         <div class="pdf-kpi"><div class="pdf-kpi-label">% Asistencia</div><div class="pdf-kpi-val text-ok">${tasa}</div></div>
       </div>
 
@@ -1299,8 +1356,8 @@ function renderPdfPreview(){
         <thead>
           <tr>
             <th style="text-align:left">Asesor</th>
-            <th style="text-align:center">Agendadas</th>
-            <th style="text-align:center">Asistieron</th>
+            <th style="text-align:center">Citas Agendadas</th>
+            <th style="text-align:center">Pacientes Atendidos</th>
             <th style="text-align:center">No Asistieron</th>
             <th style="text-align:center">Pendientes</th>
             <th style="text-align:center">Reagenda/Cancela</th>
@@ -1327,13 +1384,13 @@ function renderPdfPreview(){
       <table class="pdf-table">
         <thead>
           <tr>
-            <th style="text-align:left">Paciente</th>
-            <th style="text-align:center">Fecha / Hora</th>
-            <th style="text-align:center">Sucursal</th>
-            <th style="text-align:center">Tratamiento</th>
-            <th style="text-align:center">Tipo</th>
-            <th style="text-align:center">Asesor</th>
-            <th style="text-align:center">Estatus</th>
+            <th style="width:26%;text-align:left">Paciente</th>
+            <th style="width:16%;text-align:center">Fecha / Hora</th>
+            <th style="width:14%;text-align:center">Sucursal</th>
+            <th style="width:16%;text-align:center">Tratamiento</th>
+            <th style="width:10%;text-align:center">Origen</th>
+            <th style="width:10%;text-align:center">Asesor</th>
+            <th style="width:8%;text-align:center">Estatus</th>
           </tr>
         </thead>
         <tbody>
@@ -1342,7 +1399,7 @@ function renderPdfPreview(){
       </table>
 
       <div class="pdf-footer-total">
-        TOTAL CITAS: <span class="pdf-total-number">${tot}</span> · ASISTIERON: <span class="pdf-total-number">${asis}</span> (${tasa})
+        TOTAL CITAS AGENDADAS: <span class="pdf-total-number">${tot}</span> · PACIENTES ATENDIDOS: <span class="pdf-total-number">${asis}</span> (${tasa})
       </div>
     </div>
   `;
