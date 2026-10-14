@@ -82,7 +82,12 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 
 /* Period Navigation (Semana / Mes) */
 .period-nav-container{margin-bottom:20px}
-.period-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 20px;border-radius:var(--radius-md);flex-wrap:wrap}
+.period-nav{display:flex;flex-direction:column;gap:14px;padding:16px 20px;border-radius:var(--radius-md)}
+.period-mode-bar{display:flex;align-items:center;justify-content:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.period-mode-bar .mode-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.seg-sm{padding:3px;gap:2px}
+.seg-sm button{padding:6px 14px;font-size:12px}
+.period-main-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;width:100%}
 .nav-arrows{display:flex;gap:8px;align-items:center}
 .nav-arrows .btn.active{background:var(--btn-bg);color:var(--btn-text)}
 .period-center{text-align:center;flex:1 1 240px}
@@ -181,7 +186,11 @@ textarea.inp{resize:vertical;min-height:80px}
   .row .time{grid-area:t;font-size:19px}.row .who{grid-area:w}.row .what{grid-area:x}.row .st{grid-area:s;text-align:right}.row .act{grid-area:a;justify-content:flex-start;margin-top:8px}
   .alert-banner{flex-direction:column;align-items:stretch}
   .alert-actions .btn{width:100%}
-  .period-nav{flex-direction:column;align-items:stretch;text-align:center}
+  .period-nav{align-items:stretch;text-align:center}
+  .period-main-row{flex-direction:column;align-items:stretch}
+  .period-mode-bar{flex-direction:column;gap:8px}
+  .period-mode-bar .seg{width:100%;display:flex}
+  .period-mode-bar .seg button{flex:1}
   .nav-arrows{justify-content:center}
   .nav-arrows .btn{flex:1}
   .period-picker{flex-direction:column;align-items:stretch}
@@ -293,7 +302,10 @@ const fmtLong=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{weekday:'lo
 const fmtShort=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
 const fmtReg=s=>{if(!s)return'—';const d=new Date(s);return isNaN(d.getTime())?'—':d.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
 const getDmfWeekRange=s=>{const d=new Date(s+'T12:00:00');const day=d.getDay();const diff=(day-4+7)%7;const thu=new Date(d);thu.setDate(d.getDate()-diff);const wed=new Date(thu);wed.setDate(thu.getDate()+6);return [iso(thu),iso(wed)]};
-const getWeekRange=getDmfWeekRange;
+const getStdWeekRange=s=>{const d=new Date(s+'T12:00:00');const day=d.getDay();const diff=(day===0?-6:1-day);const mon=new Date(d);mon.setDate(d.getDate()+diff);const sun=new Date(mon);sun.setDate(mon.getDate()+6);return [iso(mon),iso(sun)]};
+let weekMode='dmf';
+try{weekMode=localStorage.getItem('dmf_week_mode')||'dmf'}catch(e){}
+const getWeekRange=s=>(weekMode==='std'?getStdWeekRange(s):getDmfWeekRange(s));
 const getMonthRange=s=>{const d=new Date(s+'T12:00:00');const y=d.getFullYear(),m=d.getMonth();const first=new Date(y,m,1);const last=new Date(y,m+1,0);return [iso(first),iso(last)]};
 const addMonths=(s,n)=>{const d=new Date(s+'T12:00:00');d.setMonth(d.getMonth()+n);return iso(d)};
 const uid=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -412,7 +424,7 @@ function renderAviso(){
 function mine(){return user.rol==='admin'?citas:citas.filter(c=>c.asesorId===user.id)}
 function currentList(){
   const t=iso(new Date());let l=mine();
-  const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef), [mStart,mEnd]=getMonthRange(selectedMonthRef);
+  const [wStart,wEnd]=getWeekRange(selectedWeekRef), [mStart,mEnd]=getMonthRange(selectedMonthRef);
   if(view==='hoy')l=l.filter(c=>c.fecha===t);
   else if(view==='manana')l=l.filter(c=>c.fecha===addDays(t,1));
   else if(view==='semana')l=l.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
@@ -447,38 +459,57 @@ function renderPeriodNav(){
   const today=iso(new Date());
 
   if(view==='semana'){
-    const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
-    const [currStart]=getDmfWeekRange(today);
+    const [wStart,wEnd]=getWeekRange(selectedWeekRef);
+    const [currStart]=getWeekRange(today);
     const isCurr=(wStart===currStart);
+    const isStd=(weekMode==='std');
 
     let optsHtml='';
     for(let i=-8;i<=6;i++){
       const refDate=addDays(currStart,i*7);
-      const [sThu,sWed]=getDmfWeekRange(refDate);
-      const isSel=(sThu===wStart);
-      const isThisWeek=(sThu===currStart);
-      const label=`Semana: Jue ${fmtShort(sThu)} al Mié ${fmtShort(sWed)}${isThisWeek?' (Actual)':''}`;
-      optsHtml+=`<option value="${sThu}" ${isSel?'selected':''}>${label}</option>`;
+      const [sStart,sEnd]=getWeekRange(refDate);
+      const isSel=(sStart===wStart);
+      const isThisWeek=(sStart===currStart);
+      const prefix=isStd?`Semana: Lun ${fmtShort(sStart)} al Dom ${fmtShort(sEnd)}`:`Semana: Jue ${fmtShort(sStart)} al Mié ${fmtShort(sEnd)}`;
+      const label=`${prefix}${isThisWeek?' (Actual)':''}`;
+      optsHtml+=`<option value="${sStart}" ${isSel?'selected':''}>${label}</option>`;
     }
+
+    const weekLabel=isStd
+      ?`Lunes ${fmtShort(wStart)} al Domingo ${fmtShort(wEnd)}`
+      :`Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}`;
+    const weekSub=isStd
+      ?'Semana estándar calendario de Lunes a Domingo'
+      :'Ciclo operativo semanal de Jueves a Miércoles';
+    const weekTypeBadge=isStd?'Semana Normal':'Semana DMF';
 
     box.innerHTML=`
       <div class="period-nav card">
-        <div class="nav-arrows">
-          <button class="btn out sm" id="b-week-prev" title="Semana anterior">◀ Anterior</button>
-          <button class="btn out sm ${isCurr?'active':''}" id="b-week-curr" title="Ir a la semana actual">Semana actual</button>
-          <button class="btn out sm" id="b-week-next" title="Semana siguiente">Siguiente ▶</button>
-        </div>
-        <div class="period-center">
-          <div class="period-label">
-            <span class="period-icon">📅</span>
-            <span>Semana DMF: <b>Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}</b></span>
-            ${isCurr?'<span class="pill-curr">En curso</span>':''}
+        <div class="period-mode-bar">
+          <span class="mode-label">Formato de semana:</span>
+          <div class="seg seg-sm" id="seg-week-mode">
+            <button class="${!isStd?'on':''}" data-mode="dmf" title="Ciclo operativo de Jueves a Miércoles">📅 Semana DMF (Jue–Mié)</button>
+            <button class="${isStd?'on':''}" data-mode="std" title="Semana estándar de Lunes a Domingo">🗓️ Semana Normal (Lun–Dom)</button>
           </div>
-          <div class="period-sub">Ciclo operativo semanal de Jueves a Miércoles</div>
         </div>
-        <div class="period-picker">
-          <label class="period-picker-label" for="sel-week-dropdown">Ir a semana:</label>
-          <select class="inp sm" id="sel-week-dropdown">${optsHtml}</select>
+        <div class="period-main-row">
+          <div class="nav-arrows">
+            <button class="btn out sm" id="b-week-prev" title="Semana anterior">◀ Anterior</button>
+            <button class="btn out sm ${isCurr?'active':''}" id="b-week-curr" title="Ir a la semana actual">Semana actual</button>
+            <button class="btn out sm" id="b-week-next" title="Semana siguiente">Siguiente ▶</button>
+          </div>
+          <div class="period-center">
+            <div class="period-label">
+              <span class="period-icon">${isStd?'🗓️':'📅'}</span>
+              <span><b>${esc(weekTypeBadge)}:</b> ${esc(weekLabel)}</span>
+              ${isCurr?'<span class="pill-curr">En curso</span>':''}
+            </div>
+            <div class="period-sub">${esc(weekSub)}</div>
+          </div>
+          <div class="period-picker">
+            <label class="period-picker-label" for="sel-week-dropdown">Ir a semana:</label>
+            <select class="inp sm" id="sel-week-dropdown">${optsHtml}</select>
+          </div>
         </div>
       </div>`;
 
@@ -486,6 +517,13 @@ function renderPeriodNav(){
     $('#b-week-next').onclick=()=>{selectedWeekRef=addDays(selectedWeekRef,7);render()};
     $('#b-week-curr').onclick=()=>{selectedWeekRef=iso(new Date());render()};
     $('#sel-week-dropdown').onchange=e=>{selectedWeekRef=e.target.value;render()};
+    $('#seg-week-mode').onclick=e=>{
+      const b=e.target.closest('button[data-mode]');
+      if(!b)return;
+      weekMode=b.dataset.mode;
+      try{localStorage.setItem('dmf_week_mode',weekMode)}catch(err){}
+      render();
+    };
     return;
   }
 
@@ -534,7 +572,8 @@ function renderAdvisorStats(){
     box.innerHTML='';
     return;
   }
-  const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
+  const isStd=(weekMode==='std');
+  const [wStart,wEnd]=getWeekRange(selectedWeekRef);
   const weekCitas=citas.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
 
   const advisorList=USUARIOS.filter(u=>u.rol==='asesor'||weekCitas.some(c=>c.asesorId===u.id));
@@ -580,12 +619,19 @@ function renderAdvisorStats(){
   const totalPctVal=conclTotal>0?Math.round((sumAsis/conclTotal)*100):null;
   const totalPctTxt=totalPctVal!==null?`${totalPctVal}%`:'—';
 
+  const titleHeader=isStd
+    ?'📊 Reporte de Asistencia por Asesor · Semana Normal (Lunes a Domingo)'
+    :'📊 Reporte de Asistencia por Asesor · Semana DMF (Jueves a Miércoles)';
+  const subHeader=isStd
+    ?`Semana del <b>Lunes ${fmtShort(wStart)}</b> al <b>Domingo ${fmtShort(wEnd)}</b> · Cálculo semanal de pacientes que asistieron por cada asesor (formato estándar).`
+    :`Ciclo del <b>Jueves ${fmtShort(wStart)}</b> al <b>Miércoles ${fmtShort(wEnd)}</b> · Cálculo semanal de pacientes que asistieron por cada asesor (ciclo operativo DMF).`;
+
   box.innerHTML=`
     <div class="card advisor-box">
       <div class="advisor-box-head">
         <div>
-          <h3>📊 Reporte de Asistencia por Asesor · Semana Jueves a Miércoles</h3>
-          <div class="sub">Ciclo del <b>Jueves ${fmtShort(wStart)}</b> al <b>Miércoles ${fmtShort(wEnd)}</b> · Cálculo semanal de pacientes que asistieron por cada asesor.</div>
+          <h3>${titleHeader}</h3>
+          <div class="sub">${subHeader}</div>
         </div>
       </div>
       <div class="table-wrap">
@@ -631,15 +677,23 @@ function render(){
   renderPeriodNav();
   renderAdvisorStats();
   const t=iso(new Date());
-  const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
+  const isStd=(weekMode==='std');
+  const [wStart,wEnd]=getWeekRange(selectedWeekRef);
   const [mStart,mEnd]=getMonthRange(selectedMonthRef);
   const mName=new Date(selectedMonthRef+'T12:00:00').toLocaleDateString('es-MX',{month:'long',year:'numeric'});
-  const isCurrWeek=(wStart===getDmfWeekRange(t)[0]);
+  const isCurrWeek=(wStart===getWeekRange(t)[0]);
   const isCurrMonth=(mStart===getMonthRange(t)[0]);
+  const weekLabel=isStd
+    ?`Lunes ${fmtShort(wStart)} al Domingo ${fmtShort(wEnd)}`
+    :`Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}`;
+  const weekTitle=isStd
+    ?(isCurrWeek?'Citas de esta semana (Lun–Dom)':'Citas de la semana (Lun–Dom)')
+    :(isCurrWeek?'Citas de esta semana (Jue–Mié)':'Citas de la semana (Jue–Mié)');
+
   const titles={
     hoy:['Citas de hoy',fmtLong(t)],
     manana:['Citas de mañana',fmtLong(addDays(t,1))],
-    semana:[isCurrWeek?'Citas de esta semana (Jue–Mié)':'Citas de la semana (Jue–Mié)',`Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}`],
+    semana:[weekTitle,weekLabel],
     mes:[isCurrMonth?'Citas de este mes':'Citas del mes',mName],
     todas:['Todas las citas','Historial completo']
   };
@@ -804,8 +858,9 @@ function exportCSV(){
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));
   let fname='citas_'+iso(new Date());
   if(view==='semana'){
-    const [wStart,wEnd]=getDmfWeekRange(selectedWeekRef);
-    fname='citas_semana_'+wStart+'_al_'+wEnd;
+    const [wStart,wEnd]=getWeekRange(selectedWeekRef);
+    const modeTag=weekMode==='std'?'normal':'dmf';
+    fname='citas_semana_'+modeTag+'_'+wStart+'_al_'+wEnd;
   } else if(view==='mes'){
     fname='citas_mes_'+selectedMonthRef.slice(0,7);
   }
@@ -841,6 +896,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.ke
   const el=$('#'+i);
   if(el) el.addEventListener('input',render);
 });
+if($('#f-date')){
+  $('#f-date').addEventListener('change', e=>{
+    if(view==='semana' && e.target.value){
+      selectedWeekRef=e.target.value;
+      render();
+    } else if(view==='mes' && e.target.value){
+      selectedMonthRef=e.target.value;
+      render();
+    }
+  });
+}
 $('#lg-btn').onclick=doLogin;
 $('#b-out').onclick=()=>{sessionStorage.removeItem('dmf_user');user=null;showLogin()};
 $('#b-theme').onclick=()=>{const d=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=d;try{localStorage.setItem('dmf_theme',d)}catch(e){}};
