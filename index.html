@@ -51,6 +51,11 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .seg{display:inline-flex;background:var(--surface);border:1px solid var(--border-dark);border-radius:9999px;padding:4px;gap:2px}
 .seg button{border:0;background:transparent;padding:8px 18px;border-radius:9999px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s ease}
 .seg button.on{background:var(--btn-bg);color:var(--btn-text)}
+.badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;margin-left:4px;background:var(--border-dark);color:var(--text-muted);vertical-align:middle;line-height:1.2}
+.seg button.on .badge{background:rgba(255,255,255,.25);color:#fff}
+:root[data-theme="dark"] .seg button.on .badge{background:rgba(0,0,0,.3);color:#0f172a}
+.badge.alert{background:#FEF3C7;color:#D97706}
+:root[data-theme="dark"] .badge.alert{background:rgba(245,158,11,.2);color:#FBBF24}
 
 /* Buttons */
 .btn{border:0;background:var(--btn-bg);color:var(--btn-text);padding:13px 22px;border-radius:var(--radius-md);font-weight:500;cursor:pointer;transition:background .15s ease;white-space:nowrap}
@@ -62,6 +67,13 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 
 /* Cards */
 .card{background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.alert-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border:1px solid var(--border-dark);border-left:4px solid var(--text-main);padding:14px 20px;border-radius:var(--radius-md);margin-bottom:20px;box-shadow:var(--shadow)}
+.alert-banner.has-pend{border-left-color:#F59E0B;background:rgba(245,158,11,.04)}
+.alert-left{display:flex;align-items:center;gap:14px}
+.alert-bell{font-size:22px;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--hover);flex-shrink:0}
+.alert-banner p{font-size:13px;color:var(--text-muted);margin-top:2px}
+.alert-pend{color:#D97706;font-weight:600}
+.alert-ok{color:var(--ok);font-weight:600}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
 .stat{padding:24px 28px}
 .stat label{display:block;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)}
@@ -91,6 +103,10 @@ textarea.inp{resize:vertical;min-height:80px}
 .row b{font-weight:500;display:block}
 .row span.m{display:block;font-size:13px;color:var(--text-muted);font-weight:300}
 .row span.m a{color:var(--text-muted)}
+.row-date{display:block;font-size:12px;color:var(--text-muted);font-weight:500;margin-top:2px}
+.reg-sub{font-size:12px!important;color:var(--text-light)!important;margin-top:3px}
+.wa-link{color:#059669!important;font-weight:500!important;text-decoration:none}
+.wa-link:hover{text-decoration:underline}
 .act{display:flex;gap:8px;justify-content:flex-end}
 .pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border-radius:9999px;font-size:12px;font-weight:500;background:var(--neutral-bg);color:var(--neutral);border:1px solid transparent}
 .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
@@ -127,6 +143,8 @@ textarea.inp{resize:vertical;min-height:80px}
   .stats{grid-template-columns:1fr 1fr;gap:12px}.stat{padding:18px 20px}
   .row{grid-template-columns:64px 1fr auto;grid-template-areas:"t w s" "t x x" "a a a";gap:6px 12px;padding:18px 20px}
   .row .time{grid-area:t;font-size:19px}.row .who{grid-area:w}.row .what{grid-area:x}.row .st{grid-area:s;text-align:right}.row .act{grid-area:a;justify-content:flex-start;margin-top:8px}
+  .alert-banner{flex-direction:column;align-items:stretch}
+  .alert-actions .btn{width:100%}
 }
 @media (max-width:520px){
   .pill-date{display:none}
@@ -168,18 +186,29 @@ textarea.inp{resize:vertical;min-height:80px}
       <div><h1 id="h-title"></h1><div class="sub" id="h-sub"></div></div>
       <button class="btn" data-act="new">+ Nueva cita</button>
     </div>
+    <div id="banner-aviso"></div>
     <div class="toolbar">
       <div class="seg" id="tabs">
-        <button data-view="hoy">Hoy</button><button data-view="manana">Mañana</button><button data-view="todas">Todas</button>
+        <button data-view="hoy">Hoy <span class="badge" id="b-badge-hoy"></span></button>
+        <button data-view="manana">Mañana <span class="badge" id="b-badge-manana"></span></button>
+        <button data-view="semana">Semana <span class="badge" id="b-badge-semana"></span></button>
+        <button data-view="mes">Mes <span class="badge" id="b-badge-mes"></span></button>
+        <button data-view="todas">Todas</button>
       </div>
       <button class="btn out sm hidden" id="b-csv" data-act="csv">Exportar CSV</button>
     </div>
     <div class="filters hidden" id="filters">
       <input class="inp" id="f-q" placeholder="Buscar paciente o teléfono">
-      <input class="inp" id="f-date" type="date">
+      <input class="inp" id="f-date" type="date" title="Filtrar por fecha específica">
       <select class="inp" id="f-st"></select>
       <select class="inp" id="f-suc"></select>
       <select class="inp hidden" id="f-as"></select>
+      <select class="inp" id="f-sort" title="Ordenar lista">
+        <option value="cita_asc">📅 Cita: más próximas primero</option>
+        <option value="cita_desc">📅 Cita: más lejanas primero</option>
+        <option value="reg_desc">🕒 Registro: más recientes primero</option>
+        <option value="reg_asc">🕒 Registro: más antiguos primero</option>
+      </select>
     </div>
     <div class="stats" id="stats"></div>
     <div id="content"></div>
@@ -217,6 +246,9 @@ const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().sli
 const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
 const fmtLong=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
 const fmtShort=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+const fmtReg=s=>{if(!s)return'—';const d=new Date(s);return isNaN(d.getTime())?'—':d.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
+const getWeekRange=s=>{const d=new Date(s+'T12:00:00');const day=d.getDay();const diff=(day===0?-6:1-day);const mon=new Date(d);mon.setDate(d.getDate()+diff);const sun=new Date(mon);sun.setDate(mon.getDate()+6);return [iso(mon),iso(sun)]};
+const getMonthRange=s=>{const d=new Date(s+'T12:00:00');const y=d.getFullYear(),m=d.getMonth();const first=new Date(y,m,1);const last=new Date(y,m+1,0);return [iso(first),iso(last)]};
 const uid=()=>'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const nameOf=id=>(USUARIOS.find(u=>u.id===id)||{}).nombre||'—';
 const opts=(arr,sel,ph)=>(ph?`<option value="">${ph}</option>`:'')+arr.map(a=>`<option ${a===sel?'selected':''}>${esc(a)}</option>`).join('');
@@ -225,14 +257,35 @@ const pillCls=e=>e==='Asistió'?'ok':e==='No asistió'?'bad':e==='Pendiente'?'pe
 let citas=[],user=null,view='hoy';
 
 function seed(){
-  const t=iso(new Date()),m=addDays(t,1);
-  const mk=(as,f,h,n,tel,suc,tr,tipo,o,est)=>({id:uid(),asesorId:as,fecha:f,hora:h,paciente:n,telefono:tel,sucursal:suc,tratamiento:tr,tipo,origen:o,notas:'',estatus:est||'Pendiente',motivo:'',historial:[{f:new Date().toISOString(),e:est||'Pendiente'}]});
+  const t=iso(new Date()),m=addDays(t,1),d3=addDays(t,3),d5=addDays(t,5),d8=addDays(t,8);
+  const now=Date.now();
+  const mk=(as,f,h,n,tel,suc,tr,tipo,o,est,daysAgo)=>({
+    id:uid(),
+    asesorId:as,
+    fecha:f,
+    hora:h,
+    paciente:n,
+    telefono:tel,
+    sucursal:suc,
+    tratamiento:tr,
+    tipo,
+    origen:o,
+    notas:'',
+    estatus:est||'Pendiente',
+    motivo:'',
+    creadoEl:new Date(now-(daysAgo||0)*86400000-3600000*2).toISOString(),
+    creadoPor:as,
+    historial:[{f:new Date(now-(daysAgo||0)*86400000-3600000*2).toISOString(),e:est||'Pendiente'}]
+  });
   return [
-    mk('u2',t,'10:00','María López','6641234567','Tijuana','Valoración','Cita nueva','Facebook'),
-    mk('u2',t,'12:30','Carlos Ruiz','6649876543','Tijuana','Ortodoncia (brackets)','Cita de tratamiento','Referido','Asistió'),
-    mk('u2',m,'09:30','Ana Torres','6861112233','Mexicali Obregón','Limpieza dental','Cita nueva','Instagram'),
-    mk('u2',m,'16:00','Luis Herrera','6462223344','Ensenada','Endodoncia','Cita de tratamiento','WhatsApp'),
-    mk('u3',m,'11:00','Sofía Mendoza','6645556677','Tijuana','Alineadores','Cita nueva','Facebook')
+    mk('u2',t,'10:00','María López','6641234567','Tijuana','Valoración','Cita nueva','Facebook','Pendiente',2),
+    mk('u2',t,'12:30','Carlos Ruiz','6649876543','Tijuana','Ortodoncia (brackets)','Cita de tratamiento','Referido','Asistió',3),
+    mk('u2',m,'09:30','Ana Torres','6861112233','Mexicali Obregón','Limpieza dental','Cita nueva','Instagram','Pendiente',1),
+    mk('u2',m,'16:00','Luis Herrera','6462223344','Ensenada','Endodoncia','Cita de tratamiento','WhatsApp','Pendiente',1),
+    mk('u3',m,'11:00','Sofía Mendoza','6645556677','Tijuana','Alineadores','Cita nueva','Facebook','Pendiente',0),
+    mk('u2',d3,'11:30','Roberto Gómez','6643334455','Tijuana','Implante','Cita nueva','WhatsApp','Pendiente',1),
+    mk('u3',d5,'15:00','Fernanda Díaz','6867778899','Mexicali Villa Verde','Blanqueamiento','Cita nueva','Instagram','Pendiente',2),
+    mk('u2',d8,'10:00','Alejandro Castro','6468889900','Ensenada','Corona','Cita de tratamiento','Paciente anterior','Pendiente',0)
   ];
 }
 function persist(){DB.save(citas)}
@@ -261,25 +314,91 @@ function startApp(){
   render();
 }
 
+function updateBadges(){
+  const all=mine(), t=iso(new Date()), m=addDays(t,1);
+  const [wStart,wEnd]=getWeekRange(t), [mStart,mEnd]=getMonthRange(t);
+  const cHoy=all.filter(c=>c.fecha===t).length;
+  const cMan=all.filter(c=>c.fecha===m);
+  const cManPend=cMan.filter(c=>c.estatus==='Pendiente').length;
+  const cSem=all.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd).length;
+  const cMes=all.filter(c=>c.fecha>=mStart&&c.fecha<=mEnd).length;
+  const setB=(id,cnt,alert)=>{
+    const el=$('#'+id);if(!el)return;
+    el.textContent=cnt||'0';
+    el.classList.toggle('alert',!!alert);
+  };
+  setB('b-badge-hoy',cHoy,false);
+  setB('b-badge-manana',cMan.length,cManPend>0);
+  setB('b-badge-semana',cSem,false);
+  setB('b-badge-mes',cMes,false);
+}
+
+function renderAviso(){
+  const box=$('#banner-aviso');if(!box)return;
+  const t=iso(new Date()), m=addDays(t,1);
+  const lMan=mine().filter(c=>c.fecha===m);
+  const pMan=lMan.filter(c=>c.estatus==='Pendiente');
+  if(!lMan.length){box.innerHTML='';return}
+  const pendTxt=pMan.length
+    ?`<span class="alert-pend">⚠️ <b>${pMan.length} ${pMan.length===1?'cita pendiente':'citas pendientes'}</b> de confirmar asistencia.</span>`
+    :`<span class="alert-ok">✅ Todas las citas de mañana están confirmadas.</span>`;
+  box.innerHTML=`
+    <div class="alert-banner ${pMan.length?'has-pend':''}">
+      <div class="alert-left">
+        <div class="alert-bell">🔔</div>
+        <div>
+          <b>Aviso para Mañana (${esc(fmtLong(m))}):</b>
+          <p>${lMan.length} ${lMan.length===1?'cita programada':'citas programadas'} para mañana. ${pendTxt}</p>
+        </div>
+      </div>
+      <div class="alert-actions">
+        <button class="btn sm" data-view="manana">Ver citas de mañana</button>
+      </div>
+    </div>`;
+}
+
 /* ============ RENDER ============ */
 function mine(){return user.rol==='admin'?citas:citas.filter(c=>c.asesorId===user.id)}
 function currentList(){
   const t=iso(new Date());let l=mine();
+  const [wStart,wEnd]=getWeekRange(t), [mStart,mEnd]=getMonthRange(t);
   if(view==='hoy')l=l.filter(c=>c.fecha===t);
   else if(view==='manana')l=l.filter(c=>c.fecha===addDays(t,1));
-  else{
-    const q=$('#f-q').value.toLowerCase().trim(),d=$('#f-date').value,st=$('#f-st').value,su=$('#f-suc').value,as=$('#f-as').value;
-    if(q)l=l.filter(c=>c.paciente.toLowerCase().includes(q)||c.telefono.includes(q));
-    if(d)l=l.filter(c=>c.fecha===d);if(st)l=l.filter(c=>c.estatus===st);
-    if(su)l=l.filter(c=>c.sucursal===su);if(as)l=l.filter(c=>c.asesorId===as);
-  }
-  return l.sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora)*(view==='todas'?-1:1));
+  else if(view==='semana')l=l.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
+  else if(view==='mes')l=l.filter(c=>c.fecha>=mStart&&c.fecha<=mEnd);
+
+  const q=$('#f-q')?$('#f-q').value.toLowerCase().trim():'';
+  const d=$('#f-date')?$('#f-date').value:'';
+  const st=$('#f-st')?$('#f-st').value:'';
+  const su=$('#f-suc')?$('#f-suc').value:'';
+  const as=$('#f-as')?$('#f-as').value:'';
+  if(q)l=l.filter(c=>c.paciente.toLowerCase().includes(q)||c.telefono.includes(q));
+  if(d)l=l.filter(c=>c.fecha===d);if(st)l=l.filter(c=>c.estatus===st);
+  if(su)l=l.filter(c=>c.sucursal===su);if(as)l=l.filter(c=>c.asesorId===as);
+
+  const sortMode=$('#f-sort')?$('#f-sort').value:'cita_asc';
+  return l.sort((a,b)=>{
+    if(sortMode==='reg_desc')return(b.creadoEl||'').localeCompare(a.creadoEl||'');
+    if(sortMode==='reg_asc')return(a.creadoEl||'').localeCompare(b.creadoEl||'');
+    if(sortMode==='cita_desc')return(b.fecha+b.hora).localeCompare(a.fecha+a.hora);
+    return(a.fecha+a.hora).localeCompare(b.fecha+b.hora);
+  });
 }
 function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
-  $('#filters').classList.toggle('hidden',view!=='todas');
+  $('#filters').classList.toggle('hidden',view==='hoy'||view==='manana');
+  updateBadges();
+  renderAviso();
   const t=iso(new Date());
-  const titles={hoy:['Citas de hoy',fmtLong(t)],manana:['Citas de mañana',fmtLong(addDays(t,1))],todas:['Todas las citas','Historial completo']};
+  const [wStart,wEnd]=getWeekRange(t), [mStart,mEnd]=getMonthRange(t);
+  const mName=new Date(t+'T12:00:00').toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+  const titles={
+    hoy:['Citas de hoy',fmtLong(t)],
+    manana:['Citas de mañana',fmtLong(addDays(t,1))],
+    semana:['Citas de esta semana',`${fmtShort(wStart)} al ${fmtShort(wEnd)}`],
+    mes:['Citas de este mes',mName],
+    todas:['Todas las citas','Historial completo']
+  };
   $('#h-title').textContent=titles[view][0];
   $('#h-sub').textContent=titles[view][1]+(user.rol==='admin'?' · Vista gerente':' · '+user.nombre);
   const l=currentList();
@@ -290,24 +409,59 @@ function render(){
     <div class="card stat"><label>Asistieron</label><b class="ok">${asis}</b></div>
     <div class="card stat"><label>No asistieron</label><b class="bad">${no}</b></div>
     <div class="card stat"><label>Asistencia</label><b>${tasa}</b></div>`;
-  if(!l.length){$('#content').innerHTML='<div class="card empty">No hay citas para mostrar.</div>';return}
+  if(!l.length){$('#content').innerHTML='<div class="card empty">No hay citas para mostrar en este periodo.</div>';return}
+  const sortByReg=($('#f-sort')&&$('#f-sort').value.startsWith('reg_'));
   let html='',cur=null;
   const rows=[];
   l.forEach(c=>{
-    if(view==='todas'&&c.fecha!==cur){if(cur!==null)html+=`<div class="card list">${rows.splice(0).join('')}</div>`;cur=c.fecha;html+=`<div class="day">${esc(fmtLong(c.fecha))}</div>`}
+    const groupKey=sortByReg?(c.creadoEl?c.creadoEl.slice(0,10):'sin_fecha'):c.fecha;
+    const groupLabel=sortByReg?('Registradas el '+fmtLong(groupKey)):fmtLong(groupKey);
+    if((view==='todas'||view==='semana'||view==='mes')&&groupKey!==cur){
+      if(cur!==null)html+=`<div class="card list">${rows.splice(0).join('')}</div>`;
+      cur=groupKey;
+      html+=`<div class="day">${esc(groupLabel)}</div>`;
+    }
     rows.push(rowHTML(c));
   });
   html+=`<div class="card list">${rows.join('')}</div>`;
   $('#content').innerHTML=html;
 }
 function rowHTML(c){
-  const wa=view==='manana'&&c.estatus==='Pendiente'?` · <a href="https://wa.me/52${c.telefono.replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+c.paciente.split(' ')[0]+', te confirmamos tu cita en Dental Más Fácil mañana a las '+c.hora+'. ¿Nos confirmas tu asistencia?')}" target="_blank" rel="noopener">Confirmar</a>`:'';
+  const t=iso(new Date());
+  let wa='';
+  if(c.telefono&&c.estatus==='Pendiente'){
+    const cleanTel=c.telefono.replace(/\D/g,'');
+    let msg='';
+    if(c.fecha===addDays(t,1)){
+      msg=`Hola ${c.paciente.split(' ')[0]}, te confirmamos tu cita en Dental Más Fácil mañana a las ${c.hora}. ¿Nos confirmas tu asistencia?`;
+    }else if(c.fecha===t){
+      msg=`Hola ${c.paciente.split(' ')[0]}, te recordamos tu cita de hoy en Dental Más Fácil a las ${c.hora}. ¡Te esperamos!`;
+    }else{
+      msg=`Hola ${c.paciente.split(' ')[0]}, te saludamos de Dental Más Fácil para confirmar tu cita del ${fmtShort(c.fecha)} a las ${c.hora}. ¿Nos confirmas tu asistencia?`;
+    }
+    wa=` · <a class="wa-link" href="https://wa.me/52${cleanTel}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Confirmar WhatsApp</a>`;
+  }
+  const showDateInCol=(view==='semana'||view==='mes'||view==='todas'||($('#f-sort')&&$('#f-sort').value.startsWith('reg_')));
+  const regTxt=c.creadoEl?`🕒 Agendada: ${fmtReg(c.creadoEl)}`:'';
   return `<div class="row">
-    <div class="time">${esc(c.hora)}</div>
-    <div class="who"><b>${esc(c.paciente)}</b><span class="m">${esc(c.telefono)}${wa}</span></div>
-    <div class="what"><b>${esc(c.tratamiento)}</b><span class="m">${esc(c.sucursal)}${user.rol==='admin'?' · '+esc(nameOf(c.asesorId)):''}${view==='todas'?'':' · '+esc(c.tipo)}</span></div>
-    <div class="st"><span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>${c.motivo?`<span class="m" style="margin-top:4px">${esc(c.motivo)}</span>`:''}</div>
-    <div class="act"><button class="btn out sm" data-act="status" data-id="${c.id}">Estatus</button><button class="btn out sm" data-act="edit" data-id="${c.id}">Editar</button></div>
+    <div class="time">${esc(c.hora)}${showDateInCol?`<span class="row-date">${esc(fmtShort(c.fecha))}</span>`:''}</div>
+    <div class="who">
+      <b>${esc(c.paciente)}</b>
+      <span class="m">${esc(c.telefono)}${wa}</span>
+      ${regTxt?`<span class="m reg-sub">${esc(regTxt)}</span>`:''}
+    </div>
+    <div class="what">
+      <b>${esc(c.tratamiento)}</b>
+      <span class="m">${esc(c.sucursal)}${user.rol==='admin'?' · '+esc(nameOf(c.asesorId)):''}${view==='todas'?'':' · '+esc(c.tipo)}</span>
+    </div>
+    <div class="st">
+      <span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>
+      ${c.motivo?`<span class="m" style="margin-top:4px">${esc(c.motivo)}</span>`:''}
+    </div>
+    <div class="act">
+      <button class="btn out sm" data-act="status" data-id="${c.id}">Estatus</button>
+      <button class="btn out sm" data-act="edit" data-id="${c.id}">Editar</button>
+    </div>
   </div>`;
 }
 
@@ -340,15 +494,27 @@ function citaForm(id){
     <div class="field"><label class="l">Notas</label><textarea class="inp" id="c-not" placeholder="Opcional">${esc(c.notas)}</textarea></div>
     <div class="err" id="c-err"></div>
     <div class="m-actions"><button class="btn out" data-act="close">Cancelar</button><button class="btn" data-act="save" data-id="${id||''}">Guardar</button></div>
-    ${id?`<div class="hist">${(c.historial||[]).map(h=>`${esc(h.e)} · ${new Date(h.f).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`).join('<br>')}</div>`:''}`);
+    ${id?`<div class="hist">
+      ${c.creadoEl?`<b>Registrada el:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Asesor: ${esc(nameOf(c.asesorId))}<br>`:''}
+      <b>Historial de cambios:</b><br>
+      ${(c.historial||[]).map(h=>`${esc(h.e)} · ${new Date(h.f).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`).join('<br>')}
+    </div>`:''}`);
 }
 function saveCita(id){
   const v=k=>$('#'+k).value.trim();
   const d={paciente:v('c-pac'),telefono:v('c-tel'),sucursal:v('c-suc'),fecha:v('c-fec'),hora:v('c-hor'),tratamiento:v('c-tra'),tipo:v('c-tip'),origen:v('c-ori'),notas:v('c-not')};
   if(!d.paciente||!d.telefono||!d.sucursal||!d.fecha||!d.hora||!d.tratamiento){$('#c-err').textContent='Completa paciente, teléfono, sucursal, fecha, hora y tratamiento.';return}
   const asesorId=$('#c-as')?$('#c-as').value:user.id;
-  if(id){Object.assign(citas.find(c=>c.id===id),d,{asesorId})}
-  else citas.push({id:uid(),...d,asesorId,estatus:'Pendiente',motivo:'',historial:[{f:new Date().toISOString(),e:'Pendiente'}]});
+  const now=new Date().toISOString();
+  if(id){
+    const target=citas.find(c=>c.id===id);
+    if(target){
+      Object.assign(target,d,{asesorId});
+      if(!target.creadoEl) target.creadoEl=now;
+    }
+  } else {
+    citas.push({id:uid(),...d,asesorId,creadoEl:now,creadoPor:user.id,estatus:'Pendiente',motivo:'',historial:[{f:now,e:'Pendiente'}]});
+  }
   persist();closeModal();render();
 }
 
@@ -374,22 +540,23 @@ function extra(c){
 }
 function saveStatus(id){
   const c=citas.find(x=>x.id===id),mot=$('#s-mot')?$('#s-mot').value.trim():'';
+  const now=new Date().toISOString();
   if(stSel==='Reagendó'){
     const f=$('#s-fec').value,h=$('#s-hor').value;
     if(!f||!h){$('#s-err').textContent='Indica la nueva fecha y hora.';return}
     if(c.estatus!=='Reagendó'){
-      citas.push({...c,id:uid(),fecha:f,hora:h,estatus:'Pendiente',motivo:'',notas:(c.notas?c.notas+' · ':'')+'Reagendada desde '+fmtShort(c.fecha)+' '+c.hora,historial:[{f:new Date().toISOString(),e:'Pendiente'}]});
+      citas.push({...c,id:uid(),fecha:f,hora:h,estatus:'Pendiente',motivo:'',notas:(c.notas?c.notas+' · ':'')+'Reagendada desde '+fmtShort(c.fecha)+' '+c.hora,creadoEl:now,creadoPor:user.id,historial:[{f:now,e:'Pendiente'}]});
     }
   }
   c.estatus=stSel;c.motivo=stSel==='Asistió'||stSel==='Pendiente'?'':mot;
-  c.historial=(c.historial||[]).concat({f:new Date().toISOString(),e:stSel});
+  c.historial=(c.historial||[]).concat({f:now,e:stSel});
   persist();closeModal();render();
 }
 
 function exportCSV(){
-  const l=currentList(),h=['Fecha','Hora','Paciente','Teléfono','Sucursal','Tratamiento','Tipo','Origen','Asesor','Estatus','Motivo','Notas'];
+  const l=currentList(),h=['Fecha Cita','Hora Cita','Fecha Registro','Paciente','Teléfono','Sucursal','Tratamiento','Tipo','Origen','Asesor','Estatus','Motivo','Notas'];
   const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
-  const csv=[h.map(q).join(',')].concat(l.map(c=>[c.fecha,c.hora,c.paciente,c.telefono,c.sucursal,c.tratamiento,c.tipo,c.origen,nameOf(c.asesorId),c.estatus,c.motivo,c.notas].map(q).join(','))).join('\n');
+  const csv=[h.map(q).join(',')].concat(l.map(c=>[c.fecha,c.hora,c.creadoEl?fmtReg(c.creadoEl):'',c.paciente,c.telefono,c.sucursal,c.tratamiento,c.tipo,c.origen,nameOf(c.asesorId),c.estatus,c.motivo,c.notas].map(q).join(','))).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='citas_'+iso(new Date())+'.csv';a.click();
 }
 
@@ -413,7 +580,10 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='Enter'&&!$('#login').classList.contains('hidden'))doLogin()});
-['f-q','f-date','f-st','f-suc','f-as'].forEach(i=>{$('#'+i).addEventListener('input',render)});
+['f-q','f-date','f-st','f-suc','f-as','f-sort'].forEach(i=>{
+  const el=$('#'+i);
+  if(el) el.addEventListener('input',render);
+});
 $('#lg-btn').onclick=doLogin;
 $('#b-out').onclick=()=>{sessionStorage.removeItem('dmf_user');user=null;showLogin()};
 $('#b-theme').onclick=()=>{const d=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=d;try{localStorage.setItem('dmf_theme',d)}catch(e){}};
@@ -422,7 +592,20 @@ $('#b-theme').onclick=()=>{const d=document.documentElement.dataset.theme==='dar
 (function(){
   let th=null;try{th=localStorage.getItem('dmf_theme')}catch(e){}
   document.documentElement.dataset.theme=th||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
-  citas=DB.load();if(!citas){citas=seed();persist()}
+  citas=DB.load();
+  if(!citas){
+    citas=seed();
+    persist();
+  } else {
+    let upd=false;
+    citas.forEach(c=>{
+      if(!c.creadoEl){
+        c.creadoEl=(c.historial&&c.historial[0]&&c.historial[0].f)||(c.fecha?c.fecha+'T10:00:00.000Z':new Date().toISOString());
+        upd=true;
+      }
+    });
+    if(upd) persist();
+  }
   const tick=()=>{$('#clock').textContent=new Date().toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
   tick();setInterval(tick,30000);
   const su=sessionStorage.getItem('dmf_user');user=USUARIOS.find(u=>u.id===su)||null;
