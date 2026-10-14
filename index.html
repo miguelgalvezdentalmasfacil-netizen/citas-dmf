@@ -99,28 +99,6 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .period-picker-label{font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap}
 .period-picker .inp{padding:8px 12px;font-size:13px;width:auto;min-width:240px}
 
-/* Advisor Attendance Stats Table (Semana) */
-.advisor-box{margin-bottom:24px;overflow:hidden}
-.advisor-box-head{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
-.advisor-box-head h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
-.advisor-box-head .sub{font-size:12px;color:var(--text-muted);margin-top:2px}
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.table-dmf{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
-.table-dmf th{padding:12px 18px;background:var(--hover);color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.5px;border-bottom:1px solid var(--border-dark);white-space:nowrap}
-.table-dmf td{padding:14px 18px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--text-main)}
-.table-dmf tr:hover td{background:var(--hover)}
-.table-dmf tfoot tr td{background:var(--hover);font-weight:600;border-top:2px solid var(--border-dark);border-bottom:0}
-.table-dmf .num{text-align:center;font-weight:500}
-.table-dmf .rate-col{font-weight:600}
-.user-highlight{background:rgba(16,185,129,.06)}
-.badge-count{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600}
-.badge-count.ok{background:var(--ok-bg);color:var(--ok)}
-.badge-count.bad{background:var(--bad-bg);color:var(--bad)}
-.badge-count.pend{background:rgba(245,158,11,.15);color:#D97706}
-.badge-count.zero{background:var(--border-dark);color:var(--text-light);opacity:.6}
-.progress-mini{width:56px;height:6px;background:var(--border-dark);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
-.progress-mini-bar{height:100%;background:var(--ok);border-radius:3px}
-
 /* Filters */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .filters>*{flex:1 1 150px}
@@ -264,7 +242,6 @@ textarea.inp{resize:vertical;min-height:80px}
       </select>
     </div>
     <div class="stats" id="stats"></div>
-    <div id="advisor-stats-box"></div>
     <div id="content"></div>
   </main>
 </div>
@@ -565,117 +542,12 @@ function renderPeriodNav(){
   box.innerHTML='';
 }
 
-function renderAdvisorStats(){
-  const box=$('#advisor-stats-box');
-  if(!box)return;
-  if(view!=='semana'){
-    box.innerHTML='';
-    return;
-  }
-  const isStd=(weekMode==='std');
-  const [wStart,wEnd]=getWeekRange(selectedWeekRef);
-  const weekCitas=citas.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
-
-  const advisorList=USUARIOS.filter(u=>u.rol==='asesor'||weekCitas.some(c=>c.asesorId===u.id));
-  if(!advisorList.length) advisorList.push(...USUARIOS);
-
-  let sumTot=0, sumAsis=0, sumNo=0, sumPend=0, sumOtr=0;
-
-  const rows=advisorList.map(u=>{
-    const uCitas=weekCitas.filter(c=>c.asesorId===u.id);
-    const tot=uCitas.length;
-    const asis=uCitas.filter(c=>c.estatus==='Asistió').length;
-    const no=uCitas.filter(c=>c.estatus==='No asistió').length;
-    const pend=uCitas.filter(c=>c.estatus==='Pendiente').length;
-    const otr=uCitas.filter(c=>c.estatus==='Reagendó'||c.estatus==='Canceló').length;
-
-    sumTot+=tot; sumAsis+=asis; sumNo+=no; sumPend+=pend; sumOtr+=otr;
-
-    const concl=asis+no;
-    const pctVal=concl>0?Math.round((asis/concl)*100):null;
-    const pctTxt=pctVal!==null?`${pctVal}%`:(tot>0?'—':'—');
-    const isMe=(user&&user.id===u.id);
-
-    return `
-      <tr class="${isMe?'user-highlight':''}">
-        <td>
-          <b>${esc(u.nombre)}</b>
-          ${u.rol==='admin'?' <span class="badge" style="font-size:10px">Gerente</span>':''}
-          ${isMe?' <span class="pill-curr">Tú</span>':''}
-        </td>
-        <td class="num"><b>${tot}</b></td>
-        <td class="num"><span class="badge-count ${asis>0?'ok':'zero'}">${asis}</span></td>
-        <td class="num"><span class="badge-count ${no>0?'bad':'zero'}">${no}</span></td>
-        <td class="num"><span class="badge-count ${pend>0?'pend':'zero'}">${pend}</span></td>
-        <td class="num"><span class="badge-count ${otr>0?'':'zero'}">${otr}</span></td>
-        <td class="num rate-col">
-          ${pctVal!==null?`<div class="progress-mini"><div class="progress-mini-bar" style="width:${pctVal}%"></div></div>`:''}
-          <b>${pctTxt}</b>
-        </td>
-      </tr>`;
-  }).join('');
-
-  const conclTotal=sumAsis+sumNo;
-  const totalPctVal=conclTotal>0?Math.round((sumAsis/conclTotal)*100):null;
-  const totalPctTxt=totalPctVal!==null?`${totalPctVal}%`:'—';
-
-  const titleHeader=isStd
-    ?'📊 Reporte de Asistencia por Asesor · Semana Normal (Lunes a Domingo)'
-    :'📊 Reporte de Asistencia por Asesor · Semana DMF (Jueves a Miércoles)';
-  const subHeader=isStd
-    ?`Semana del <b>Lunes ${fmtShort(wStart)}</b> al <b>Domingo ${fmtShort(wEnd)}</b> · Cálculo semanal de pacientes que asistieron por cada asesor (formato estándar).`
-    :`Ciclo del <b>Jueves ${fmtShort(wStart)}</b> al <b>Miércoles ${fmtShort(wEnd)}</b> · Cálculo semanal de pacientes que asistieron por cada asesor (ciclo operativo DMF).`;
-
-  box.innerHTML=`
-    <div class="card advisor-box">
-      <div class="advisor-box-head">
-        <div>
-          <h3>${titleHeader}</h3>
-          <div class="sub">${subHeader}</div>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table class="table-dmf">
-          <thead>
-            <tr>
-              <th>Asesor</th>
-              <th class="num">Citas Agendadas</th>
-              <th class="num">Pacientes Asistieron</th>
-              <th class="num">No Asistieron</th>
-              <th class="num">Pendientes</th>
-              <th class="num">Reagendó / Canceló</th>
-              <th class="num">% Asistencia</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td><b>TOTAL CLÍNICA</b></td>
-              <td class="num"><b>${sumTot}</b></td>
-              <td class="num"><span class="badge-count ${sumAsis>0?'ok':'zero'}"><b>${sumAsis}</b></span></td>
-              <td class="num"><span class="badge-count ${sumNo>0?'bad':'zero'}"><b>${sumNo}</b></span></td>
-              <td class="num"><span class="badge-count ${sumPend>0?'pend':'zero'}"><b>${sumPend}</b></span></td>
-              <td class="num"><span class="badge-count ${sumOtr>0?'':'zero'}"><b>${sumOtr}</b></span></td>
-              <td class="num rate-col">
-                ${totalPctVal!==null?`<div class="progress-mini"><div class="progress-mini-bar" style="width:${totalPctVal}%"></div></div>`:''}
-                <b>${totalPctTxt}</b>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>`;
-}
-
 function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   $('#filters').classList.toggle('hidden',view==='hoy'||view==='manana');
   updateBadges();
   renderAviso();
   renderPeriodNav();
-  renderAdvisorStats();
   const t=iso(new Date());
   const isStd=(weekMode==='std');
   const [wStart,wEnd]=getWeekRange(selectedWeekRef);
