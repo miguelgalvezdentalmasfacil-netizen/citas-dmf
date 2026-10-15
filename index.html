@@ -74,7 +74,8 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .alert-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border:1px solid var(--border-dark);border-left:4px solid var(--text-main);padding:14px 20px;border-radius:var(--radius-md);margin-bottom:20px;box-shadow:var(--shadow)}
 .alert-banner.has-pend{border-left-color:#F59E0B;background:rgba(245,158,11,.04)}
 .alert-left{display:flex;align-items:center;gap:14px}
-.alert-bell{font-size:22px;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--hover);flex-shrink:0}
+.alert-bell{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--hover);color:var(--text-main);flex-shrink:0}
+.alert-banner.has-pend .alert-bell{color:#d97706;background:rgba(217,119,6,.1)}
 .alert-banner p{font-size:13px;color:var(--text-muted);margin-top:2px}
 .alert-pend{color:#D97706;font-weight:600}
 .alert-ok{color:var(--ok);font-weight:600}
@@ -96,7 +97,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .nav-arrows .btn.active{background:var(--btn-bg);color:var(--btn-text)}
 .period-center{text-align:center;flex:1 1 240px}
 .period-label{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
-.period-icon{font-size:18px}
+.period-icon{display:inline-flex;align-items:center;color:var(--text-muted)}
 .period-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
 .pill-curr{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--ok-bg);color:var(--ok);margin-left:4px}
 .period-picker{display:flex;align-items:center;gap:8px}
@@ -235,6 +236,7 @@ textarea.inp{resize:vertical;min-height:80px}
   .pdf-kpi-grid{grid-template-columns:repeat(2,1fr)}
   .dmf-pdf-document{padding:24px 16px}
 }
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -289,8 +291,8 @@ textarea.inp{resize:vertical;min-height:80px}
       <input class="inp" id="f-q" placeholder="Buscar paciente o teléfono">
       <input class="inp" id="f-date" type="date" title="Filtrar por fecha específica">
       <select class="inp" id="f-date-type" title="Criterio de fecha para el filtro">
-        <option value="cita">📅 Cita de ese día</option>
-        <option value="registro">📝 Registrada ese día</option>
+        <option value="cita">Por Fecha de Cita</option>
+        <option value="registro">Por Fecha de Registro</option>
       </select>
       <select class="inp" id="f-st"></select>
       <select class="inp" id="f-suc"></select>
@@ -298,10 +300,10 @@ textarea.inp{resize:vertical;min-height:80px}
       <select class="inp" id="f-ori" title="Filtrar por origen"></select>
       <select class="inp hidden" id="f-as"></select>
       <select class="inp" id="f-sort" title="Ordenar lista">
-        <option value="cita_asc">📅 Fecha de Cita: más próximas primero</option>
-        <option value="cita_desc">📅 Fecha de Cita: más lejanas primero</option>
-        <option value="reg_desc">📝 Fecha de Registro: más recientes primero</option>
-        <option value="reg_asc">📝 Fecha de Registro: más antiguos primero</option>
+        <option value="cita_asc">Cita: más próximas primero</option>
+        <option value="cita_desc">Cita: más lejanas primero</option>
+        <option value="reg_desc">Registro: más recientes primero</option>
+        <option value="reg_asc">Registro: más antiguos primero</option>
       </select>
     </div>
     <div class="stats" id="stats"></div>
@@ -446,12 +448,14 @@ function renderAviso(){
   const pMan=lMan.filter(c=>c.estatus==='Pendiente');
   if(!lMan.length){box.innerHTML='';return}
   const pendTxt=pMan.length
-    ?`<span class="alert-pend">⚠️ <b>${pMan.length} ${pMan.length===1?'cita pendiente':'citas pendientes'}</b> de confirmar asistencia.</span>`
-    :`<span class="alert-ok">✅ Todas las citas de mañana están confirmadas.</span>`;
+    ?`<span class="alert-pend"><b>${pMan.length} ${pMan.length===1?'cita pendiente':'citas pendientes'}</b> por confirmar asistencia.</span>`
+    :`<span class="alert-ok">Todas las citas de mañana están confirmadas.</span>`;
   box.innerHTML=`
     <div class="alert-banner ${pMan.length?'has-pend':''}">
       <div class="alert-left">
-        <div class="alert-bell">🔔</div>
+        <div class="alert-bell">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        </div>
         <div>
           <b>Aviso para Mañana (${esc(fmtLong(m))}):</b>
           <p>${lMan.length} ${lMan.length===1?'cita programada':'citas programadas'} para mañana. ${pendTxt}</p>
@@ -536,8 +540,8 @@ function renderPeriodNav(){
         <div class="period-mode-bar">
           <span class="mode-label">Formato de semana:</span>
           <div class="seg seg-sm" id="seg-week-mode">
-            <button class="${!isStd?'on':''}" data-mode="dmf" title="Ciclo operativo de Jueves a Miércoles">📅 Semana DMF (Jue–Mié)</button>
-            <button class="${isStd?'on':''}" data-mode="std" title="Semana estándar de Lunes a Domingo">🗓️ Semana Normal (Lun–Dom)</button>
+            <button class="${!isStd?'on':''}" data-mode="dmf" title="Ciclo operativo de Jueves a Miércoles">Semana DMF (Jue–Mié)</button>
+            <button class="${isStd?'on':''}" data-mode="std" title="Semana estándar de Lunes a Domingo">Semana Normal (Lun–Dom)</button>
           </div>
         </div>
         <div class="period-main-row">
@@ -548,7 +552,7 @@ function renderPeriodNav(){
           </div>
           <div class="period-center">
             <div class="period-label">
-              <span class="period-icon">${isStd?'🗓️':'📅'}</span>
+              <span class="period-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="18" y2="10"></line></svg></span>
               <span><b>${esc(weekTypeBadge)}:</b> ${esc(weekLabel)}</span>
               ${isCurr?'<span class="pill-curr">En curso</span>':''}
             </div>
@@ -591,7 +595,7 @@ function renderPeriodNav(){
         </div>
         <div class="period-center">
           <div class="period-label">
-            <span class="period-icon">📆</span>
+            <span class="period-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="18" y2="10"></line></svg></span>
             <span style="text-transform:capitalize"><b>${mName}</b></span>
             ${isCurr?'<span class="pill-curr">En curso</span>':''}
           </div>
@@ -686,13 +690,13 @@ function rowHTML(c){
   return `<div class="row">
     <div class="time">
       <div class="row-hora">${esc(c.hora)}</div>
-      <div class="row-cita-badge" title="Fecha en que el paciente tiene su cita">📅 Cita: ${esc(fmtShort(c.fecha))}</div>
+      <div class="row-cita-badge" title="Fecha en que el paciente tiene su cita">Cita: ${esc(fmtShort(c.fecha))}</div>
     </div>
     <div class="who">
       <b>${esc(c.paciente)}</b>
       <span class="m">${esc(c.telefono)}${wa}</span>
       <div class="reg-badge" title="Momento exacto en que el asesor la dio de alta en el sistema">
-        📝 Registrada el: <b>${esc(regTxt)}</b>
+        Registrada el: <b>${esc(regTxt)}</b>
       </div>
     </div>
     <div class="what">
@@ -740,8 +744,8 @@ function citaForm(id){
     <div class="err" id="c-err"></div>
     <div class="m-actions"><button class="btn out" data-act="close">Cancelar</button><button class="btn" data-act="save" data-id="${id||''}">Guardar</button></div>
     ${id?`<div class="hist">
-      ${c.creadoEl?`<b>📝 Fecha de registro:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Asesor: ${esc(nameOf(c.asesorId))}<br>`:''}
-      <b>📅 Fecha de la cita:</b> ${fmtLong(c.fecha)} a las ${esc(c.hora)}<br>
+      ${c.creadoEl?`<b>Fecha de registro:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Asesor: ${esc(nameOf(c.asesorId))}<br>`:''}
+      <b>Fecha de la cita:</b> ${fmtLong(c.fecha)} a las ${esc(c.hora)}<br>
       <b>Historial de cambios:</b><br>
       ${(c.historial||[]).map(h=>`${esc(h.e)} · ${new Date(h.f).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`).join('<br>')}
     </div>`:''}`);
@@ -836,11 +840,11 @@ let repConfig={
 
 function getRepTypeHelpText(){
   if(repConfig.type==='atendidos'){
-    return '✅ <b>Regla Dental Fácil:</b> En este reporte <u>solo se incluyen pacientes que asistieron</u> a su cita. (Las citas que no asistieron o están pendientes se consultan en Control de Citas).';
+    return '<b>Regla Dental Fácil:</b> En este reporte <u>solo se incluyen pacientes que asistieron</u> a su cita. (Las citas que no asistieron o están pendientes se consultan en Control de Citas).';
   } else if(repConfig.type==='citas'){
-    return 'ℹ️ Muestra el control de <u>todas las citas agendadas</u> en el período (pendientes, asistió, no asistió, reagendadas, canceladas).';
+    return 'Muestra el control de <u>todas las citas agendadas</u> en el período (pendientes, asistió, no asistió, reagendadas, canceladas).';
   } else {
-    return '📊 Consolida el número de <u>citas agendadas</u> vs <u>pacientes que asistieron</u> con métricas y desglose por asesor.';
+    return 'Consolida el número de <u>citas agendadas</u> vs <u>pacientes que asistieron</u> con métricas y desglose por asesor.';
   }
 }
 
@@ -935,10 +939,10 @@ function openReportModal(){
   const html=`
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">
       <div>
-        <h2 style="font-size:22px;display:flex;align-items:center;gap:8px">📄 Generador de Reportes PDF</h2>
+        <h2 style="font-size:20px;font-weight:700">Generador de Reportes PDF</h2>
         <div class="sub nocap">Descarga reportes semanales, quincenales o mensuales en PDF con el formato oficial de Dental Más Fácil.</div>
       </div>
-      <button class="btn out sm" data-act="close" style="padding:6px 14px">✕ Cerrar</button>
+      <button class="btn out sm" data-act="close" style="padding:6px 14px">Cerrar</button>
     </div>
 
     <div class="rep-config-card">
@@ -946,16 +950,16 @@ function openReportModal(){
         <div>
           <label class="rep-field-label">Tipo de Reporte:</label>
           <div class="seg" id="seg-rep-type" style="width:100%;display:flex">
-            <button class="${repConfig.type==='atendidos'?'on':''}" data-type="atendidos" style="flex:1" title="Solo pacientes que asistieron a su cita">📋 Pacientes Atendidos</button>
-            <button class="${repConfig.type==='citas'?'on':''}" data-type="citas" style="flex:1" title="Control de todas las citas agendadas y sus estatus">📅 Control de Citas</button>
-            <button class="${repConfig.type==='ejecutivo'?'on':''}" data-type="ejecutivo" style="flex:1" title="Métricas de asistencia, citas agendadas vs pacientes y resumen por asesor">📊 Reporte Ejecutivo</button>
+            <button class="${repConfig.type==='atendidos'?'on':''}" data-type="atendidos" style="flex:1" title="Solo pacientes que asistieron a su cita">Pacientes Atendidos</button>
+            <button class="${repConfig.type==='citas'?'on':''}" data-type="citas" style="flex:1" title="Control de todas las citas agendadas y sus estatus">Control de Citas</button>
+            <button class="${repConfig.type==='ejecutivo'?'on':''}" data-type="ejecutivo" style="flex:1" title="Métricas de asistencia, citas agendadas vs pacientes y resumen por asesor">Reporte Ejecutivo</button>
           </div>
         </div>
         <div>
           <label class="rep-field-label">Asesor:</label>
           <select class="inp sm" id="rep-asesor-sel">
-            <option value="todos" ${repConfig.asesor==='todos'?'selected':''}>👥 Todos los Asesores (Consolidado general)</option>
-            ${USUARIOS.map(u=>`<option value="${u.id}" ${repConfig.asesor===u.id?'selected':''}>👤 ${esc(u.nombre)}${u.rol==='admin'?' (Gerente)':''}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
+            <option value="todos" ${repConfig.asesor==='todos'?'selected':''}>Todos los Asesores (Consolidado general)</option>
+            ${USUARIOS.map(u=>`<option value="${u.id}" ${repConfig.asesor===u.id?'selected':''}>${esc(u.nombre)}${u.rol==='admin'?' (Gerente)':''}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -963,10 +967,10 @@ function openReportModal(){
       <div class="rep-field">
         <label class="rep-field-label">Frecuencia / Período:</label>
         <div class="seg" id="seg-rep-period" style="width:100%;display:flex">
-          <button class="${repConfig.period==='semana'?'on':''}" data-p="semana" style="flex:1">📅 Semanal</button>
-          <button class="${repConfig.period==='quincena'?'on':''}" data-p="quincena" style="flex:1">🗓️ Quincenal</button>
-          <button class="${repConfig.period==='mes'?'on':''}" data-p="mes" style="flex:1">📆 Mensual</button>
-          <button class="${repConfig.period==='rango'?'on':''}" data-p="rango" style="flex:1">⚙️ Personalizado</button>
+          <button class="${repConfig.period==='semana'?'on':''}" data-p="semana" style="flex:1">Semanal</button>
+          <button class="${repConfig.period==='quincena'?'on':''}" data-p="quincena" style="flex:1">Quincenal</button>
+          <button class="${repConfig.period==='mes'?'on':''}" data-p="mes" style="flex:1">Mensual</button>
+          <button class="${repConfig.period==='rango'?'on':''}" data-p="rango" style="flex:1">Personalizado</button>
         </div>
       </div>
 
@@ -975,8 +979,8 @@ function openReportModal(){
       <div class="rep-field" style="margin-top:12px">
         <label class="rep-field-label">Criterio de fecha para el reporte:</label>
         <div class="seg seg-sm" id="seg-rep-date-basis" style="display:inline-flex;width:100%">
-          <button class="${repConfig.dateBasis==='cita'?'on':''}" data-basis="cita" style="flex:1" title="Filtra por la fecha en que el paciente tiene su cita">📅 Por Fecha de la Cita (cuándo es la cita)</button>
-          <button class="${repConfig.dateBasis==='registro'?'on':''}" data-basis="registro" style="flex:1" title="Filtra por la fecha en que el asesor registró la cita en sistema">📝 Por Fecha de Registro (cuándo se agendó)</button>
+          <button class="${repConfig.dateBasis==='cita'?'on':''}" data-basis="cita" style="flex:1" title="Filtra por la fecha en que el paciente tiene su cita">Por Fecha de la Cita (cuándo es la cita)</button>
+          <button class="${repConfig.dateBasis==='registro'?'on':''}" data-basis="registro" style="flex:1" title="Filtra por la fecha en que el asesor registró la cita en sistema">Por Fecha de Registro (cuándo se agendó)</button>
         </div>
       </div>
 
@@ -998,7 +1002,7 @@ function openReportModal(){
     </div>
 
     <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
-      👁️ Vista Previa del Documento:
+      Vista Previa del Documento:
     </div>
     <div class="pdf-preview-box">
       <div id="pdf-printable-area"></div>
@@ -1036,8 +1040,8 @@ function updateReportSuboptions(){
         <div>
           <span style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-right:8px">Formato:</span>
           <div class="seg seg-sm" id="seg-rep-week-mode" style="display:inline-flex">
-            <button class="${!isStd?'on':''}" data-mode="dmf">📅 Semana DMF (Jue–Mié)</button>
-            <button class="${isStd?'on':''}" data-mode="std">🗓️ Semana Normal (Lun–Dom)</button>
+            <button class="${!isStd?'on':''}" data-mode="dmf">Semana DMF (Jue–Mié)</button>
+            <button class="${isStd?'on':''}" data-mode="std">Semana Normal (Lun–Dom)</button>
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -1406,7 +1410,7 @@ function renderPdfPreview(){
         <div class="pdf-kpi"><div class="pdf-kpi-label">% Asistencia</div><div class="pdf-kpi-val text-ok">${tasa}</div></div>
       </div>
 
-      <div class="pdf-section-title">📊 Resumen de Rendimiento por Asesor</div>
+      <div class="pdf-section-title">Resumen de Rendimiento por Asesor</div>
       <table class="pdf-table">
         <thead>
           <tr>
@@ -1435,7 +1439,7 @@ function renderPdfPreview(){
         </tfoot>
       </table>
 
-      <div class="pdf-section-title">📋 Detalle de Citas del Período (${tot})</div>
+      <div class="pdf-section-title">Detalle de Citas del Período (${tot})</div>
       <table class="pdf-table">
         <thead>
           <tr>
@@ -1469,7 +1473,7 @@ function downloadReportPDF(){
     const btn=document.getElementById('b-pdf-download');
     const origText=btn?btn.innerHTML:'';
     if(btn){
-      btn.innerHTML='⏳ Generando PDF...';
+      btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Generando PDF...';
       btn.disabled=true;
     }
     const opt={
