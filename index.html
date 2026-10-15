@@ -283,16 +283,20 @@ textarea.inp{resize:vertical;min-height:80px}
     <div class="filters hidden" id="filters">
       <input class="inp" id="f-q" placeholder="Buscar paciente o teléfono">
       <input class="inp" id="f-date" type="date" title="Filtrar por fecha específica">
+      <select class="inp" id="f-date-type" title="Criterio de fecha para el filtro">
+        <option value="cita">📅 Cita de ese día</option>
+        <option value="registro">📝 Registrada ese día</option>
+      </select>
       <select class="inp" id="f-st"></select>
       <select class="inp" id="f-suc"></select>
       <select class="inp" id="f-tip" title="Filtrar por tipo de cita"></select>
       <select class="inp" id="f-ori" title="Filtrar por origen"></select>
       <select class="inp hidden" id="f-as"></select>
       <select class="inp" id="f-sort" title="Ordenar lista">
-        <option value="cita_asc">📅 Cita: más próximas primero</option>
-        <option value="cita_desc">📅 Cita: más lejanas primero</option>
-        <option value="reg_desc">🕒 Registro: más recientes primero</option>
-        <option value="reg_asc">🕒 Registro: más antiguos primero</option>
+        <option value="cita_asc">📅 Fecha de Cita: más próximas primero</option>
+        <option value="cita_desc">📅 Fecha de Cita: más lejanas primero</option>
+        <option value="reg_desc">📝 Fecha de Registro: más recientes primero</option>
+        <option value="reg_asc">📝 Fecha de Registro: más antiguos primero</option>
       </select>
     </div>
     <div class="stats" id="stats"></div>
@@ -463,13 +467,18 @@ function currentList(){
 
   const q=$('#f-q')?$('#f-q').value.toLowerCase().trim():'';
   const d=$('#f-date')?$('#f-date').value:'';
+  const dType=$('#f-date-type')?$('#f-date-type').value:'cita';
   const st=$('#f-st')?$('#f-st').value:'';
   const su=$('#f-suc')?$('#f-suc').value:'';
   const tip=$('#f-tip')?$('#f-tip').value:'';
   const ori=$('#f-ori')?$('#f-ori').value:'';
   const as=$('#f-as')?$('#f-as').value:'';
   if(q)l=l.filter(c=>c.paciente.toLowerCase().includes(q)||c.telefono.includes(q));
-  if(d)l=l.filter(c=>c.fecha===d);if(st)l=l.filter(c=>c.estatus===st);
+  if(d){
+    if(dType==='registro') l=l.filter(c=>(c.creadoEl||'').slice(0,10)===d);
+    else l=l.filter(c=>c.fecha===d);
+  }
+  if(st)l=l.filter(c=>c.estatus===st);
   if(su)l=l.filter(c=>c.sucursal===su);
   if(tip)l=l.filter(c=>c.tipo===tip);
   if(ori)l=l.filter(c=>c.origen===ori);
@@ -666,13 +675,13 @@ function rowHTML(c){
     wa=` · <a class="wa-link" href="https://wa.me/52${cleanTel}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Confirmar WhatsApp</a>`;
   }
   const showDateInCol=(view==='semana'||view==='mes'||view==='todas'||($('#f-sort')&&$('#f-sort').value.startsWith('reg_')));
-  const regTxt=c.creadoEl?`🕒 Agendada: ${fmtReg(c.creadoEl)}`:'';
+  const regTxt=c.creadoEl?`📝 Registrada el: ${fmtReg(c.creadoEl)}`:'';
   return `<div class="row">
-    <div class="time">${esc(c.hora)}${showDateInCol?`<span class="row-date">${esc(fmtShort(c.fecha))}</span>`:''}</div>
+    <div class="time">${esc(c.hora)}${showDateInCol?`<span class="row-date" title="Fecha programada de la cita">📅 Cita: ${esc(fmtShort(c.fecha))}</span>`:''}</div>
     <div class="who">
       <b>${esc(c.paciente)}</b>
       <span class="m">${esc(c.telefono)}${wa}</span>
-      ${regTxt?`<span class="m reg-sub">${esc(regTxt)}</span>`:''}
+      ${regTxt?`<span class="m reg-sub" title="Fecha y hora de registro en sistema">${esc(regTxt)}</span>`:''}
     </div>
     <div class="what">
       <b>${esc(c.tratamiento)}</b>
@@ -704,7 +713,7 @@ function citaForm(id){
       <div class="field"><label class="l">Sucursal</label><select class="inp" id="c-suc">${opts(SUCURSALES,c.sucursal,'Seleccionar')}</select></div>
     </div>
     <div class="grid2">
-      <div class="field"><label class="l">Fecha</label><input class="inp" id="c-fec" type="date" value="${c.fecha}"></div>
+      <div class="field"><label class="l">Fecha de la cita</label><input class="inp" id="c-fec" type="date" value="${c.fecha}"></div>
       <div class="field"><label class="l">Hora</label><input class="inp" id="c-hor" type="time" value="${c.hora}"></div>
     </div>
     <div class="grid2">
@@ -719,7 +728,8 @@ function citaForm(id){
     <div class="err" id="c-err"></div>
     <div class="m-actions"><button class="btn out" data-act="close">Cancelar</button><button class="btn" data-act="save" data-id="${id||''}">Guardar</button></div>
     ${id?`<div class="hist">
-      ${c.creadoEl?`<b>Registrada el:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Asesor: ${esc(nameOf(c.asesorId))}<br>`:''}
+      ${c.creadoEl?`<b>📝 Fecha de registro:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Asesor: ${esc(nameOf(c.asesorId))}<br>`:''}
+      <b>📅 Fecha de la cita:</b> ${fmtLong(c.fecha)} a las ${esc(c.hora)}<br>
       <b>Historial de cambios:</b><br>
       ${(c.historial||[]).map(h=>`${esc(h.e)} · ${new Date(h.f).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`).join('<br>')}
     </div>`:''}`);
@@ -808,7 +818,8 @@ let repConfig={
   fortnightPart:'1',
   dateFrom:iso(new Date()),
   dateTo:iso(new Date()),
-  asesor:'todos'
+  asesor:'todos',
+  dateBasis:'cita'
 };
 
 function getRepTypeHelpText(){
@@ -876,6 +887,7 @@ function getReportFilename(){
   if(repConfig.type==='citas') typeTag='Control_Citas';
   else if(repConfig.type==='ejecutivo') typeTag='Reporte_Ejecutivo';
   const asesorTag=repConfig.asesor==='todos'?'Todos_Asesores':(nameOf(repConfig.asesor).replace(/\s+/g,'_')||'Asesor');
+  const basisTag=repConfig.dateBasis==='registro'?'Por_Registro':'Por_Cita';
   let periodTag='';
   if(repConfig.period==='semana'){
     const isStd=(repConfig.weekMode==='std');
@@ -890,7 +902,7 @@ function getReportFilename(){
   } else {
     periodTag=`Rango_${repConfig.dateFrom}_al_${repConfig.dateTo}`;
   }
-  return `DentalFacil_${typeTag}_${periodTag}_${asesorTag}.pdf`;
+  return `DentalFacil_${typeTag}_${periodTag}_${basisTag}_${asesorTag}.pdf`;
 }
 
 function openReportModal(){
@@ -947,6 +959,14 @@ function openReportModal(){
       </div>
 
       <div class="rep-suboptions" id="rep-suboptions-box"></div>
+
+      <div class="rep-field" style="margin-top:12px">
+        <label class="rep-field-label">Criterio de fecha para el reporte:</label>
+        <div class="seg seg-sm" id="seg-rep-date-basis" style="display:inline-flex;width:100%">
+          <button class="${repConfig.dateBasis==='cita'?'on':''}" data-basis="cita" style="flex:1" title="Filtra por la fecha en que el paciente tiene su cita">📅 Por Fecha de la Cita (cuándo es la cita)</button>
+          <button class="${repConfig.dateBasis==='registro'?'on':''}" data-basis="registro" style="flex:1" title="Filtra por la fecha en que el asesor registró la cita en sistema">📝 Por Fecha de Registro (cuándo se agendó)</button>
+        </div>
+      </div>
 
       <div id="rep-type-help" style="margin-top:12px;padding:8px 12px;background:var(--surface);border-left:3px solid #0097a7;border-radius:4px;font-size:12px;color:var(--text-muted)">
         ${getRepTypeHelpText()}
@@ -1152,6 +1172,17 @@ function bindReportModalEvents(){
     };
   }
 
+  const segBasis=$('#seg-rep-date-basis');
+  if(segBasis){
+    segBasis.onclick=e=>{
+      const b=e.target.closest('button[data-basis]');
+      if(!b)return;
+      repConfig.dateBasis=b.dataset.basis;
+      segBasis.querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',btn.dataset.basis===repConfig.dateBasis));
+      renderPdfPreview();
+    };
+  }
+
   const btnDl=$('#b-pdf-download');
   if(btnDl) btnDl.onclick=downloadReportPDF;
 
@@ -1169,7 +1200,13 @@ function renderPdfPreview(){
   const generatedStr=fmtDateLongEs(iso(now));
 
   const asesorName=repConfig.asesor==='todos'?'Todos los Asesores':nameOf(repConfig.asesor);
-  let list=citas.filter(c=>c.fecha>=startDate&&c.fecha<=endDate);
+  const basisIsReg=(repConfig.dateBasis==='registro');
+  const basisLabel=basisIsReg?'Filtrado por Fecha de Registro':'Filtrado por Fecha de Cita';
+
+  let list=citas.filter(c=>{
+    const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
+    return dVal>=startDate&&dVal<=endDate;
+  });
   if(repConfig.asesor!=='todos'){
     list=list.filter(c=>c.asesorId===repConfig.asesor);
   }
@@ -1201,7 +1238,7 @@ function renderPdfPreview(){
           <div class="pdf-title">REPORTE DE PACIENTES ATENDIDOS</div>
           <div class="pdf-divider"></div>
           <div class="pdf-meta-date">${esc(startDate===endDate?fmtDateLongEs(startDate):`Del ${fmtDateLongEs(startDate)} al ${fmtDateLongEs(endDate)}`)}</div>
-          <div class="pdf-meta-sub">${esc(periodSub)} · Asesor: <b>${esc(asesorName)}</b></div>
+          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b></div>
         </div>
 
         <table class="pdf-table">
@@ -1232,12 +1269,13 @@ function renderPdfPreview(){
 
     let rowsHtml='';
     if(!list.length){
-      rowsHtml=`<tr><td colspan="7" style="text-align:center;padding:36px;color:#94a3b8;font-style:italic">No hay citas registradas en este período.</td></tr>`;
+      rowsHtml=`<tr><td colspan="8" style="text-align:center;padding:36px;color:#94a3b8;font-style:italic">No hay citas registradas en este período.</td></tr>`;
     } else {
       rowsHtml=list.map(c=>`
         <tr>
           <td class="col-paciente"><b>${esc(c.paciente)}</b></td>
-          <td style="text-align:center;white-space:nowrap">${esc(fmtDateYY(c.fecha))} ${esc(c.hora)}</td>
+          <td style="text-align:center;white-space:nowrap"><b>${esc(fmtDateYY(c.fecha))}</b> ${esc(c.hora)}</td>
+          <td style="text-align:center;white-space:nowrap;font-size:11px;color:#64748b">${esc(fmtDateYY((c.creadoEl||'').slice(0,10)))}</td>
           <td style="text-align:center">${esc(c.sucursal)}</td>
           <td style="text-align:center">${esc(c.tratamiento)}</td>
           <td class="col-origen" style="text-align:center">${esc(fmtOrigenShort(c.origen))}</td>
@@ -1256,19 +1294,20 @@ function renderPdfPreview(){
           <div class="pdf-title">REPORTE DE CONTROL DE CITAS</div>
           <div class="pdf-divider"></div>
           <div class="pdf-meta-date">${esc(startDate===endDate?fmtDateLongEs(startDate):`Del ${fmtDateLongEs(startDate)} al ${fmtDateLongEs(endDate)}`)}</div>
-          <div class="pdf-meta-sub">${esc(periodSub)} · Asesor: <b>${esc(asesorName)}</b></div>
+          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b></div>
         </div>
 
         <table class="pdf-table">
           <thead>
             <tr>
-              <th style="width:26%;text-align:left">PACIENTE</th>
-              <th style="width:16%;text-align:center">FECHA / HORA</th>
-              <th style="width:14%;text-align:center">SUCURSAL</th>
-              <th style="width:16%;text-align:center">TRATAMIENTO</th>
-              <th style="width:10%;text-align:center">ORIGEN</th>
-              <th style="width:10%;text-align:center">ASESOR</th>
-              <th style="width:8%;text-align:center">ESTATUS</th>
+              <th style="width:23%;text-align:left">PACIENTE</th>
+              <th style="width:14%;text-align:center">FECHA CITA</th>
+              <th style="width:13%;text-align:center">REGISTRADA</th>
+              <th style="width:13%;text-align:center">SUCURSAL</th>
+              <th style="width:14%;text-align:center">TRATAMIENTO</th>
+              <th style="width:9%;text-align:center">ORIGEN</th>
+              <th style="width:8%;text-align:center">ASESOR</th>
+              <th style="width:6%;text-align:center">ESTATUS</th>
             </tr>
           </thead>
           <tbody>
@@ -1297,7 +1336,10 @@ function renderPdfPreview(){
   const adList=(repConfig.asesor==='todos')?USUARIOS:USUARIOS.filter(u=>u.id===repConfig.asesor);
   let sumT=0,sumA=0,sumN=0,sumP=0,sumO=0;
   const adRows=adList.map(u=>{
-    const uCitas=citas.filter(c=>c.fecha>=startDate&&c.fecha<=endDate&&c.asesorId===u.id);
+    const uCitas=citas.filter(c=>{
+      const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
+      return dVal>=startDate&&dVal<=endDate&&c.asesorId===u.id;
+    });
     const uT=uCitas.length;
     const uA=uCitas.filter(c=>c.estatus==='Asistió').length;
     const uN=uCitas.filter(c=>c.estatus==='No asistió').length;
@@ -1322,7 +1364,8 @@ function renderPdfPreview(){
   const detailRows=list.length?list.map(c=>`
     <tr>
       <td class="col-paciente"><b>${esc(c.paciente)}</b></td>
-      <td style="text-align:center;white-space:nowrap">${esc(fmtDateYY(c.fecha))} ${esc(c.hora)}</td>
+      <td style="text-align:center;white-space:nowrap"><b>${esc(fmtDateYY(c.fecha))}</b> ${esc(c.hora)}</td>
+      <td style="text-align:center;white-space:nowrap;font-size:11px;color:#64748b">${esc(fmtDateYY((c.creadoEl||'').slice(0,10)))}</td>
       <td style="text-align:center">${esc(c.sucursal)}</td>
       <td style="text-align:center">${esc(c.tratamiento)}</td>
       <td class="col-origen" style="text-align:center">${esc(fmtOrigenShort(c.origen))}</td>
@@ -1331,7 +1374,7 @@ function renderPdfPreview(){
         <span class="pill ${pillCls(c.estatus)}" style="font-size:11px;padding:3px 8px">${esc(c.estatus)}</span>
       </td>
     </tr>
-  `).join(''):`<tr><td colspan="7" style="text-align:center;padding:28px;color:#94a3b8;font-style:italic">No hay citas en este período.</td></tr>`;
+  `).join(''):`<tr><td colspan="8" style="text-align:center;padding:28px;color:#94a3b8;font-style:italic">No hay citas en este período.</td></tr>`;
 
   box.innerHTML=`
     <div class="dmf-pdf-document">
@@ -1340,7 +1383,7 @@ function renderPdfPreview(){
         <div class="pdf-title">REPORTE EJECUTIVO DE CITAS Y ASISTENCIA</div>
         <div class="pdf-divider"></div>
         <div class="pdf-meta-date">${esc(periodTitle)}</div>
-        <div class="pdf-meta-sub">Asesor: <b>${esc(asesorName)}</b> · Generado el ${esc(generatedStr)}</div>
+        <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Generado el ${esc(generatedStr)}</div>
       </div>
 
       <div class="pdf-kpi-grid">
@@ -1519,7 +1562,7 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='Enter'&&!$('#login').classList.contains('hidden'))doLogin()});
-['f-q','f-date','f-st','f-suc','f-as','f-sort','f-tip','f-ori'].forEach(i=>{
+['f-q','f-date','f-date-type','f-st','f-suc','f-as','f-sort','f-tip','f-ori'].forEach(i=>{
   const el=$('#'+i);
   if(el) el.addEventListener('input',render);
 });
