@@ -86,24 +86,28 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .stat b{display:block;font-size:30px;font-weight:300;letter-spacing:-1px;margin-top:6px}
 .stat b.ok{color:var(--ok)} .stat b.bad{color:var(--bad)}
 
-/* Period Navigation (Semana / Mes) */
-.period-nav-container{margin-bottom:20px}
-.period-nav{display:flex;flex-direction:column;gap:14px;padding:16px 20px;border-radius:var(--radius-md)}
-.period-mode-bar{display:flex;align-items:center;justify-content:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.period-mode-bar .mode-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
-.seg-sm{padding:3px;gap:2px}
-.seg-sm button{padding:6px 14px;font-size:12px}
-.period-main-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;width:100%}
-.nav-arrows{display:flex;gap:8px;align-items:center}
-.nav-arrows .btn.active{background:var(--btn-bg);color:var(--btn-text)}
-.period-center{text-align:center;flex:1 1 240px}
-.period-label{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
-.period-icon{display:inline-flex;align-items:center;color:var(--text-muted)}
-.period-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+/* Period Navigation Bar (Semana / Mes) */
+.period-nav-container{margin-bottom:18px}
+.period-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 18px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--border-dark);box-shadow:var(--shadow)}
+.period-bar-left{display:flex;align-items:center;flex-shrink:0}
+.p-btn-group{display:inline-flex;gap:3px;background:var(--bg-color);padding:3px;border-radius:var(--radius-md);border:1px solid var(--border-dark)}
+.p-nav-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:12.5px;font-weight:500;border:0!important;background:transparent!important;color:var(--text-muted)!important;border-radius:calc(var(--radius-md) - 2px)!important;cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.p-nav-btn:hover{background:var(--hover)!important;color:var(--text-main)!important;transform:none!important}
+.p-nav-btn.active{background:var(--btn-bg)!important;color:var(--btn-text)!important;font-weight:600}
+.period-bar-center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;flex:1 1 auto}
+.period-title-row{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;letter-spacing:-.2px}
+.p-cal-icon{color:var(--text-muted);flex-shrink:0}
+.period-month-name{font-weight:600;color:var(--text-main);text-transform:capitalize}
+.period-range-sub{font-size:12px;color:var(--text-muted);font-weight:400}
 .pill-curr{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--ok-bg);color:var(--ok);margin-left:4px}
-.period-picker{display:flex;align-items:center;gap:8px}
-.period-picker-label{font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap}
-.period-picker .inp{padding:8px 12px;font-size:13px;width:auto;min-width:240px}
+.p-mode-segmented{display:inline-flex;background:var(--bg-color);border:1px solid var(--border-dark);border-radius:999px;padding:2px;gap:2px;margin-top:2px}
+.p-seg-pill{border:0;background:transparent;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s ease}
+.p-seg-pill.on{background:var(--btn-bg);color:var(--btn-text)}
+.period-bar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.p-picker-label{font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap}
+.p-picker-input{height:34px;padding:0 10px;font-size:12.5px;color:var(--text-main);background:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);outline:none;transition:border-color .15s ease;cursor:pointer}
+.p-picker-input:focus{border-color:var(--text-main)}
+.p-picker-sel{max-width:260px}
 
 /* Sync indicator */
 .pill-sync{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;color:var(--text-muted);padding:3px 10px;border-radius:999px;background:var(--hover);border:1px solid var(--border-dark);margin-right:6px}
@@ -112,9 +116,30 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .sync-dot.offline{background:#ef4444}
 @keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* Filters */
-.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-.filters>*{flex:1 1 150px}
+/* Filters Card */
+.filters-card{background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.filters-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.search-wrap{flex:1 1 280px;min-width:220px;position:relative;display:flex;align-items:center}
+.f-icon{position:absolute;left:11px;color:var(--text-muted);pointer-events:none}
+.f-inp{width:100%;height:38px;background:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:0 30px 0 34px;font-size:13px;color:var(--text-main);outline:none;transition:all .15s ease}
+.f-inp:focus{border-color:var(--text-main);box-shadow:0 0 0 2px rgba(0,151,167,.12)}
+.f-inp::placeholder{color:var(--text-light)}
+.f-clear-btn{position:absolute;right:8px;background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;padding:4px 6px;border-radius:50%;transition:all .15s ease}
+.f-clear-btn:hover{color:var(--text-main);background:var(--hover)}
+.date-filter-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.date-wrap{position:relative;display:flex;align-items:center}
+.f-date-inp{height:38px;padding:0 10px 0 32px;min-width:150px;cursor:pointer}
+.f-sel{height:38px;width:100%;background-color:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:0 28px 0 11px;font-size:13px;color:var(--text-main);outline:none;transition:all .15s ease;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+:root[data-theme="dark"] .f-sel{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")}
+.f-sel:hover{border-color:var(--text-muted)}
+.f-sel:focus{border-color:var(--text-main);box-shadow:0 0 0 2px rgba(0,151,167,.12)}
+.f-sel-criteria{height:38px;min-width:165px}
+.f-reset-btn{height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;font-size:12.5px;font-weight:500;color:#0097a7;border:1px solid rgba(0,151,167,.3);background:rgba(0,151,167,.06);cursor:pointer;border-radius:var(--radius-md);transition:all .15s ease}
+.f-reset-btn:hover{background:rgba(0,151,167,.14);border-color:#0097a7;color:#00838f}
+.f-sel.has-val,.f-date-inp.has-val,.f-inp.has-val{border-color:#0097a7;background-color:rgba(0,151,167,.04)}
+.filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;align-items:flex-end;padding-top:12px;border-top:1px solid var(--border)}
+.f-item{display:flex;flex-direction:column;gap:5px;min-width:0}
+.f-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)}
 
 /* Forms */
 label.l{display:block;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:8px}
@@ -179,17 +204,23 @@ textarea.inp{resize:vertical;min-height:80px}
   .row .time{grid-area:t;font-size:18px}.row .who{grid-area:w}.row .what{grid-area:x}.row .st{grid-area:s;text-align:right}.row .act{grid-area:a;justify-content:flex-start;margin-top:8px}
   .alert-banner{flex-direction:column;align-items:stretch}
   .alert-actions .btn{width:100%}
-  .period-nav{align-items:stretch;text-align:center}
-  .period-main-row{flex-direction:column;align-items:stretch}
-  .period-mode-bar{flex-direction:column;gap:8px}
-  .period-mode-bar .seg{width:100%;display:flex}
-  .period-mode-bar .seg button{flex:1}
-  .nav-arrows{justify-content:center}
-  .nav-arrows .btn{flex:1}
-  .period-picker{flex-direction:column;align-items:stretch}
-  .period-picker .inp{width:100%}
+  .period-bar{flex-direction:column;align-items:stretch;gap:12px;padding:14px 16px}
+  .period-bar-left{justify-content:center}
+  .p-btn-group{width:100%;display:flex}
+  .p-nav-btn{flex:1;justify-content:center}
+  .period-bar-right{justify-content:space-between;width:100%}
+  .p-picker-input{flex:1}
+  .filters-top{flex-direction:column;align-items:stretch}
+  .search-wrap{width:100%}
+  .date-filter-group{width:100%;flex-direction:column;align-items:stretch}
+  .date-wrap{width:100%}
+  .f-date-inp{width:100%}
+  .f-sel-criteria{width:100%}
+  .f-reset-btn{width:100%;justify-content:center}
+  .filters-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:520px){
+  .filters-grid{grid-template-columns:1fr}
   .pill-date{display:none}
   .brand img{height:28px}.brand{gap:10px}.brand-tag{padding-left:10px}
   .modal{padding:28px 22px}.grid2{grid-template-columns:1fr}
@@ -298,24 +329,63 @@ textarea.inp{resize:vertical;min-height:80px}
       </div>
     </div>
     <div id="period-nav-box" class="period-nav-container"></div>
-    <div class="filters hidden" id="filters">
-      <input class="inp" id="f-q" placeholder="Buscar paciente o teléfono">
-      <input class="inp" id="f-date" type="date" title="Filtrar por fecha específica">
-      <select class="inp" id="f-date-type" title="Criterio de fecha para el filtro">
-        <option value="cita">Por Fecha de Cita</option>
-        <option value="registro">Por Fecha de Registro</option>
-      </select>
-      <select class="inp" id="f-st"></select>
-      <select class="inp" id="f-suc"></select>
-      <select class="inp" id="f-tip" title="Filtrar por tipo de cita"></select>
-      <select class="inp" id="f-ori" title="Filtrar por origen"></select>
-      <select class="inp hidden" id="f-as"></select>
-      <select class="inp" id="f-sort" title="Ordenar lista">
-        <option value="cita_asc">Cita: más próximas primero</option>
-        <option value="cita_desc">Cita: más lejanas primero</option>
-        <option value="reg_desc">Registro: más recientes primero</option>
-        <option value="reg_asc">Registro: más antiguos primero</option>
-      </select>
+    <div class="filters-card card hidden" id="filters">
+      <div class="filters-top">
+        <div class="search-wrap">
+          <svg class="f-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input class="f-inp" id="f-q" placeholder="Buscar por paciente o teléfono...">
+          <button class="f-clear-btn hidden" id="b-clear-q" title="Borrar búsqueda">✕</button>
+        </div>
+        <div class="date-filter-group">
+          <div class="date-wrap">
+            <svg class="f-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/>
+            </svg>
+            <input class="f-inp f-date-inp" id="f-date" type="date" title="Filtrar por fecha específica">
+          </div>
+          <select class="f-sel f-sel-criteria" id="f-date-type" title="Criterio de fecha para el filtro">
+            <option value="cita">Por Fecha de Cita</option>
+            <option value="registro">Por Fecha de Registro</option>
+          </select>
+        </div>
+        <button class="f-reset-btn hidden" id="b-reset-filters" title="Restablecer todos los filtros">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <span>Limpiar filtros</span>
+        </button>
+      </div>
+      <div class="filters-grid">
+        <div class="f-item">
+          <label class="f-label" for="f-st">Estatus</label>
+          <select class="f-sel" id="f-st"></select>
+        </div>
+        <div class="f-item">
+          <label class="f-label" for="f-suc">Sucursal</label>
+          <select class="f-sel" id="f-suc"></select>
+        </div>
+        <div class="f-item">
+          <label class="f-label" for="f-tip">Tipo de cita</label>
+          <select class="f-sel" id="f-tip" title="Filtrar por tipo de cita"></select>
+        </div>
+        <div class="f-item">
+          <label class="f-label" for="f-ori">Origen</label>
+          <select class="f-sel" id="f-ori" title="Filtrar por origen"></select>
+        </div>
+        <div class="f-item hidden" id="f-as-wrap">
+          <label class="f-label" for="f-as">Asesor</label>
+          <select class="f-sel" id="f-as"></select>
+        </div>
+        <div class="f-item f-item-sort">
+          <label class="f-label" for="f-sort">Ordenar por</label>
+          <select class="f-sel" id="f-sort" title="Ordenar lista">
+            <option value="cita_asc">Cita: más próximas primero</option>
+            <option value="cita_desc">Cita: más lejanas primero</option>
+            <option value="reg_desc">Registro: más recientes primero</option>
+            <option value="reg_asc">Registro: más antiguos primero</option>
+          </select>
+        </div>
+      </div>
     </div>
     <div class="stats" id="stats"></div>
     <div id="content"></div>
@@ -550,6 +620,7 @@ function doLogin(){
 function startApp(){
   $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
   const admin=user.rol==='admin';
+  if($('#f-as-wrap')) $('#f-as-wrap').classList.toggle('hidden',!admin);
   $('#f-as').classList.toggle('hidden',!admin);
   $('#b-csv').classList.remove('hidden');
   $('#f-st').innerHTML=opts(ESTATUS,'','Todos los estatus');
@@ -668,38 +739,36 @@ function renderPeriodNav(){
     const weekLabel=isStd
       ?`Lunes ${fmtShort(wStart)} al Domingo ${fmtShort(wEnd)}`
       :`Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}`;
-    const weekSub=isStd
-      ?'Semana estándar calendario de Lunes a Domingo'
-      :'Ciclo operativo semanal de Jueves a Miércoles';
-    const weekTypeBadge=isStd?'Semana Normal':'Semana DMF';
 
     box.innerHTML=`
-      <div class="period-nav card">
-        <div class="period-mode-bar">
-          <span class="mode-label">Formato de semana:</span>
-          <div class="seg seg-sm" id="seg-week-mode">
-            <button class="${!isStd?'on':''}" data-mode="dmf" title="Ciclo operativo de Jueves a Miércoles">Semana DMF (Jue–Mié)</button>
-            <button class="${isStd?'on':''}" data-mode="std" title="Semana estándar de Lunes a Domingo">Semana Normal (Lun–Dom)</button>
+      <div class="period-bar card">
+        <div class="period-bar-left">
+          <div class="p-btn-group">
+            <button class="p-nav-btn" id="b-week-prev" title="Semana anterior">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              <span class="p-nav-txt">Anterior</span>
+            </button>
+            <button class="p-nav-btn ${isCurr?'active':''}" id="b-week-curr" title="Ir a la semana actual">Semana actual</button>
+            <button class="p-nav-btn" id="b-week-next" title="Semana siguiente">
+              <span class="p-nav-txt">Siguiente</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           </div>
         </div>
-        <div class="period-main-row">
-          <div class="nav-arrows">
-            <button class="btn out sm" id="b-week-prev" title="Semana anterior">◀ Anterior</button>
-            <button class="btn out sm ${isCurr?'active':''}" id="b-week-curr" title="Ir a la semana actual">Semana actual</button>
-            <button class="btn out sm" id="b-week-next" title="Semana siguiente">Siguiente ▶</button>
+        <div class="period-bar-center">
+          <div class="period-title-row">
+            <svg class="p-cal-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg>
+            <span class="period-month-name">${esc(weekLabel)}</span>
+            ${isCurr?'<span class="pill-curr">En curso</span>':''}
           </div>
-          <div class="period-center">
-            <div class="period-label">
-              <span class="period-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="18" y2="10"></line></svg></span>
-              <span><b>${esc(weekTypeBadge)}:</b> ${esc(weekLabel)}</span>
-              ${isCurr?'<span class="pill-curr">En curso</span>':''}
-            </div>
-            <div class="period-sub">${esc(weekSub)}</div>
+          <div class="p-mode-segmented" id="seg-week-mode">
+            <button class="p-seg-pill ${!isStd?'on':''}" data-mode="dmf" title="Ciclo operativo de Jueves a Miércoles">Semana DMF (Jue–Mié)</button>
+            <button class="p-seg-pill ${isStd?'on':''}" data-mode="std" title="Semana estándar de Lunes a Domingo">Normal (Lun–Dom)</button>
           </div>
-          <div class="period-picker">
-            <label class="period-picker-label" for="sel-week-dropdown">Ir a semana:</label>
-            <select class="inp sm" id="sel-week-dropdown">${optsHtml}</select>
-          </div>
+        </div>
+        <div class="period-bar-right">
+          <label class="p-picker-label" for="sel-week-dropdown">Ir a semana:</label>
+          <select class="p-picker-input p-picker-sel" id="sel-week-dropdown">${optsHtml}</select>
         </div>
       </div>`;
 
@@ -725,23 +794,31 @@ function renderPeriodNav(){
     const mName=mDate.toLocaleDateString('es-MX',{month:'long',year:'numeric'});
 
     box.innerHTML=`
-      <div class="period-nav card">
-        <div class="nav-arrows">
-          <button class="btn out sm" id="b-month-prev" title="Mes anterior">◀ Anterior</button>
-          <button class="btn out sm ${isCurr?'active':''}" id="b-month-curr" title="Ir al mes actual">Mes actual</button>
-          <button class="btn out sm" id="b-month-next" title="Mes siguiente">Siguiente ▶</button>
+      <div class="period-bar card">
+        <div class="period-bar-left">
+          <div class="p-btn-group">
+            <button class="p-nav-btn" id="b-month-prev" title="Mes anterior">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              <span class="p-nav-txt">Anterior</span>
+            </button>
+            <button class="p-nav-btn ${isCurr?'active':''}" id="b-month-curr" title="Ir al mes actual">Mes actual</button>
+            <button class="p-nav-btn" id="b-month-next" title="Mes siguiente">
+              <span class="p-nav-txt">Siguiente</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
         </div>
-        <div class="period-center">
-          <div class="period-label">
-            <span class="period-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="18" y2="10"></line></svg></span>
-            <span style="text-transform:capitalize"><b>${mName}</b></span>
+        <div class="period-bar-center">
+          <div class="period-title-row">
+            <svg class="p-cal-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg>
+            <span class="period-month-name">${mName}</span>
             ${isCurr?'<span class="pill-curr">En curso</span>':''}
           </div>
-          <div class="period-sub">Del ${fmtShort(mStart)} al ${fmtShort(mEnd)}</div>
+          <span class="period-range-sub">Del ${fmtShort(mStart)} al ${fmtShort(mEnd)}</span>
         </div>
-        <div class="period-picker">
-          <label class="period-picker-label" for="sel-month-input">Ir a mes:</label>
-          <input type="month" class="inp sm" id="sel-month-input" value="${selectedMonthRef.slice(0,7)}">
+        <div class="period-bar-right">
+          <label class="p-picker-label" for="sel-month-input">Ir a mes:</label>
+          <input type="month" class="p-picker-input" id="sel-month-input" value="${selectedMonthRef.slice(0,7)}">
         </div>
       </div>`;
 
@@ -758,6 +835,7 @@ function renderPeriodNav(){
 function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   $('#filters').classList.toggle('hidden',view==='hoy'||view==='manana');
+  checkFiltersActive();
   updateBadges();
   renderAviso();
   renderPeriodNav();
@@ -1733,9 +1811,66 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='Enter'&&!$('#login').classList.contains('hidden'))doLogin()});
+function checkFiltersActive(){
+  const q=$('#f-q')?.value.trim()||'';
+  const d=$('#f-date')?.value||'';
+  const dType=$('#f-date-type')?.value||'cita';
+  const st=$('#f-st')?.value||'';
+  const su=$('#f-suc')?.value||'';
+  const tip=$('#f-tip')?.value||'';
+  const ori=$('#f-ori')?.value||'';
+  const as=$('#f-as')?.value||'';
+  const sort=$('#f-sort')?.value||'cita_asc';
+
+  const isActive = !!(q || d || st || su || tip || ori || as || sort !== 'cita_asc' || dType !== 'cita');
+  $('#b-reset-filters')?.classList.toggle('hidden', !isActive);
+  $('#b-clear-q')?.classList.toggle('hidden', !q);
+
+  $('#f-q')?.classList.toggle('has-val', !!q);
+  $('#f-date')?.classList.toggle('has-val', !!d);
+  $('#f-st')?.classList.toggle('has-val', !!st);
+  $('#f-suc')?.classList.toggle('has-val', !!su);
+  $('#f-tip')?.classList.toggle('has-val', !!tip);
+  $('#f-ori')?.classList.toggle('has-val', !!ori);
+  $('#f-as')?.classList.toggle('has-val', !!as);
+}
+
+function resetFilters(){
+  if($('#f-q')) $('#f-q').value='';
+  if($('#f-date')) $('#f-date').value='';
+  if($('#f-date-type')) $('#f-date-type').value='cita';
+  if($('#f-st')) $('#f-st').value='';
+  if($('#f-suc')) $('#f-suc').value='';
+  if($('#f-tip')) $('#f-tip').value='';
+  if($('#f-ori')) $('#f-ori').value='';
+  if($('#f-as')) $('#f-as').value='';
+  if($('#f-sort')) $('#f-sort').value='cita_asc';
+  checkFiltersActive();
+  render();
+}
+
+$('#b-reset-filters')?.addEventListener('click', resetFilters);
+$('#b-clear-q')?.addEventListener('click', ()=>{
+  if($('#f-q')) {
+    $('#f-q').value='';
+    $('#f-q').focus();
+  }
+  checkFiltersActive();
+  render();
+});
+
 ['f-q','f-date','f-date-type','f-st','f-suc','f-as','f-sort','f-tip','f-ori'].forEach(i=>{
   const el=$('#'+i);
-  if(el) el.addEventListener('input',render);
+  if(el){
+    el.addEventListener('input', ()=>{
+      checkFiltersActive();
+      render();
+    });
+    el.addEventListener('change', ()=>{
+      checkFiltersActive();
+      render();
+    });
+  }
 });
 if($('#f-date')){
   $('#f-date').addEventListener('change', e=>{
