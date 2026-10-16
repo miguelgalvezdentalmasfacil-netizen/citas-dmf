@@ -861,7 +861,7 @@ function render(){
     todas:['Todas las citas','Historial completo']
   };
   $('#h-title').textContent=titles[view][0];
-  $('#h-sub').textContent=titles[view][1]+(user.rol==='admin'?' · Vista gerente':' · '+user.nombre);
+  $('#h-sub').textContent=titles[view][1];
   const l=currentList();
   const n=e=>l.filter(c=>c.estatus===e).length;
   const asis=n('Asistió'),no=n('No asistió'),tasa=(asis+no)?Math.round(asis/(asis+no)*100)+'%':'—';
