@@ -118,6 +118,13 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 
 /* Filters Card */
 .filters-card{background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;position:relative;z-index:15}
+.filters-card:not(.hidden){animation:filterCardSlide .2s cubic-bezier(0.16,1,0.3,1)}
+@keyframes filterCardSlide{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.btn-filter-toggle{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border-dark);color:var(--text-muted);padding:8px 14px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.btn-filter-toggle:hover{background:var(--hover);border-color:var(--text-main);color:var(--text-main)}
+.btn-filter-toggle.active{background:rgba(0,151,167,.1);border-color:#0097a7;color:#0097a7;font-weight:600}
+.btn-filter-toggle.has-filters{border-color:#0097a7;color:#0097a7}
+.filter-badge-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;font-size:11px;font-weight:700;background:#0097a7;color:#fff;line-height:1}
 .filters-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .search-wrap{flex:1 1 280px;min-width:220px;position:relative;display:flex;align-items:center}
 .f-icon{position:absolute;left:11px;color:var(--text-muted);pointer-events:none}
@@ -133,6 +140,8 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .f-sel-criteria{height:38px;min-width:165px}
 .f-reset-btn{height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;font-size:12.5px;font-weight:500;color:#0097a7;border:1px solid rgba(0,151,167,.3);background:rgba(0,151,167,.06);cursor:pointer;border-radius:var(--radius-md);transition:all .15s ease}
 .f-reset-btn:hover{background:rgba(0,151,167,.14);border-color:#0097a7;color:#00838f}
+.f-close-btn{height:38px;display:inline-flex;align-items:center;gap:5px;padding:0 12px;font-size:12px;font-weight:500;color:var(--text-muted);background:transparent;border:1px solid var(--border-dark);border-radius:var(--radius-md);cursor:pointer;transition:all .15s ease;white-space:nowrap;margin-left:auto}
+.f-close-btn:hover{background:var(--hover);color:var(--text-main);border-color:var(--text-main)}
 .f-sel.has-val,.f-date-inp.has-val,.f-inp.has-val{border-color:#0097a7;background-color:rgba(0,151,167,.04)}
 .filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;align-items:flex-end;padding-top:12px;border-top:1px solid var(--border)}
 .f-item{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -377,6 +386,11 @@ textarea.inp{resize:vertical;min-height:80px}
         <button data-view="todas">Todas</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn out sm btn-filter-toggle" id="b-toggle-filters" title="Buscar por paciente, teléfono o aplicar filtros">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="btn-filter-txt">Buscar / Filtros</span>
+          <span class="filter-badge-count hidden" id="b-filter-count"></span>
+        </button>
         <button class="btn sm btn-teal" id="b-pdf" data-act="pdf-modal" title="Descargar reportes semanales, quincenales o mensuales en PDF" style="display:inline-flex;align-items:center;gap:6px">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           Descargar Reporte PDF
@@ -409,6 +423,10 @@ textarea.inp{resize:vertical;min-height:80px}
         <button class="f-reset-btn hidden" id="b-reset-filters" title="Restablecer todos los filtros">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           <span>Limpiar filtros</span>
+        </button>
+        <button class="f-close-btn" id="b-close-filters" title="Ocultar barra de búsqueda y filtros">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span>Ocultar</span>
         </button>
       </div>
       <div class="filters-grid">
@@ -906,7 +924,7 @@ function attachMonthPicker(wrapEl, initialYm, onSelect){
   };
 }
 
-let citas=[],user=null,view='hoy';
+let citas=[],user=null,view='hoy',filtersOpen=false;
 let selectedWeekRef=iso(new Date());
 let selectedMonthRef=iso(new Date());
 
@@ -1151,7 +1169,8 @@ function renderPeriodNav(){
 
 function render(){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
-  $('#filters').classList.toggle('hidden',view==='hoy'||view==='manana');
+  $('#filters').classList.toggle('hidden',!filtersOpen);
+  $('#b-toggle-filters')?.classList.toggle('active',filtersOpen);
   checkFiltersActive();
   updateBadges();
   renderAviso();
@@ -2163,7 +2182,18 @@ function checkFiltersActive(){
   const as=$('#f-as')?.value||'';
   const sort=$('#f-sort')?.value||'cita_asc';
 
-  const isActive = !!(q || d || st || su || tip || ori || as || sort !== 'cita_asc' || dType !== 'cita');
+  let activeCount = 0;
+  if(q) activeCount++;
+  if(d) activeCount++;
+  if(st) activeCount++;
+  if(su) activeCount++;
+  if(tip) activeCount++;
+  if(ori) activeCount++;
+  if(as) activeCount++;
+  if(sort !== 'cita_asc') activeCount++;
+  if(d && dType !== 'cita') activeCount++;
+
+  const isActive = activeCount > 0;
   $('#b-reset-filters')?.classList.toggle('hidden', !isActive);
   $('#b-clear-q')?.classList.toggle('hidden', !q);
 
@@ -2175,6 +2205,14 @@ function checkFiltersActive(){
   $('#f-ori')?.classList.toggle('has-val', !!ori);
   $('#f-as')?.classList.toggle('has-val', !!as);
   syncAllCustomSelects();
+
+  const countBadge = $('#b-filter-count');
+  const toggleBtn = $('#b-toggle-filters');
+  if(countBadge && toggleBtn){
+    countBadge.textContent = activeCount;
+    countBadge.classList.toggle('hidden', activeCount === 0);
+    toggleBtn.classList.toggle('has-filters', activeCount > 0);
+  }
 }
 
 function resetFilters(){
@@ -2192,6 +2230,18 @@ function resetFilters(){
   render();
 }
 
+function toggleFilters(force){
+  filtersOpen = (typeof force === 'boolean') ? force : !filtersOpen;
+  $('#filters')?.classList.toggle('hidden', !filtersOpen);
+  $('#b-toggle-filters')?.classList.toggle('active', filtersOpen);
+  if(filtersOpen){
+    $('#f-q')?.focus();
+    enhanceAllSelects($('#filters'));
+  }
+}
+
+$('#b-toggle-filters')?.addEventListener('click', () => toggleFilters());
+$('#b-close-filters')?.addEventListener('click', () => toggleFilters(false));
 $('#b-reset-filters')?.addEventListener('click', resetFilters);
 $('#b-clear-q')?.addEventListener('click', ()=>{
   if($('#f-q')) {
