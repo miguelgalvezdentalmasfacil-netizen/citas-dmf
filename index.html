@@ -429,6 +429,7 @@ function toRow(c){
   const asesor = nameOf(c.asesorId);
   const creador = nameOf(c.creadoPor || c.asesorId);
   return {
+    id: c.id,
     asesor_id: asesor,
     fecha: c.fecha,
     hora: c.hora,
