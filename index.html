@@ -94,20 +94,20 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .p-nav-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;font-size:12.5px;font-weight:500;border:0!important;background:transparent!important;color:var(--text-muted)!important;border-radius:calc(var(--radius-md) - 2px)!important;cursor:pointer;transition:all .15s ease;white-space:nowrap}
 .p-nav-btn:hover{background:var(--hover)!important;color:var(--text-main)!important;transform:none!important}
 .p-nav-btn.active{background:var(--btn-bg)!important;color:var(--btn-text)!important;font-weight:600}
-.period-bar-center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;flex:1 1 auto}
-.period-title-row{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;letter-spacing:-.2px}
+.period-bar-center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;flex:1 1 auto;min-width:0}
+.period-title-row{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:600;letter-spacing:-.2px;white-space:nowrap}
 .p-cal-icon{color:var(--text-muted);flex-shrink:0}
-.period-month-name{font-weight:600;color:var(--text-main);text-transform:capitalize}
-.period-range-sub{font-size:12px;color:var(--text-muted);font-weight:400}
-.pill-curr{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--ok-bg);color:var(--ok);margin-left:4px}
-.p-mode-segmented{display:inline-flex;background:var(--bg-color);border:1px solid var(--border-dark);border-radius:999px;padding:2px;gap:2px;margin-top:2px}
-.p-seg-pill{border:0;background:transparent;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s ease}
-.p-seg-pill.on{background:var(--btn-bg);color:var(--btn-text)}
+.period-month-name{font-weight:600;color:var(--text-main);font-size:15px;white-space:nowrap}
+.period-range-sub{font-size:12px;color:var(--text-muted);font-weight:400;white-space:nowrap}
+.pill-curr{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--ok-bg);color:var(--ok);margin-left:4px;white-space:nowrap;flex-shrink:0}
+.p-mode-segmented{display:inline-flex;align-items:center;background:var(--bg-color);border:1px solid var(--border-dark);border-radius:999px;padding:2px;gap:2px;margin-top:2px}
+.p-seg-pill{border:0;background:transparent;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s ease;white-space:nowrap}
+.p-seg-pill.on{background:var(--btn-bg);color:var(--btn-text);box-shadow:0 1px 2px rgba(0,0,0,.06)}
 .period-bar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .p-picker-label{font-size:12px;font-weight:500;color:var(--text-muted);white-space:nowrap}
 .p-picker-input{height:34px;padding:0 10px;font-size:12.5px;color:var(--text-main);background:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);outline:none;transition:border-color .15s ease;cursor:pointer}
 .p-picker-input:focus{border-color:var(--text-main)}
-.p-picker-sel{max-width:260px}
+.p-picker-sel{min-width:200px;max-width:250px}
 
 /* Sync indicator */
 .pill-sync{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:500;color:var(--text-muted);padding:3px 10px;border-radius:999px;background:var(--hover);border:1px solid var(--border-dark);margin-right:6px}
@@ -158,12 +158,15 @@ textarea.inp{resize:vertical;min-height:80px}
 .row:hover{background:var(--hover)}
 .row .time{display:flex;flex-direction:column;gap:3px}
 .row-hora{font-size:20px;font-weight:600;letter-spacing:-.5px;color:var(--text-main);line-height:1.1}
-.row-cita-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#0097a7;background:rgba(0,151,167,.12);padding:2px 7px;border-radius:4px;width:fit-content;margin-top:2px}
+.row-cita-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#0097a7;background:rgba(0,151,167,.12);padding:2px 7px;border-radius:4px;width:fit-content;margin-top:2px;white-space:nowrap}
+.row .who,.row .what{min-width:0}
 .row b{font-weight:500;display:block}
 .row span.m{display:block;font-size:13px;color:var(--text-muted);font-weight:300}
 .row span.m a{color:var(--text-muted)}
-.reg-badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px!important;color:var(--text-muted)!important;margin-top:4px;background:var(--hover);padding:3px 8px;border-radius:4px;width:fit-content;border:1px solid var(--border-dark)}
-.reg-badge b{font-weight:600;color:var(--text-main);display:inline}
+.reg-meta,.reg-badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px!important;color:var(--text-muted)!important;margin-top:4px;background:var(--hover);padding:3px 8px;border-radius:4px;width:fit-content;max-width:100%;border:1px solid var(--border-dark);white-space:nowrap;line-height:1.2}
+.reg-meta svg,.reg-badge svg{flex-shrink:0;color:var(--text-muted);opacity:.75}
+.reg-meta b,.reg-badge b{font-weight:600;color:var(--text-main);display:inline}
+.reg-sep{opacity:.4;margin:0 1px}
 .wa-link{color:#059669!important;font-weight:500!important;text-decoration:none}
 .wa-link:hover{text-decoration:underline}
 .act{display:flex;gap:8px;justify-content:flex-end}
@@ -591,7 +594,51 @@ const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().sli
 const addDays=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);return iso(d)};
 const fmtLong=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
 const fmtShort=s=>new Date(s+'T12:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
-const fmtReg=s=>{if(!s)return'—';const d=new Date(s);return isNaN(d.getTime())?'—':d.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
+const shortMonths=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const longMonths=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const fmtReg=s=>{
+  if(!s)return'—';
+  const d=new Date(s);
+  if(isNaN(d.getTime()))return'—';
+  const day=d.getDate();
+  const mon=shortMonths[d.getMonth()];
+  let h=d.getHours();
+  const m=String(d.getMinutes()).padStart(2,'0');
+  const ampm=h>=12?'pm':'am';
+  h=h%12||12;
+  return `${day} ${mon}, ${h}:${m}${ampm}`;
+};
+function formatWeekTitle(wStart,wEnd,isStd){
+  const d1=new Date(wStart+'T12:00:00');
+  const d2=new Date(wEnd+'T12:00:00');
+  const day1=d1.getDate();
+  const day2=d2.getDate();
+  const m1=d1.getMonth();
+  const m2=d2.getMonth();
+  const dName1=isStd?'Lun':'Jue';
+  const dName2=isStd?'Dom':'Mié';
+  if(m1===m2){
+    return `${dName1} ${day1} al ${dName2} ${day2} de ${longMonths[m2]}`;
+  }
+  return `${dName1} ${day1} ${shortMonths[m1]} al ${dName2} ${day2} ${shortMonths[m2]}`;
+}
+function formatWeekOption(sStart,sEnd,isStd,isThisWeek){
+  const d1=new Date(sStart+'T12:00:00');
+  const d2=new Date(sEnd+'T12:00:00');
+  const day1=d1.getDate();
+  const day2=d2.getDate();
+  const m1=d1.getMonth();
+  const m2=d2.getMonth();
+  const dName1=isStd?'Lun':'Jue';
+  const dName2=isStd?'Dom':'Mié';
+  let range='';
+  if(m1===m2){
+    range=`${dName1} ${day1} – ${dName2} ${day2} ${shortMonths[m2]}`;
+  }else{
+    range=`${dName1} ${day1} ${shortMonths[m1]} – ${dName2} ${day2} ${shortMonths[m2]}`;
+  }
+  return isThisWeek?`${range} (Actual)`:range;
+}
 const getDmfWeekRange=s=>{const d=new Date(s+'T12:00:00');const day=d.getDay();const diff=(day-4+7)%7;const thu=new Date(d);thu.setDate(d.getDate()-diff);const wed=new Date(thu);wed.setDate(thu.getDate()+6);return [iso(thu),iso(wed)]};
 const getStdWeekRange=s=>{const d=new Date(s+'T12:00:00');const day=d.getDay();const diff=(day===0?-6:1-day);const mon=new Date(d);mon.setDate(d.getDate()+diff);const sun=new Date(mon);sun.setDate(mon.getDate()+6);return [iso(mon),iso(sun)]};
 let weekMode='dmf';
@@ -736,14 +783,11 @@ function renderPeriodNav(){
       const [sStart,sEnd]=getWeekRange(refDate);
       const isSel=(sStart===wStart);
       const isThisWeek=(sStart===currStart);
-      const prefix=isStd?`Semana: Lun ${fmtShort(sStart)} al Dom ${fmtShort(sEnd)}`:`Semana: Jue ${fmtShort(sStart)} al Mié ${fmtShort(sEnd)}`;
-      const label=`${prefix}${isThisWeek?' (Actual)':''}`;
+      const label=formatWeekOption(sStart,sEnd,isStd,isThisWeek);
       optsHtml+=`<option value="${sStart}" ${isSel?'selected':''}>${label}</option>`;
     }
 
-    const weekLabel=isStd
-      ?`Lunes ${fmtShort(wStart)} al Domingo ${fmtShort(wEnd)}`
-      :`Jueves ${fmtShort(wStart)} al Miércoles ${fmtShort(wEnd)}`;
+    const weekLabel=formatWeekTitle(wStart,wEnd,isStd);
 
     box.innerHTML=`
       <div class="period-bar card">
@@ -772,7 +816,7 @@ function renderPeriodNav(){
           </div>
         </div>
         <div class="period-bar-right">
-          <label class="p-picker-label" for="sel-week-dropdown">Ir a semana:</label>
+          <label class="p-picker-label" for="sel-week-dropdown">Semana:</label>
           <select class="p-picker-input p-picker-sel" id="sel-week-dropdown">${optsHtml}</select>
         </div>
       </div>`;
@@ -796,7 +840,8 @@ function renderPeriodNav(){
     const [currStart]=getMonthRange(today);
     const isCurr=(mStart===currStart);
     const mDate=new Date(selectedMonthRef+'T12:00:00');
-    const mName=mDate.toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+    const mRaw=mDate.toLocaleDateString('es-MX',{month:'long',year:'numeric'});
+    const mName=mRaw.charAt(0).toUpperCase()+mRaw.slice(1);
 
     box.innerHTML=`
       <div class="period-bar card">
@@ -822,7 +867,7 @@ function renderPeriodNav(){
           <span class="period-range-sub">Del ${fmtShort(mStart)} al ${fmtShort(mEnd)}</span>
         </div>
         <div class="period-bar-right">
-          <label class="p-picker-label" for="sel-month-input">Ir a mes:</label>
+          <label class="p-picker-label" for="sel-month-input">Mes:</label>
           <input type="month" class="p-picker-input" id="sel-month-input" value="${selectedMonthRef.slice(0,7)}">
         </div>
       </div>`;
@@ -907,7 +952,14 @@ function rowHTML(c){
     }
     wa=` · <a class="wa-link" href="https://wa.me/52${cleanTel}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Confirmar WhatsApp</a>`;
   }
-  const regTxt=c.creadoEl?fmtReg(c.creadoEl):'—';
+  const regTxt=c.creadoEl?fmtReg(c.creadoEl):'';
+  const creator=c.creadoPor?nameOf(c.creadoPor):'';
+  const regHtml=regTxt?`
+      <div class="reg-meta" title="Fecha y hora de registro: ${esc(regTxt)}${creator?' · Por: '+esc(creator):''}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Alta: <b>${esc(regTxt)}</b></span>
+        ${creator?`<span class="reg-sep">·</span><span>por <b>${esc(creator)}</b></span>`:''}
+      </div>`:'';
   return `<div class="row">
     <div class="time">
       <div class="row-hora">${esc(c.hora)}</div>
@@ -916,9 +968,7 @@ function rowHTML(c){
     <div class="who">
       <b>${esc(c.paciente)}</b>
       <span class="m">${esc(c.telefono)}${wa}</span>
-      <div class="reg-badge" title="Momento exacto en que se dio de alta en el sistema">
-        Registrada el: <b>${esc(regTxt)}</b>${c.creadoPor?' · por <b>'+esc(nameOf(c.creadoPor))+'</b>':''}
-      </div>
+      ${regHtml}
     </div>
     <div class="what">
       <b>${esc(c.tratamiento)}</b>
