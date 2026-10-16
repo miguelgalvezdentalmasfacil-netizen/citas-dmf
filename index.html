@@ -409,6 +409,12 @@ const USUARIOS=[
   {id:'u4',nombre:'Asesor 4',rol:'asesor',pin:'1234'}
 ];
 
+function nameOf(id){
+  if(!id) return '—';
+  const u=USUARIOS.find(x=>x.id===id||x.nombre.toLowerCase()===String(id).toLowerCase());
+  return u?u.nombre:String(id);
+}
+
 /* ============ SUPABASE & DATA LAYER ============ */
 const SUPABASE_URL='https://hzdootsarxbawbwtsfyp.supabase.co';
 const SUPABASE_KEY='sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
@@ -420,44 +426,47 @@ const HEADERS_SB={
 const KEY='dmf_citas_v2';
 
 function toRow(c){
+  const asesor = nameOf(c.asesorId);
+  const creador = nameOf(c.creadoPor || c.asesorId);
   return {
-    id:c.id,
-    asesor_id:c.asesorId,
-    fecha:c.fecha,
-    hora:c.hora,
-    paciente:c.paciente,
-    telefono:c.telefono||'',
-    sucursal:c.sucursal||'',
-    tratamiento:c.tratamiento||'',
-    tipo:c.tipo||'Nueva',
-    origen:c.origen||'',
-    notas:c.notas||'',
-    estatus:c.estatus||'Pendiente',
-    motivo:c.motivo||'',
-    creado_el:c.creadoEl||new Date().toISOString(),
-    creado_por:c.creadoPor||c.asesorId,
-    historial:c.historial||[]
+    asesor_id: asesor,
+    fecha: c.fecha,
+    hora: c.hora,
+    paciente: c.paciente,
+    telefono: c.telefono||'',
+    sucursal: c.sucursal||'',
+    tratamiento: c.tratamiento||'',
+    tipo: c.tipo||'Nueva',
+    origen: c.origen||'',
+    notas: c.notas||'',
+    estatus: c.estatus||'Pendiente',
+    motivo: c.motivo||'',
+    creado_el: c.creadoEl||new Date().toISOString(),
+    creado_por: creador,
+    historial: c.historial||[]
   };
 }
 
 function fromRow(r){
+  const asesor = nameOf(r.asesor_id);
+  const creador = nameOf(r.creado_por || r.asesor_id);
   return {
-    id:r.id,
-    asesorId:r.asesor_id,
-    fecha:r.fecha,
-    hora:r.hora,
-    paciente:r.paciente,
-    telefono:r.telefono||'',
-    sucursal:r.sucursal||'',
-    tratamiento:r.tratamiento||'',
-    tipo:r.tipo||'Nueva',
-    origen:r.origen||'',
-    notas:r.notas||'',
-    estatus:r.estatus||'Pendiente',
-    motivo:r.motivo||'',
-    creadoEl:r.creado_el?new Date(r.creado_el).toISOString():new Date().toISOString(),
-    creadoPor:r.creado_por||r.asesor_id,
-    historial:Array.isArray(r.historial)?r.historial:[]
+    id: r.id || ('c_' + (r.telefono||'').replace(/\D/g,'') + '_' + (r.fecha||'') + '_' + (r.hora||'').replace(':','')),
+    asesorId: asesor,
+    fecha: r.fecha,
+    hora: r.hora,
+    paciente: r.paciente,
+    telefono: r.telefono||'',
+    sucursal: r.sucursal||'',
+    tratamiento: r.tratamiento||'',
+    tipo: r.tipo||'Nueva',
+    origen: r.origen||'',
+    notas: r.notas||'',
+    estatus: r.estatus||'Pendiente',
+    motivo: r.motivo||'',
+    creadoEl: r.creado_el?new Date(r.creado_el).toISOString():new Date().toISOString(),
+    creadoPor: creador,
+    historial: Array.isArray(r.historial)?r.historial:[]
   };
 }
 
@@ -594,7 +603,6 @@ const getWeekRange=s=>(weekMode==='std'?getStdWeekRange(s):getDmfWeekRange(s));
 const getMonthRange=s=>{const d=new Date(s+'T12:00:00');const y=d.getFullYear(),m=d.getMonth();const first=new Date(y,m,1);const last=new Date(y,m+1,0);return [iso(first),iso(last)]};
 const addMonths=(s,n)=>{const d=new Date(s+'T12:00:00');d.setMonth(d.getMonth()+n);return iso(d)};
 const uid=()=>'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-const nameOf=id=>(USUARIOS.find(u=>u.id===id)||{}).nombre||'—';
 const opts=(arr,sel,ph)=>(ph?`<option value="">${ph}</option>`:'')+arr.map(a=>`<option ${a===sel?'selected':''}>${esc(a)}</option>`).join('');
 const pillCls=e=>e==='Asistió'?'ok':e==='No asistió'?'bad':e==='Pendiente'?'pend':'';
 
@@ -627,7 +635,7 @@ function startApp(){
   $('#f-suc').innerHTML=opts(SUCURSALES,'','Todas las sucursales');
   if($('#f-tip')) $('#f-tip').innerHTML=opts(TIPOS,'','Todos los tipos');
   if($('#f-ori')) $('#f-ori').innerHTML=opts(ORIGENES,'','Todos los orígenes');
-  $('#f-as').innerHTML='<option value="">Todos los asesores</option>'+USUARIOS.map(u=>`<option value="${u.id}">${esc(u.nombre)}</option>`).join('');
+  $('#f-as').innerHTML='<option value="">Todos los asesores</option>'+USUARIOS.map(u=>`<option value="${esc(u.nombre)}">${esc(u.nombre)}</option>`).join('');
   render();
 }
 
@@ -677,7 +685,7 @@ function renderAviso(){
 }
 
 /* ============ RENDER ============ */
-function mine(){return user.rol==='admin'?citas:citas.filter(c=>c.asesorId===user.id)}
+function mine(){return user.rol==='admin'?citas:citas.filter(c=>nameOf(c.asesorId)===user.nombre||c.asesorId===user.id||nameOf(c.creadoPor)===user.nombre)}
 function currentList(){
   const t=iso(new Date());let l=mine();
   const [wStart,wEnd]=getWeekRange(selectedWeekRef), [mStart,mEnd]=getMonthRange(selectedMonthRef);
@@ -703,7 +711,7 @@ function currentList(){
   if(su)l=l.filter(c=>c.sucursal===su);
   if(tip)l=l.filter(c=>c.tipo===tip);
   if(ori)l=l.filter(c=>c.origen===ori);
-  if(as)l=l.filter(c=>c.asesorId===as);
+  if(as)l=l.filter(c=>nameOf(c.asesorId)===nameOf(as)||c.asesorId===as);
 
   const sortMode=$('#f-sort')?$('#f-sort').value:'cita_asc';
   return l.sort((a,b)=>{
@@ -911,13 +919,13 @@ function rowHTML(c){
     <div class="who">
       <b>${esc(c.paciente)}</b>
       <span class="m">${esc(c.telefono)}${wa}</span>
-      <div class="reg-badge" title="Momento exacto en que el asesor la dio de alta en el sistema">
-        Registrada el: <b>${esc(regTxt)}</b>
+      <div class="reg-badge" title="Momento exacto en que se dio de alta en el sistema">
+        Registrada el: <b>${esc(regTxt)}</b>${c.creadoPor?' · por <b>'+esc(nameOf(c.creadoPor))+'</b>':''}
       </div>
     </div>
     <div class="what">
       <b>${esc(c.tratamiento)}</b>
-      <span class="m">${esc(c.sucursal)} · <b>${esc(c.tipo||'Nueva')}</b> · ${esc(c.origen||'—')}${user.rol==='admin'?' · '+esc(nameOf(c.asesorId)):''}</span>
+      <span class="m">${esc(c.sucursal)} · <b>${esc(c.tipo||'Nueva')}</b> · ${esc(c.origen||'—')} · Asesor: <b>${esc(nameOf(c.asesorId))}</b></span>
     </div>
     <div class="st">
       <span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>
@@ -935,8 +943,8 @@ function openModal(h, cls){const m=$('#modal');m.innerHTML=`<div class="modal ${
 function closeModal(){$('#modal').classList.add('hidden');$('#modal').innerHTML=''}
 
 function citaForm(id){
-  const c=citas.find(x=>x.id===id)||{fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',tipo:'Nueva',origen:'',notas:'',asesorId:user.id};
-  const admin=user.rol==='admin';
+  const c=citas.find(x=>x.id===id)||{fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',tipo:'Nueva',origen:'',notas:'',asesorId:user?user.nombre:'Miguel'};
+  const selAsesor=c.asesorId?nameOf(c.asesorId):(user?user.nombre:'Miguel');
   openModal(`
     <h2>${id?'Editar cita':'Nueva cita'}</h2><div class="sub nocap">Captura la información del paciente.</div>
     <div class="field"><label class="l">Paciente</label><input class="inp" id="c-pac" value="${esc(c.paciente)}" placeholder="Nombre completo"></div>
@@ -954,7 +962,7 @@ function citaForm(id){
     </div>
     <div class="grid2">
       <div class="field"><label class="l">Origen</label><select class="inp" id="c-ori">${opts(ORIGENES,c.origen,'Seleccionar')}</select></div>
-      ${admin?`<div class="field"><label class="l">Asesor</label><select class="inp" id="c-as">${USUARIOS.map(u=>`<option value="${u.id}" ${u.id===c.asesorId?'selected':''}>${esc(u.nombre)}</option>`).join('')}</select></div>`:'<div></div>'}
+      <div class="field"><label class="l">Asesor asignado</label><select class="inp" id="c-as">${USUARIOS.map(u=>`<option value="${esc(u.nombre)}" ${(nameOf(selAsesor)===u.nombre||selAsesor===u.id)?'selected':''}>${esc(u.nombre)}</option>`).join('')}</select></div>
     </div>
     <div class="field"><label class="l">Notas</label><textarea class="inp" id="c-not" placeholder="Opcional">${esc(c.notas)}</textarea></div>
     <div class="err" id="c-err"></div>
@@ -964,8 +972,8 @@ function citaForm(id){
       <button class="btn" data-act="save" data-id="${id||''}">Guardar</button>
     </div>
     ${id?`<div class="hist">
-      ${c.creadoEl?`<b>Fecha de registro:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Asesor: ${esc(nameOf(c.asesorId))}<br>`:''}
-      <b>Fecha de la cita:</b> ${fmtLong(c.fecha)} a las ${esc(c.hora)}<br>
+      ${c.creadoEl?`<b>Fecha de registro:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Registrada por: <b>${esc(nameOf(c.creadoPor||c.asesorId))}</b><br>`:''}
+      <b>Fecha de la cita:</b> ${fmtLong(c.fecha)} a las ${esc(c.hora)} · Asesor: <b>${esc(nameOf(c.asesorId))}</b><br>
       <b>Historial de cambios:</b><br>
       ${(c.historial||[]).map(h=>`${esc(h.e)} · ${new Date(h.f).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`).join('<br>')}
     </div>`:''}`);
@@ -974,17 +982,19 @@ async function saveCita(id){
   const v=k=>$('#'+k).value.trim();
   const d={paciente:v('c-pac'),telefono:v('c-tel'),sucursal:v('c-suc'),fecha:v('c-fec'),hora:v('c-hor'),tratamiento:v('c-tra'),tipo:v('c-tip'),origen:v('c-ori'),notas:v('c-not')};
   if(!d.paciente||!d.telefono||!d.sucursal||!d.fecha||!d.hora||!d.tratamiento){$('#c-err').textContent='Completa paciente, teléfono, sucursal, fecha, hora y tratamiento.';return}
-  const asesorId=$('#c-as')?$('#c-as').value:user.id;
+  const asesorNombre=($('#c-as')&&$('#c-as').value)?$('#c-as').value.trim():(user?user.nombre:'Miguel');
+  const creadorNombre=user?user.nombre:asesorNombre;
   const now=new Date().toISOString();
   let target=null;
   if(id){
     target=citas.find(c=>c.id===id);
     if(target){
-      Object.assign(target,d,{asesorId});
+      Object.assign(target,d,{asesorId:asesorNombre});
       if(!target.creadoEl) target.creadoEl=now;
+      if(!target.creadoPor) target.creadoPor=creadorNombre;
     }
   } else {
-    target={id:uid(),...d,asesorId,creadoEl:now,creadoPor:user.id,estatus:'Pendiente',motivo:'',historial:[{f:now,e:'Pendiente'}]};
+    target={id:uid(),...d,asesorId:asesorNombre,creadoEl:now,creadoPor:creadorNombre,estatus:'Pendiente',motivo:'',historial:[{f:now,e:'Pendiente'}]};
     citas.push(target);
   }
   persist();closeModal();render();
@@ -1019,7 +1029,7 @@ async function saveStatus(id){
     const f=$('#s-fec').value,h=$('#s-hor').value;
     if(!f||!h){$('#s-err').textContent='Indica la nueva fecha y hora.';return}
     if(c.estatus!=='Reagendó'){
-      nuevaCita={...c,id:uid(),fecha:f,hora:h,tipo:'Reagenda',estatus:'Pendiente',motivo:'',notas:(c.notas?c.notas+' · ':'')+'Reagendada desde '+fmtShort(c.fecha)+' '+c.hora,creadoEl:now,creadoPor:user.id,historial:[{f:now,e:'Pendiente'}]};
+      nuevaCita={...c,id:uid(),fecha:f,hora:h,tipo:'Reagenda',estatus:'Pendiente',motivo:'',notas:(c.notas?c.notas+' · ':'')+'Reagendada desde '+fmtShort(c.fecha)+' '+c.hora,creadoEl:now,creadoPor:user?user.nombre:nameOf(c.asesorId),asesorId:nameOf(c.asesorId),historial:[{f:now,e:'Pendiente'}]};
       citas.push(nuevaCita);
     }
   }
