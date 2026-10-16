@@ -532,10 +532,14 @@ const DB={
   async delete(id){
     try{
       setSyncState('busy','Eliminando...');
+      const target=citas.find(c=>c.id===id);
       citas=citas.filter(c=>c.id!==id);
       localStorage.setItem(KEY,JSON.stringify(citas));
       render();
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/citas?id=eq.${encodeURIComponent(id)}`,{
+      const query = (target && target.telefono)
+        ? `telefono=eq.${encodeURIComponent(target.telefono)}&fecha=eq.${encodeURIComponent(target.fecha)}`
+        : `id=eq.${encodeURIComponent(id)}`;
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/citas?${query}`,{
         method:'DELETE',
         headers:HEADERS_SB
       });
@@ -560,24 +564,16 @@ function initRealtime(){
         .on('postgres_changes',{event:'*',schema:'public',table:'citas'},payload=>{
           if(payload.eventType==='INSERT'){
             const incoming=fromRow(payload.new);
-            if(!citas.some(c=>c.id===incoming.id)){
+            if(!citas.some(c=>c.id===incoming.id || (c.telefono&&c.telefono===incoming.telefono&&c.fecha===incoming.fecha&&c.hora===incoming.hora))){
               citas.push(incoming);
               localStorage.setItem(KEY,JSON.stringify(citas));
               render();
             }
-          }else if(payload.eventType==='UPDATE'){
-            const updated=fromRow(payload.new);
-            const idx=citas.findIndex(c=>c.id===updated.id);
-            if(idx!==-1){
-              citas[idx]=updated;
-              localStorage.setItem(KEY,JSON.stringify(citas));
+          }else if(payload.eventType==='UPDATE'||payload.eventType==='DELETE'){
+            DB.loadAll().then(loaded=>{
+              citas=loaded;
               render();
-            }
-          }else if(payload.eventType==='DELETE'){
-            const oldId=payload.old.id;
-            citas=citas.filter(c=>c.id!==oldId);
-            localStorage.setItem(KEY,JSON.stringify(citas));
-            render();
+            });
           }
         })
         .subscribe();
