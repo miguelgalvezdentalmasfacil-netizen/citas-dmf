@@ -200,6 +200,81 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .cmp-today-btn{background:transparent;border:none;font-size:11.5px;font-weight:500;color:#0097a7;cursor:pointer;padding:4px 8px;border-radius:4px;transition:all .15s ease}
 .cmp-today-btn:hover{background:rgba(0,151,167,.08)}
 
+/* ============ CUSTOM DATE PICKER ============ */
+.cdp-wrap{position:relative;display:inline-block;width:100%}
+.date-wrap .cdp-wrap{width:100%}
+.date-wrap:has(.cdp-wrap) > .f-icon, .date-wrap .cdp-wrap ~ .f-icon{display:none!important}
+.cdp-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:38px;padding:0 12px;background-color:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);color:var(--text-main);font-size:13px;font-weight:400;cursor:pointer;outline:none;transition:all .15s ease;user-select:none;text-align:left;box-sizing:border-box}
+.inp.cdp-trigger{height:48px;padding:0 16px;font-size:14px}
+.inp.sm.cdp-trigger{height:36px;padding:0 12px;font-size:12.5px}
+.f-inp.cdp-trigger{height:38px;padding:0 12px;font-size:13px;min-width:180px}
+.cdp-trigger:hover{border-color:var(--text-muted)}
+.cdp-trigger:focus-visible,.cdp-trigger.open{border-color:var(--text-main);box-shadow:0 0 0 2px rgba(0,151,167,.15)}
+.cdp-trigger.has-val{border-color:#0097a7;background-color:rgba(0,151,167,.04)}
+.cdp-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;line-height:1.2}
+.cdp-label.placeholder{color:var(--text-light)}
+.cdp-icon{color:var(--text-muted);flex-shrink:0;display:inline-flex;align-items:center}
+.cdp-chevron{color:var(--text-muted);flex-shrink:0;transition:transform .2s ease;display:inline-flex;align-items:center}
+.cdp-trigger.open .cdp-chevron{transform:rotate(180deg);color:var(--text-main)}
+
+.cdp-popover{position:absolute;top:calc(100% + 6px);left:0;width:280px;background:var(--surface);border:1px solid var(--border-dark);border-radius:14px;box-shadow:0 16px 36px -4px rgba(0,0,0,.18),0 4px 14px rgba(0,0,0,.08);z-index:1000;padding:14px;animation:cDropFade .12s ease-out;user-select:none;box-sizing:border-box}
+:root[data-theme="dark"] .cdp-popover{box-shadow:0 18px 42px rgba(0,0,0,.6);border-color:#334155;background:var(--surface)}
+.cdp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px}
+.cdp-title{font-size:13.5px;font-weight:600;color:var(--text-main);letter-spacing:-.2px;text-transform:capitalize}
+.cdp-nav{display:grid;place-items:center;width:28px;height:28px;border-radius:6px;border:1px solid var(--border-dark);background:var(--bg-color);color:var(--text-muted);cursor:pointer;transition:all .15s ease}
+.cdp-nav:hover{background:var(--hover);color:var(--text-main);border-color:var(--text-muted)}
+.cdp-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;text-align:center}
+.cdp-wd{font-size:11px;font-weight:600;color:var(--text-muted);padding:4px 0;text-transform:uppercase}
+.cdp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cdp-day{aspect-ratio:1;display:grid;place-items:center;border:1px solid transparent;background:transparent;border-radius:8px;font-size:12.5px;font-weight:500;color:var(--text-main);cursor:pointer;transition:all .12s ease}
+.cdp-day:hover{background:var(--hover)}
+.cdp-day.other-month{color:var(--text-light);opacity:.45}
+.cdp-day.is-today{border-color:rgba(0,151,167,.5);color:#0097a7;font-weight:600}
+.cdp-day.selected{background:#0097a7!important;color:#fff!important;font-weight:600;border-color:#0097a7!important}
+.cdp-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.cdp-btn-action{background:transparent;border:none;font-size:11.5px;font-weight:600;color:#0097a7;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .15s ease}
+.cdp-btn-action:hover{background:rgba(0,151,167,.08)}
+.cdp-btn-action.clear{color:var(--text-muted)}
+.cdp-btn-action.clear:hover{color:var(--text-main);background:var(--hover)}
+
+/* ============ CUSTOM TIME PICKER ============ */
+.ctp-wrap{position:relative;display:inline-block;width:100%}
+.ctp-trigger{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:38px;padding:0 12px;background-color:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);color:var(--text-main);font-size:13px;font-weight:400;cursor:pointer;outline:none;transition:all .15s ease;user-select:none;text-align:left;box-sizing:border-box}
+.inp.ctp-trigger{height:48px;padding:0 16px;font-size:14px}
+.inp.sm.ctp-trigger{height:36px;padding:0 12px;font-size:12.5px}
+.ctp-trigger:hover{border-color:var(--text-muted)}
+.ctp-trigger:focus-visible,.ctp-trigger.open{border-color:var(--text-main);box-shadow:0 0 0 2px rgba(0,151,167,.15)}
+.ctp-trigger.has-val{border-color:#0097a7;background-color:rgba(0,151,167,.04)}
+.ctp-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;line-height:1.2}
+.ctp-label.placeholder{color:var(--text-light)}
+.ctp-icon{color:var(--text-muted);flex-shrink:0;display:inline-flex;align-items:center}
+.ctp-chevron{color:var(--text-muted);flex-shrink:0;transition:transform .2s ease;display:inline-flex;align-items:center}
+.ctp-trigger.open .ctp-chevron{transform:rotate(180deg);color:var(--text-main)}
+
+.ctp-popover{position:absolute;top:calc(100% + 6px);left:0;width:260px;background:var(--surface);border:1px solid var(--border-dark);border-radius:14px;box-shadow:0 16px 36px -4px rgba(0,0,0,.18),0 4px 14px rgba(0,0,0,.08);z-index:1000;padding:14px;animation:cDropFade .12s ease-out;user-select:none;box-sizing:border-box}
+:root[data-theme="dark"] .ctp-popover{box-shadow:0 18px 42px rgba(0,0,0,.6);border-color:#334155;background:var(--surface)}
+.ctp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.ctp-display{font-size:18px;font-weight:700;letter-spacing:-.5px;color:var(--text-main);font-variant-numeric:tabular-nums}
+.ctp-ampm-seg{display:inline-flex;background:var(--bg-color);border:1px solid var(--border-dark);border-radius:8px;padding:2px;gap:2px}
+.ctp-ampm-btn{border:none;background:transparent;padding:4px 9px;border-radius:6px;font-size:11.5px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .15s ease}
+.ctp-ampm-btn.active{background:var(--btn-bg);color:var(--btn-text)}
+
+.ctp-columns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ctp-col-title{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:6px;text-align:center}
+.ctp-col-list{max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;padding-right:2px}
+.ctp-col-list::-webkit-scrollbar{width:4px}
+.ctp-col-list::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:999px}
+.ctp-val-btn{padding:6px 0;text-align:center;border-radius:6px;border:1px solid transparent;background:transparent;font-size:13px;font-weight:500;color:var(--text-main);cursor:pointer;transition:all .12s ease}
+.ctp-val-btn:hover{background:var(--hover)}
+.ctp-val-btn.selected{background:rgba(0,151,167,.12);color:#0097a7;font-weight:600;border-color:rgba(0,151,167,.3)}
+:root[data-theme="dark"] .ctp-val-btn.selected{background:rgba(0,151,167,.2);color:#22d3ee;border-color:rgba(34,211,238,.4)}
+
+.ctp-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.ctp-preset-btn{padding:4px 0;text-align:center;border-radius:6px;border:1px solid var(--border-dark);background:var(--bg-color);font-size:11px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .12s ease}
+.ctp-preset-btn:hover{background:var(--hover);color:var(--text-main);border-color:var(--text-main)}
+
+.ctp-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+
 /* Forms */
 label.l{display:block;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:8px}
 .inp{width:100%;background:var(--bg-color);border:1px solid var(--border-dark);padding:14px 16px;border-radius:var(--radius-md);outline:none;transition:border-color .15s ease}
@@ -727,6 +802,10 @@ function closeAllCustomDropdowns(){
   document.querySelectorAll('.c-select-trigger.open').forEach(t=>t.classList.remove('open'));
   document.querySelectorAll('.cmp-popover:not(.hidden)').forEach(p=>p.classList.add('hidden'));
   document.querySelectorAll('.cmp-trigger.open').forEach(t=>t.classList.remove('open'));
+  document.querySelectorAll('.cdp-popover:not(.hidden)').forEach(p=>p.classList.add('hidden'));
+  document.querySelectorAll('.cdp-trigger.open').forEach(t=>t.classList.remove('open'));
+  document.querySelectorAll('.ctp-popover:not(.hidden)').forEach(p=>p.classList.add('hidden'));
+  document.querySelectorAll('.ctp-trigger.open').forEach(t=>t.classList.remove('open'));
 }
 document.addEventListener('click',()=>closeAllCustomDropdowns());
 document.addEventListener('keydown',e=>{
@@ -921,7 +1000,503 @@ function attachMonthPicker(wrapEl, initialYm, onSelect){
       onSelect(ym);
       return;
     }
+};
+}
+
+/* ============ CUSTOM DATE & TIME PICKERS ============ */
+const CDP_MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const CDP_DAY_NAMES = ['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
+
+function formatDateDisplay(val){
+  if(!val || typeof val !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(val)) return '';
+  const [y, m, d] = val.split('-').map(Number);
+  const dt = new Date(y, m - 1, d, 12, 0, 0);
+  if(isNaN(dt.getTime())) return val;
+  const wd = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][dt.getDay()];
+  const mos = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${wd}, ${d} ${mos[m - 1]} ${y}`;
+}
+
+function enhanceDatePicker(inp){
+  if(!inp || inp.dataset.enhanced) return;
+  inp.dataset.enhanced = 'true';
+  inp.style.cssText = 'position:absolute!important;opacity:0!important;pointer-events:none!important;width:0!important;height:0!important;padding:0!important;border:0!important;margin:0!important;';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'cdp-wrap';
+  if(inp.id) wrap.dataset.for = inp.id;
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'cdp-trigger ' + (inp.className || '');
+
+  const leftBox = document.createElement('div');
+  leftBox.style.cssText = 'display:flex;align-items:center;gap:8px;overflow:hidden;flex:1 1 auto;';
+
+  const icon = document.createElement('span');
+  icon.className = 'cdp-icon';
+  icon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg>';
+
+  const label = document.createElement('span');
+  label.className = 'cdp-label';
+
+  leftBox.appendChild(icon);
+  leftBox.appendChild(label);
+
+  const chevron = document.createElement('span');
+  chevron.className = 'cdp-chevron';
+  chevron.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+  trigger.appendChild(leftBox);
+  trigger.appendChild(chevron);
+
+  const popover = document.createElement('div');
+  popover.className = 'cdp-popover hidden';
+
+  inp.parentNode.insertBefore(wrap, inp);
+  wrap.appendChild(trigger);
+  wrap.appendChild(popover);
+  wrap.appendChild(inp);
+
+  const parentDateWrap = wrap.closest('.date-wrap');
+  if(parentDateWrap){
+    const staticIcon = parentDateWrap.querySelector('.f-icon');
+    if(staticIcon) staticIcon.style.display = 'none';
+  }
+
+  const todayIso = iso(new Date());
+  let viewYear = parseInt((inp.value || todayIso).slice(0, 4), 10);
+  let viewMonth = parseInt((inp.value || todayIso).slice(5, 7), 10) - 1;
+
+  function updateTrigger(){
+    const val = inp.value;
+    const hasVal = !!val;
+    trigger.classList.toggle('has-val', hasVal);
+    if(hasVal){
+      label.textContent = formatDateDisplay(val);
+      label.classList.remove('placeholder');
+    } else {
+      label.textContent = inp.placeholder || inp.title || 'Seleccionar fecha';
+      label.classList.add('placeholder');
+    }
+  }
+
+  function renderCalendar(){
+    const selVal = inp.value || '';
+    const nowIso = iso(new Date());
+
+    const titleStr = `${CDP_MONTH_NAMES[viewMonth]} ${viewYear}`;
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+    const firstDayIndex = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7;
+
+    let daysHtml = '';
+
+    for(let i = firstDayIndex - 1; i >= 0; i--){
+      const dNum = daysInPrevMonth - i;
+      const prevM = viewMonth === 0 ? 11 : viewMonth - 1;
+      const prevY = viewMonth === 0 ? viewYear - 1 : viewYear;
+      const dIso = `${prevY}-${String(prevM + 1).padStart(2,'0')}-${String(dNum).padStart(2,'0')}`;
+      daysHtml += `<button type="button" class="cdp-day other-month" data-date="${dIso}">${dNum}</button>`;
+    }
+
+    for(let d = 1; d <= daysInMonth; d++){
+      const dIso = `${viewYear}-${String(viewMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isSel = (dIso === selVal);
+      const isToday = (dIso === nowIso);
+      daysHtml += `<button type="button" class="cdp-day ${isSel?'selected':''} ${isToday?'is-today':''}" data-date="${dIso}">${d}</button>`;
+    }
+
+    const filledCells = firstDayIndex + daysInMonth;
+    const totalCells = Math.ceil(filledCells / 7) * 7;
+    const nextDaysCount = totalCells - filledCells;
+    for(let d = 1; d <= nextDaysCount; d++){
+      const nextM = viewMonth === 11 ? 0 : viewMonth + 1;
+      const nextY = viewMonth === 11 ? viewYear + 1 : viewYear;
+      const dIso = `${nextY}-${String(nextM + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      daysHtml += `<button type="button" class="cdp-day other-month" data-date="${dIso}">${d}</button>`;
+    }
+
+    const weekdaysHtml = CDP_DAY_NAMES.map(w => `<div class="cdp-wd">${w}</div>`).join('');
+
+    popover.innerHTML = `
+      <div class="cdp-head">
+        <button type="button" class="cdp-nav" data-act="prev" title="Mes anterior">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="cdp-title">${titleStr}</span>
+        <button type="button" class="cdp-nav" data-act="next" title="Mes siguiente">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="cdp-weekdays">${weekdaysHtml}</div>
+      <div class="cdp-days">${daysHtml}</div>
+      <div class="cdp-footer">
+        <button type="button" class="cdp-btn-action clear" data-act="clear">Borrar</button>
+        <button type="button" class="cdp-btn-action" data-act="today">Hoy</button>
+      </div>
+    `;
+  }
+
+  function adjustPopoverPosition(){
+    popover.style.left = '0';
+    popover.style.right = 'auto';
+    const rect = popover.getBoundingClientRect();
+    if(rect.right > (window.innerWidth || document.documentElement.clientWidth) - 12){
+      popover.style.left = 'auto';
+      popover.style.right = '0';
+    }
+  }
+
+  trigger.onclick = e => {
+    e.stopPropagation();
+    const isOpen = !popover.classList.contains('hidden');
+    closeAllCustomDropdowns();
+    if(!isOpen){
+      const current = inp.value || iso(new Date());
+      viewYear = parseInt(current.slice(0, 4), 10) || new Date().getFullYear();
+      viewMonth = (parseInt(current.slice(5, 7), 10) - 1);
+      if(isNaN(viewMonth) || viewMonth < 0 || viewMonth > 11) viewMonth = new Date().getMonth();
+      renderCalendar();
+      popover.classList.remove('hidden');
+      trigger.classList.add('open');
+      adjustPopoverPosition();
+    }
   };
+
+  popover.onclick = e => {
+    e.stopPropagation();
+    const btnNav = e.target.closest('.cdp-nav');
+    if(btnNav){
+      if(btnNav.dataset.act === 'prev'){
+        viewMonth--;
+        if(viewMonth < 0){ viewMonth = 11; viewYear--; }
+      } else if(btnNav.dataset.act === 'next'){
+        viewMonth++;
+        if(viewMonth > 11){ viewMonth = 0; viewYear++; }
+      }
+      renderCalendar();
+      return;
+    }
+
+    const btnClear = e.target.closest('[data-act="clear"]');
+    if(btnClear){
+      inp.value = '';
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      updateTrigger();
+      popover.classList.add('hidden');
+      trigger.classList.remove('open');
+      return;
+    }
+
+    const btnToday = e.target.closest('[data-act="today"]');
+    if(btnToday){
+      const t = iso(new Date());
+      inp.value = t;
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      updateTrigger();
+      popover.classList.add('hidden');
+      trigger.classList.remove('open');
+      return;
+    }
+
+    const dayBtn = e.target.closest('.cdp-day');
+    if(dayBtn && dayBtn.dataset.date){
+      inp.value = dayBtn.dataset.date;
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      updateTrigger();
+      popover.classList.add('hidden');
+      trigger.classList.remove('open');
+      return;
+    }
+  };
+
+  inp._syncCustomPicker = updateTrigger;
+  updateTrigger();
+}
+
+function formatTimeDisplay(val){
+  if(!val || typeof val !== 'string' || !val.includes(':')) return '';
+  const parts = val.split(':');
+  let h = parseInt(parts[0], 10);
+  const m = parts[1].slice(0, 2);
+  if(isNaN(h)) return val;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  let h12 = h % 12;
+  if(h12 === 0) h12 = 12;
+  return `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
+}
+
+function parseTimeToParts(val){
+  let h12 = 10, m = '00', ampm = 'AM';
+  if(val && typeof val === 'string' && val.includes(':')){
+    const parts = val.split(':');
+    let h = parseInt(parts[0], 10);
+    if(!isNaN(h)){
+      ampm = h >= 12 ? 'PM' : 'AM';
+      h12 = h % 12;
+      if(h12 === 0) h12 = 12;
+    }
+    const parsedM = parseInt(parts[1], 10);
+    if(!isNaN(parsedM)){
+      m = String(parsedM).padStart(2, '0');
+    }
+  }
+  return { h12, m, ampm };
+}
+
+function to24h(h12, mStr, ampm){
+  let h = parseInt(h12, 10);
+  if(ampm === 'PM' && h < 12) h += 12;
+  if(ampm === 'AM' && h === 12) h = 0;
+  return `${String(h).padStart(2, '0')}:${String(mStr).padStart(2, '0')}`;
+}
+
+const CTP_PRESETS = [
+  '09:00 AM','10:00 AM','11:00 AM','12:00 PM',
+  '01:00 PM','02:00 PM','03:00 PM','04:00 PM',
+  '05:00 PM','06:00 PM'
+];
+
+function enhanceTimePicker(inp){
+  if(!inp || inp.dataset.enhanced) return;
+  inp.dataset.enhanced = 'true';
+  inp.style.cssText = 'position:absolute!important;opacity:0!important;pointer-events:none!important;width:0!important;height:0!important;padding:0!important;border:0!important;margin:0!important;';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'ctp-wrap';
+  if(inp.id) wrap.dataset.for = inp.id;
+
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'ctp-trigger ' + (inp.className || '');
+
+  const leftBox = document.createElement('div');
+  leftBox.style.cssText = 'display:flex;align-items:center;gap:8px;overflow:hidden;flex:1 1 auto;';
+
+  const icon = document.createElement('span');
+  icon.className = 'ctp-icon';
+  icon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+
+  const label = document.createElement('span');
+  label.className = 'ctp-label';
+
+  leftBox.appendChild(icon);
+  leftBox.appendChild(label);
+
+  const chevron = document.createElement('span');
+  chevron.className = 'ctp-chevron';
+  chevron.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+  trigger.appendChild(leftBox);
+  trigger.appendChild(chevron);
+
+  const popover = document.createElement('div');
+  popover.className = 'ctp-popover hidden';
+
+  inp.parentNode.insertBefore(wrap, inp);
+  wrap.appendChild(trigger);
+  wrap.appendChild(popover);
+  wrap.appendChild(inp);
+
+  let tempH12 = 10, tempM = '00', tempAmPm = 'AM';
+
+  function updateTrigger(){
+    const val = inp.value;
+    const hasVal = !!val;
+    trigger.classList.toggle('has-val', hasVal);
+    if(hasVal){
+      label.textContent = formatTimeDisplay(val);
+      label.classList.remove('placeholder');
+    } else {
+      label.textContent = inp.placeholder || inp.title || 'Seleccionar hora';
+      label.classList.add('placeholder');
+    }
+  }
+
+  function commitValue(h12, mStr, ampm, closeAfter = false){
+    const val24 = to24h(h12, mStr, ampm);
+    inp.value = val24;
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+    updateTrigger();
+    if(closeAfter){
+      popover.classList.add('hidden');
+      trigger.classList.remove('open');
+    } else {
+      renderContent();
+    }
+  }
+
+  function renderContent(){
+    const displayStr = `${String(tempH12).padStart(2,'0')}:${String(tempM).padStart(2,'0')} ${tempAmPm}`;
+
+    let hoursHtml = '';
+    for(let h = 1; h <= 12; h++){
+      const isSel = (h === tempH12);
+      const hStr = String(h).padStart(2, '0');
+      hoursHtml += `<button type="button" class="ctp-val-btn ${isSel?'selected':''}" data-hour="${h}">${hStr}</button>`;
+    }
+
+    const minutesList = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+    let minHtml = '';
+    minutesList.forEach(m => {
+      const isSel = (String(tempM).padStart(2,'0') === m);
+      minHtml += `<button type="button" class="ctp-val-btn ${isSel?'selected':''}" data-min="${m}">${m}</button>`;
+    });
+
+    const presetsHtml = CTP_PRESETS.map(p => `<button type="button" class="ctp-preset-btn" data-preset="${p}">${p}</button>`).join('');
+
+    popover.innerHTML = `
+      <div class="ctp-header">
+        <span class="ctp-display">${displayStr}</span>
+        <div class="ctp-ampm-seg">
+          <button type="button" class="ctp-ampm-btn ${tempAmPm==='AM'?'active':''}" data-ampm="AM">AM</button>
+          <button type="button" class="ctp-ampm-btn ${tempAmPm==='PM'?'active':''}" data-ampm="PM">PM</button>
+        </div>
+      </div>
+      <div class="ctp-columns">
+        <div>
+          <div class="ctp-col-title">Hora</div>
+          <div class="ctp-col-list ctp-col-hours">${hoursHtml}</div>
+        </div>
+        <div>
+          <div class="ctp-col-title">Minuto</div>
+          <div class="ctp-col-list ctp-col-mins">${minHtml}</div>
+        </div>
+      </div>
+      <div class="ctp-presets">${presetsHtml}</div>
+      <div class="ctp-footer">
+        <button type="button" class="cdp-btn-action clear" data-act="clear">Borrar</button>
+        <div style="display:flex;gap:6px">
+          <button type="button" class="cdp-btn-action" data-act="now">Ahora</button>
+          <button type="button" class="cdp-btn-action" data-act="done" style="background:var(--btn-bg);color:var(--btn-text);padding:4px 10px;border-radius:6px">Aceptar</button>
+        </div>
+      </div>
+    `;
+
+    setTimeout(()=>{
+      const selH = popover.querySelector('.ctp-col-hours .selected');
+      if(selH) selH.scrollIntoView({block:'nearest'});
+      const selM = popover.querySelector('.ctp-col-mins .selected');
+      if(selM) selM.scrollIntoView({block:'nearest'});
+    }, 0);
+  }
+
+  function adjustPopoverPosition(){
+    popover.style.left = '0';
+    popover.style.right = 'auto';
+    const rect = popover.getBoundingClientRect();
+    if(rect.right > (window.innerWidth || document.documentElement.clientWidth) - 12){
+      popover.style.left = 'auto';
+      popover.style.right = '0';
+    }
+  }
+
+  trigger.onclick = e => {
+    e.stopPropagation();
+    const isOpen = !popover.classList.contains('hidden');
+    closeAllCustomDropdowns();
+    if(!isOpen){
+      const parsed = parseTimeToParts(inp.value);
+      tempH12 = parsed.h12;
+      tempM = parsed.m;
+      tempAmPm = parsed.ampm;
+      renderContent();
+      popover.classList.remove('hidden');
+      trigger.classList.add('open');
+      adjustPopoverPosition();
+    }
+  };
+
+  popover.onclick = e => {
+    e.stopPropagation();
+
+    const ampmBtn = e.target.closest('.ctp-ampm-btn');
+    if(ampmBtn){
+      tempAmPm = ampmBtn.dataset.ampm;
+      commitValue(tempH12, tempM, tempAmPm, false);
+      return;
+    }
+
+    const hBtn = e.target.closest('[data-hour]');
+    if(hBtn){
+      tempH12 = parseInt(hBtn.dataset.hour, 10);
+      commitValue(tempH12, tempM, tempAmPm, false);
+      return;
+    }
+
+    const mBtn = e.target.closest('[data-min]');
+    if(mBtn){
+      tempM = mBtn.dataset.min;
+      commitValue(tempH12, tempM, tempAmPm, false);
+      return;
+    }
+
+    const pBtn = e.target.closest('[data-preset]');
+    if(pBtn){
+      const [hStr, rest] = pBtn.dataset.preset.split(':');
+      const [mStr, ampm] = rest.split(' ');
+      tempH12 = parseInt(hStr, 10);
+      tempM = mStr;
+      tempAmPm = ampm;
+      commitValue(tempH12, tempM, tempAmPm, true);
+      return;
+    }
+
+    const clearBtn = e.target.closest('[data-act="clear"]');
+    if(clearBtn){
+      inp.value = '';
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      updateTrigger();
+      popover.classList.add('hidden');
+      trigger.classList.remove('open');
+      return;
+    }
+
+    const nowBtn = e.target.closest('[data-act="now"]');
+    if(nowBtn){
+      const now = new Date();
+      let nowH = now.getHours();
+      let nowM = Math.round(now.getMinutes() / 5) * 5;
+      if(nowM >= 60){ nowM = 0; nowH++; }
+      const ampm = nowH >= 12 ? 'PM' : 'AM';
+      let h12 = nowH % 12;
+      if(h12 === 0) h12 = 12;
+      tempH12 = h12;
+      tempM = String(nowM).padStart(2, '0');
+      tempAmPm = ampm;
+      commitValue(tempH12, tempM, tempAmPm, true);
+      return;
+    }
+
+    const doneBtn = e.target.closest('[data-act="done"]');
+    if(doneBtn){
+      commitValue(tempH12, tempM, tempAmPm, true);
+      return;
+    }
+  };
+
+  inp._syncCustomPicker = updateTrigger;
+  updateTrigger();
+}
+
+function enhanceAllDatePickers(container = document){
+  container.querySelectorAll('input[type="date"]:not([data-enhanced]):not([data-no-enhance])').forEach(enhanceDatePicker);
+}
+
+function enhanceAllTimePickers(container = document){
+  container.querySelectorAll('input[type="time"]:not([data-enhanced]):not([data-no-enhance])').forEach(enhanceTimePicker);
+}
+
+function syncAllCustomPickers(){
+  document.querySelectorAll('input[data-enhanced]').forEach(inp => {
+    inp._syncCustomPicker?.();
+  });
 }
 
 let citas=[],user=null,view='hoy',filtersOpen=false;
@@ -956,6 +1531,8 @@ function startApp(){
   if($('#f-ori')) $('#f-ori').innerHTML=opts(ORIGENES,'','Todos los orígenes');
   $('#f-as').innerHTML='<option value="">Todos los asesores</option>'+USUARIOS.map(u=>`<option value="${esc(u.nombre)}">${esc(u.nombre)}</option>`).join('');
   enhanceAllSelects($('#filters'));
+  enhanceAllDatePickers(document);
+  enhanceAllTimePickers(document);
   render();
 }
 
@@ -1224,6 +1801,9 @@ function render(){
   $('#content').innerHTML=html;
   enhanceAllSelects();
   syncAllCustomSelects();
+  enhanceAllDatePickers();
+  enhanceAllTimePickers();
+  syncAllCustomPickers();
 }
 function rowHTML(c){
   const t=iso(new Date());
@@ -1274,7 +1854,7 @@ function rowHTML(c){
 }
 
 /* ============ MODALS ============ */
-function openModal(h, cls){const m=$('#modal');m.innerHTML=`<div class="modal ${cls||''}">${h}</div>`;m.classList.remove('hidden');enhanceAllSelects(m);}
+function openModal(h, cls){const m=$('#modal');m.innerHTML=`<div class="modal ${cls||''}">${h}</div>`;m.classList.remove('hidden');enhanceAllSelects(m);enhanceAllDatePickers(m);enhanceAllTimePickers(m);}
 function closeModal(){$('#modal').classList.add('hidden');$('#modal').innerHTML='';closeAllCustomDropdowns();}
 
 function citaForm(id){
@@ -1355,6 +1935,8 @@ function extra(c){
   if(stSel==='Reagendó')box.innerHTML=`<div class="grid2"><div class="field"><label class="l">Nueva fecha</label><input class="inp" id="s-fec" type="date" value="${addDays(c.fecha,1)}"></div><div class="field"><label class="l">Nueva hora</label><input class="inp" id="s-hor" type="time" value="${c.hora}"></div></div><div class="field"><label class="l">Motivo</label><input class="inp" id="s-mot" placeholder="Opcional" value="${esc(c.motivo)}"></div>`;
   else if(stSel==='No asistió'||stSel==='Canceló')box.innerHTML=`<div class="field"><label class="l">Motivo</label><input class="inp" id="s-mot" placeholder="Opcional" value="${esc(c.motivo)}"></div>`;
   else box.innerHTML='';
+  enhanceAllDatePickers(box);
+  enhanceAllTimePickers(box);
 }
 async function saveStatus(id){
   const c=citas.find(x=>x.id===id),mot=$('#s-mot')?$('#s-mot').value.trim():'';
@@ -1729,6 +2311,8 @@ function updateReportSuboptions(){
         </div>
       </div>
     `;
+
+    enhanceAllDatePickers(box);
 
     $('#rep-rango-desde').onchange=e=>{
       repConfig.dateFrom=e.target.value;
@@ -2205,6 +2789,7 @@ function checkFiltersActive(){
   $('#f-ori')?.classList.toggle('has-val', !!ori);
   $('#f-as')?.classList.toggle('has-val', !!as);
   syncAllCustomSelects();
+  syncAllCustomPickers();
 
   const countBadge = $('#b-filter-count');
   const toggleBtn = $('#b-toggle-filters');
@@ -2226,6 +2811,7 @@ function resetFilters(){
   if($('#f-as')) $('#f-as').value='';
   if($('#f-sort')) $('#f-sort').value='cita_asc';
   syncAllCustomSelects();
+  syncAllCustomPickers();
   checkFiltersActive();
   render();
 }
@@ -2237,6 +2823,7 @@ function toggleFilters(force){
   if(filtersOpen){
     $('#f-q')?.focus();
     enhanceAllSelects($('#filters'));
+    enhanceAllDatePickers($('#filters'));
   }
 }
 
