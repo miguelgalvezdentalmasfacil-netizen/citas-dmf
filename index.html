@@ -292,17 +292,17 @@ textarea.inp{resize:vertical;min-height:80px}
 /* List */
 .day{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin:28px 4px 12px}
 .list{overflow:hidden}
-.row{display:grid;grid-template-columns:115px 1.4fr 1.2fr 140px auto;gap:16px;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border);transition:background .15s ease}
+.row{display:grid;grid-template-columns:95px minmax(180px, 1.2fr) minmax(200px, 1.4fr) 120px auto;gap:20px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);transition:background .15s ease}
 .row:last-child{border-bottom:0}
 .row:hover{background:var(--hover)}
-.row .time{display:flex;flex-direction:column;gap:3px}
-.row-hora{font-size:20px;font-weight:600;letter-spacing:-.5px;color:var(--text-main);line-height:1.1}
+.row .time{display:flex;flex-direction:column;gap:3px;min-width:0}
+.row-hora{font-size:19px;font-weight:600;letter-spacing:-.5px;color:var(--text-main);line-height:1.1}
 .row-cita-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#0097a7;background:rgba(0,151,167,.12);padding:2px 7px;border-radius:4px;width:fit-content;margin-top:2px;white-space:nowrap}
 .row .who,.row .what{min-width:0}
-.row b{font-weight:500;display:block}
-.row span.m{display:block;font-size:13px;color:var(--text-muted);font-weight:300}
-.row span.m a{color:var(--text-muted)}
-.reg-meta,.reg-badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px!important;color:var(--text-muted)!important;margin-top:4px;background:var(--hover);padding:3px 8px;border-radius:4px;width:fit-content;max-width:100%;border:1px solid var(--border-dark);white-space:nowrap;line-height:1.2}
+.row b{font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row span.m{display:block;font-size:13px;color:var(--text-muted);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.row .who span.m{white-space:normal}
+.reg-meta,.reg-badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px!important;color:var(--text-muted)!important;margin-top:4px;background:var(--hover);padding:3px 8px;border-radius:4px;width:fit-content;max-width:100%;border:1px solid var(--border-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
 .reg-meta svg,.reg-badge svg{flex-shrink:0;color:var(--text-muted);opacity:.75}
 .reg-meta b,.reg-badge b{font-weight:600;color:var(--text-main);display:inline}
 .reg-sep{opacity:.4;margin:0 1px}
@@ -339,7 +339,7 @@ textarea.inp{resize:vertical;min-height:80px}
 .err{color:var(--bad);font-size:13px;margin-bottom:12px;min-height:18px}
 
 /* Responsive */
-@media (max-width:860px){
+@media (max-width:980px){
   .nav{padding:12px 16px}.wrap{padding:24px 16px 80px}
   .stats{grid-template-columns:1fr 1fr;gap:12px}.stat{padding:18px 20px}
   .row{grid-template-columns:100px 1fr auto;grid-template-areas:"t w s" "t x x" "a a a";gap:8px 12px;padding:18px 20px}
@@ -2371,8 +2371,7 @@ function rowHTML(c){
   const pCitas = getPatientCitas(c.telefono, c.paciente);
   const vIdx = pCitas.findIndex(x => x.id === c.id);
   const vNum = vIdx >= 0 ? vIdx + 1 : 1;
-  const isValora = (c.tratamiento || '').toLowerCase().includes('valora');
-  const visitBadge = (vNum === 1 && isValora) ? 'Cita #1 (Valoración)' : `Cita #${vNum}`;
+  const visitText = vNum > 1 ? `Cita #${vNum}` : (c.tipo || 'Nueva');
 
   let budgetHtml = '';
   if(b){
@@ -2380,7 +2379,7 @@ function rowHTML(c){
     const sem = getBudgetSemáforo(b, pCitas);
     budgetHtml = `
       <div class="row-budget-pill ${sem.badgeClass}" data-act="budget" data-id="${c.id}" data-key="${esc(pKey)}" title="Presupuesto #${esc(b.folio)}: Pagado ${fmtMoney(totals.totalPagado)} de ${fmtMoney(b.total)}. Clic para ver plan completo.">
-        <span>${sem.icon}</span>
+        ${sem.icon}
         <span><b>Presupuesto #${esc(b.folio || 'S/N')}</b>: ${fmtMoney(totals.totalPagado)} / ${fmtMoney(b.total)} (${totals.progreso}%)</span>
         <div class="bp-mini-bar"><div class="bp-mini-fill" style="width:${totals.progreso}%"></div></div>
       </div>`;
@@ -2392,23 +2391,20 @@ function rowHTML(c){
       <div class="row-cita-badge" title="Fecha en que el paciente tiene su cita">Cita: ${esc(fmtShort(c.fecha))}</div>
     </div>
     <div class="who">
-      <b>${esc(c.paciente)}</b>
+      <b title="${esc(c.paciente)}">${esc(c.paciente)}</b>
       <span class="m">${esc(c.telefono)}${wa}</span>
       ${regHtml}
       ${budgetHtml}
     </div>
     <div class="what">
-      <b>${esc(c.tratamiento)}</b>
-      <span class="m">${esc(c.sucursal)} · <b>${esc(visitBadge)}</b> · ${esc(c.tipo||'Nueva')} · ${esc(c.origen||'—')} · Asesor: <b>${esc(nameOf(c.asesorId))}</b></span>
+      <b title="${esc(c.tratamiento)}">${esc(c.tratamiento)}</b>
+      <span class="m" title="${esc(c.sucursal)} · ${esc(visitText)} · Asesor: ${esc(nameOf(c.asesorId))}">${esc(c.sucursal)} · <b>${esc(visitText)}</b> · Asesor: <b>${esc(nameOf(c.asesorId))}</b></span>
     </div>
     <div class="st">
       <span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>
       ${c.motivo?`<span class="m" style="margin-top:4px">${esc(c.motivo)}</span>`:''}
     </div>
     <div class="act">
-      <button class="btn out sm ${b ? 'btn-teal' : ''}" data-act="budget" data-id="${c.id}" data-key="${esc(pKey)}" title="${b ? 'Ver o editar plan de tratamiento y presupuesto' : 'Adjuntar presupuesto Dentalink'}">
-        ${b ? 'Presupuesto' : '+ Presupuesto'}
-      </button>
       <button class="btn out sm" data-act="status" data-id="${c.id}">Estatus</button>
       <button class="btn out sm" data-act="edit" data-id="${c.id}">Editar</button>
     </div>
@@ -2445,7 +2441,8 @@ function citaForm(id){
     <div class="err" id="c-err"></div>
     <div class="m-actions">
       <button class="btn out" data-act="close">Cancelar</button>
-      ${id?`<button class="btn out sm" data-act="delete" data-id="${id}" style="color:var(--bad);border-color:var(--bad)">Eliminar cita</button>`:''}
+      ${id?`<button class="btn out sm" data-act="budget" data-id="${id}" style="color:#0097a7;border-color:rgba(0,151,167,.4)">Presupuesto</button>`:''}
+      ${id?`<button class="btn out sm" data-act="delete" data-id="${id}" style="color:var(--bad);border-color:var(--bad)">Eliminar</button>`:''}
       <button class="btn" data-act="save" data-id="${id||''}">Guardar</button>
     </div>
     ${id?`<div class="hist">
