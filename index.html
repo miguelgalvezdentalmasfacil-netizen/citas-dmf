@@ -538,16 +538,41 @@ textarea.inp{resize:vertical;min-height:80px}
 .pdf-spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}
 
 /* Modal Budget specifics */
-.modal.modal-budget{max-width:640px;padding:36px}
+.modal.modal-budget{max-width:680px;padding:36px}
 .grid3-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px}
 .grid3-kpis .field{display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:0}
 .grid3-kpis label.l{min-height:28px;display:flex;align-items:flex-end;margin-bottom:6px;line-height:1.2}
 @media (max-width:560px){.grid3-kpis{grid-template-columns:1fr}.grid3-kpis label.l{min-height:auto}}
 .bp-progress-box{background:var(--bg-color);border:1px solid var(--border-dark);border-radius:10px;padding:12px 14px;margin-top:14px}
 .bp-progress-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px}
-.bp-pasos-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
-.bp-paso-item{display:flex;align-items:center;gap:8px;background:var(--bg-color);padding:8px 10px;border-radius:6px;border:1px solid var(--border);font-size:12.5px}
-.bp-paso-item input{background:transparent;border:none;outline:none}
+.bp-pasos-list{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;padding-right:2px}
+.bp-paso-card{display:flex;align-items:center;gap:12px;background:var(--bg-color);padding:10px 14px;border-radius:var(--radius-md);border:1px solid var(--border-dark);transition:all .15s ease}
+.bp-paso-card:hover{border-color:var(--text-main);background:var(--hover)}
+.bp-paso-card.is-completed{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.35)}
+:root[data-theme="dark"] .bp-paso-card.is-completed{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4)}
+.bp-paso-check-label{display:inline-flex;align-items:center;cursor:pointer;position:relative;user-select:none;flex-shrink:0}
+.bp-paso-checkbox{position:absolute;opacity:0;cursor:pointer;width:0;height:0}
+.bp-paso-custom-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border-dark);background:var(--surface);display:grid;place-items:center;transition:all .15s ease;color:transparent}
+.bp-paso-checkbox:hover ~ .bp-paso-custom-check{border-color:var(--ok)}
+.bp-paso-checkbox:checked ~ .bp-paso-custom-check{background:var(--ok);border-color:var(--ok);color:#fff}
+.bp-paso-info{flex:1;min-width:0}
+.bp-paso-title{font-size:13px;font-weight:600;color:var(--text-main);line-height:1.3}
+.bp-paso-sub{font-size:11.5px;color:var(--text-muted);margin-top:2px}
+.bp-paso-amount{text-align:right;flex-shrink:0;margin-left:auto}
+.bp-paso-amount b{font-size:13.5px;font-weight:700;color:var(--text-main);display:block}
+.bp-paso-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;display:inline-block;margin-top:2px;text-transform:uppercase;letter-spacing:.3px}
+.bp-paso-badge.ok{background:rgba(16,185,129,.15);color:var(--ok)}
+.bp-paso-badge.pend{background:var(--border);color:var(--text-muted)}
+.bp-card-pasos-box{background:var(--bg-color);border:1px solid var(--border);border-radius:8px;padding:8px 12px;display:flex;flex-direction:column;gap:5px}
+.bp-pasos-mini-head{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.bp-pasos-mini-list{display:flex;flex-direction:column;gap:3px;max-height:110px;overflow-y:auto}
+.bp-paso-mini-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-main);padding:2px 0}
+.bp-paso-mini-row.ok{color:#059669;font-weight:500}
+.bp-paso-mini-row.ok .bp-paso-mini-icon{color:#059669;font-weight:700}
+.bp-paso-mini-row.pend .bp-paso-mini-icon{color:var(--text-light)}
+.bp-paso-mini-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bp-paso-mini-price{font-weight:600;font-size:11.5px;color:var(--text-muted);flex-shrink:0}
+.bp-paso-mini-row.ok .bp-paso-mini-price{color:#059669}
 .bp-abonos-table{background:var(--bg-color);border:1px solid var(--border-dark);border-radius:8px;overflow:hidden;max-height:160px;overflow-y:auto;font-size:12px}
 .bp-abono-row{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border)}
 .bp-abono-row:last-child{border-bottom:none}
@@ -989,7 +1014,7 @@ function computeBudgetTotals(b){
   if(!b) return {totalPagado:0, saldo:0, progreso:0};
   const abonoIni = parseFloat(b.abonoInicial) || 0;
   const sumAbonos = (b.abonos||[]).reduce((acc,a)=>acc+(parseFloat(a.monto)||0), 0);
-  const totalPagado = Math.max(abonoIni, abonoIni + sumAbonos);
+  const totalPagado = abonoIni + sumAbonos;
   const total = parseFloat(b.total) || 0;
   const saldo = Math.max(0, total - totalPagado);
   const progreso = (total > 0) ? Math.min(100, Math.round((totalPagado / total) * 1000) / 10) : 0;
@@ -1023,6 +1048,10 @@ function getBudgetSemáforo(b, patientCitas){
   const lastDate = lastAttended ? lastAttended.fecha : (b.fechaEmision || today);
   const daysSinceLast = Math.max(0, Math.floor((new Date(today+'T12:00:00') - new Date(lastDate+'T12:00:00')) / (1000 * 60 * 60 * 24)));
 
+  const hasTratamientoActivo = (Array.isArray(b.pasos) && b.pasos.some(p => p.completado))
+                            || ((b.abonos||[]).length > 0)
+                            || (totals.totalPagado > (b.abonoInicial || 350));
+
   if(future.length === 0){
     if(daysSinceLast >= 14){
       return {
@@ -1034,6 +1063,16 @@ function getBudgetSemáforo(b, patientCitas){
         days:daysSinceLast
       };
     } else {
+      if(hasTratamientoActivo){
+        return {
+          status:'en_tratamiento',
+          label:`En Tratamiento (${daysSinceLast}d sin cita)`,
+          color:'green',
+          icon:'<span class="bp-dot green"></span>',
+          badgeClass:'st-tratamiento',
+          days:daysSinceLast
+        };
+      }
       return {
         status:'solo_valoracion',
         label: attended.length <= 1 ? 'Solo Valoración (Sin Cita #2)' : `Sin Cita (${daysSinceLast}d)`,
@@ -1126,16 +1165,57 @@ function extractDentalinkData(text){
   const saldoStr = saldoMatch ? saldoMatch[1].replace(/,/g, '') : '';
   const saldo = saldoStr ? (parseFloat(saldoStr) || 0) : Math.max(0, total - abono);
 
-  // Pasos: PASO 1, PASO 2, PASO 3
+  // Fases o procedimientos clínicos del presupuesto de Dentalink
   const pasos = [];
-  const pasoRegex = /PASO\s+(\d+)\s*[:\-–]?\s*([^$]*?)\$?\s*([\d,]+(?:\.\d{2})?)/gi;
-  let pm;
-  while ((pm = pasoRegex.exec(clean)) !== null) {
+  const tableMatch = clean.match(/Detalle\s+del\s+Presupuesto\s*:\s*(?:Estado\s+Procedimientos\s+Cl[íi]nicos\s+Pieza\(s\)\s+Subtotal\s+Dcto\.\s+Total)?\s*(.*?)\s*(?:Resumen\s+del\s+Presupuesto|Estado\s+de\s+cuenta|Total\s+del\s+presupuesto|Dr\.)/i);
+  const tableChunk = tableMatch ? tableMatch[1].trim() : clean;
+
+  const itemRegex = /(Realizada|Pendiente|En\s+proceso|En\s+tratamiento|Planificada|Realizado)\s+(.*?)\s+\$?([\d,]+(?:\.\d{2})?)\s+[\d\.]+\%\s+\$?([\d,]+(?:\.\d{2})?)(?=\s+(?:Realizada|Pendiente|En\s+proceso|En\s+tratamiento|Planificada|Realizado)|$)/gi;
+  let m;
+  let num = 1;
+  while ((m = itemRegex.exec(tableChunk)) !== null) {
+    const estadoRaw = m[1].trim();
+    let rawDesc = m[2].trim();
+    const rowTotal = parseFloat(m[4].replace(/,/g, '')) || 0;
+
+    let cleanDesc = rawDesc;
+    let piezas = '';
+    if (/^(.*?)\s*-\s*$/.test(cleanDesc)) {
+      cleanDesc = cleanDesc.replace(/\s*-\s*$/, '').trim();
+    } else {
+      const pieceMatch = cleanDesc.match(/^(.*?)\s+((?:\b\d{1,2}\b[\s,]*)+)$/);
+      if (pieceMatch) {
+        cleanDesc = pieceMatch[1].trim();
+        piezas = pieceMatch[2].trim().split(/\s+/).join(', ');
+      }
+    }
+
+    const isCompleted = /^Realizada|^Realizado/i.test(estadoRaw);
+
     pasos.push({
-      numero: parseInt(pm[1], 10),
-      descripcion: (pm[2] || '').trim() || `Paso ${pm[1]}`,
-      monto: parseFloat(pm[3].replace(/,/g, '')) || 0
+      numero: num++,
+      descripcion: cleanDesc || `Fase ${num}`,
+      piezas: piezas,
+      monto: rowTotal,
+      estado: estadoRaw,
+      completado: isCompleted
     });
+  }
+
+  // Fallback si no venía formato de tabla pero decía PASO 1, FASE 1, etc.
+  if (!pasos.length) {
+    const pasoRegex = /(?:PASO|FASE)\s+(\d+)\s*[:\-–]?\s*([^$]*?)\$?\s*([\d,]+(?:\.\d{2})?)/gi;
+    let pm;
+    while ((pm = pasoRegex.exec(clean)) !== null) {
+      pasos.push({
+        numero: parseInt(pm[1], 10),
+        descripcion: (pm[2] || '').trim() || `Paso ${pm[1]}`,
+        piezas: '',
+        monto: parseFloat(pm[3].replace(/,/g, '')) || 0,
+        estado: 'Pendiente',
+        completado: false
+      });
+    }
   }
 
   return { folio, paciente, total, abono, saldo, pasos };
@@ -2389,6 +2469,21 @@ function budgetCardHTML(b){
         </div>
       </div>
 
+      ${b.pasos && b.pasos.length ? `
+        <div class="bp-card-pasos-box">
+          <div class="bp-pasos-mini-head">Fases del tratamiento (${b.pasos.filter(p=>p.completado).length}/${b.pasos.length} realizadas):</div>
+          <div class="bp-pasos-mini-list">
+            ${b.pasos.map(p => `
+              <div class="bp-paso-mini-row ${p.completado ? 'ok' : 'pend'}">
+                <span class="bp-paso-mini-icon">${p.completado ? '✓' : '○'}</span>
+                <span class="bp-paso-mini-name">${esc(p.descripcion)}</span>
+                <span class="bp-paso-mini-price">${fmtMoney(p.monto)}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
       <div class="bp-card-citas-row">
         <span>Historial: <b>${attendedCount} citas asistidas</b></span>
         <span>·</span>
@@ -2801,9 +2896,12 @@ function openBudgetModal(citaId, pKey){
 
     <!-- Pasos / Fases detectados -->
     <div class="field" style="margin-top:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <label class="l" style="margin-bottom:0">Fases o Pasos del Tratamiento</label>
-        <button type="button" class="btn-text-sm" id="btn-add-paso">+ Agregar Paso</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <label class="l" style="margin-bottom:0">Fases o Procedimientos Clínicos del Presupuesto</label>
+        <button type="button" class="btn-text-sm" id="btn-add-paso">+ Agregar Paso manual</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:8px">
+        Marca con <b>check (✓)</b> las fases que el paciente vaya realizando o pagando para actualizar su avance y registrar el abono automáticamente.
       </div>
       <div id="bp-pasos-list" class="bp-pasos-list"></div>
     </div>
@@ -2869,12 +2967,21 @@ function openBudgetModal(citaId, pKey){
   $('#bp-abono-inicial')?.addEventListener('input', recalculateModalBudget);
 
   $('#btn-add-paso')?.addEventListener('click', () => {
+    const desc = prompt('Nombre del procedimiento o fase clínica:', `Fase ${currentModalPasos.length + 1}`);
+    if(!desc) return;
+    const montoStr = prompt('Costo de esta fase ($ MXN):', '1000');
+    const monto = parseFloat(montoStr) || 0;
+    const piezas = prompt('Pieza(s) dental(es) (opcional, ej. 14 o 23, 24):', '') || '';
     currentModalPasos.push({
       numero: currentModalPasos.length + 1,
-      descripcion: `Paso ${currentModalPasos.length + 1}`,
-      monto: 0
+      descripcion: desc.trim(),
+      piezas: piezas.trim(),
+      monto: monto,
+      estado: 'Pendiente',
+      completado: false
     });
     renderModalPasos();
+    recalculateModalBudget();
   });
 
   $('#btn-add-abono-inline')?.addEventListener('click', () => {
@@ -2907,25 +3014,80 @@ function renderModalPasos(){
   const listEl = $('#bp-pasos-list');
   if(!listEl) return;
   if(!currentModalPasos.length){
-    listEl.innerHTML = `<div style="font-size:12px;color:var(--text-light);padding:8px 4px;font-style:italic">No se han registrado fases específicas (se desglosan del presupuesto de Dentalink)</div>`;
+    listEl.innerHTML = `
+      <div style="font-size:12px;color:var(--text-muted);padding:14px;text-align:center;background:var(--bg-color);border:1px dashed var(--border-dark);border-radius:var(--radius-md)">
+        No se han detectado fases clínicas todavía. Adjunta el PDF de Dentalink arriba para extraerlas automáticamente o haz clic en <b>+ Agregar Paso manual</b>.
+      </div>`;
     return;
   }
   listEl.innerHTML = currentModalPasos.map((p, idx) => `
-    <div class="bp-paso-item">
-      <span style="font-weight:600;color:var(--text-muted);min-width:54px">Paso ${p.numero || (idx+1)}:</span>
-      <input type="text" style="flex:1;font-size:12.5px" value="${esc(p.descripcion)}" onchange="currentModalPasos[${idx}].descripcion=this.value.trim()" placeholder="Descripción">
-      <span style="font-size:12px;color:var(--text-muted)">$</span>
-      <input type="number" step="0.01" style="width:90px;font-weight:600;font-size:12.5px;text-align:right" value="${p.monto||0}" onchange="currentModalPasos[${idx}].monto=parseFloat(this.value)||0;recalculateModalBudget()" placeholder="0.00">
-      <button type="button" class="btn-text-sm" style="color:var(--bad)" onclick="currentModalPasos.splice(${idx},1);renderModalPasos();recalculateModalBudget()">✕</button>
+    <div class="bp-paso-card ${p.completado ? 'is-completed' : ''}">
+      <label class="bp-paso-check-label" title="${p.completado ? 'Fase realizada (clic para desmarcar)' : 'Clic para marcar como Realizada y registrar abono'}">
+        <input type="checkbox" class="bp-paso-checkbox" ${p.completado ? 'checked' : ''} onchange="togglePasoCompletado(${idx}, this.checked)">
+        <span class="bp-paso-custom-check">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+      </label>
+      <div class="bp-paso-info">
+        <div class="bp-paso-title">${esc(p.descripcion)}</div>
+        ${p.piezas && p.piezas !== '-' ? `<div class="bp-paso-sub">Piezas: <b>${esc(p.piezas)}</b></div>` : ''}
+      </div>
+      <div class="bp-paso-amount">
+        <b>${fmtMoney(p.monto)}</b>
+        <span class="bp-paso-badge ${p.completado ? 'ok' : 'pend'}">${p.completado ? 'Realizada' : 'Pendiente'}</span>
+      </div>
+      <button type="button" class="btn-text-sm" style="color:var(--bad);padding:4px 6px;margin-left:4px" title="Eliminar fase" onclick="deleteModalPaso(${idx})">✕</button>
     </div>
   `).join('');
+}
+
+function deleteModalPaso(idx){
+  const paso = currentModalPasos[idx];
+  if(!paso) return;
+  const pasoKey = 'paso_' + (paso.numero || (idx + 1));
+  currentModalAbonos = (currentModalAbonos || []).filter(a => a.pasoKey !== pasoKey);
+  currentModalPasos.splice(idx, 1);
+  renderModalPasos();
+  renderModalAbonos();
+  recalculateModalBudget();
+}
+
+function togglePasoCompletado(idx, isChecked){
+  const paso = currentModalPasos[idx];
+  if(!paso) return;
+  paso.completado = isChecked;
+  paso.estado = isChecked ? 'Realizada' : 'Pendiente';
+
+  const pasoKey = 'paso_' + (paso.numero || (idx + 1));
+
+  if(isChecked){
+    // Registrar abono vinculado a esta fase si no existe
+    const existingAbono = (currentModalAbonos || []).find(a => a.pasoKey === pasoKey);
+    if(!existingAbono && paso.monto > 0){
+      currentModalAbonos.push({
+        id: 'ab_' + uid(),
+        fecha: new Date().toISOString(),
+        monto: paso.monto,
+        concepto: `${paso.descripcion}`,
+        asesor: user ? user.nombre : 'Miguel',
+        pasoKey: pasoKey
+      });
+    }
+  } else {
+    // Si se desmarca, remover el abono automático vinculado a este paso
+    currentModalAbonos = (currentModalAbonos || []).filter(a => a.pasoKey !== pasoKey);
+  }
+
+  renderModalPasos();
+  renderModalAbonos();
+  recalculateModalBudget();
 }
 
 function renderModalAbonos(){
   const tableEl = $('#bp-abonos-table');
   if(!tableEl) return;
   if(!currentModalAbonos.length){
-    tableEl.innerHTML = `<div style="padding:12px;font-size:12px;color:var(--text-light);text-align:center">No hay abonos adicionales registrados para este paciente</div>`;
+    tableEl.innerHTML = `<div style="padding:12px;font-size:12px;color:var(--text-light);text-align:center">No hay abonos registrados para este paciente</div>`;
     return;
   }
   tableEl.innerHTML = currentModalAbonos.map((a, idx) => `
@@ -2946,7 +3108,7 @@ function recalculateModalBudget(){
   const total = parseFloat($('#bp-total')?.value) || 0;
   const abonoIni = parseFloat($('#bp-abono-inicial')?.value) || 0;
   const sumAbonos = (currentModalAbonos || []).reduce((acc,a)=>acc+(parseFloat(a.monto)||0), 0);
-  const totalPagado = Math.max(abonoIni, abonoIni + sumAbonos);
+  const totalPagado = abonoIni + sumAbonos;
   const saldo = Math.max(0, total - totalPagado);
   const pct = (total > 0) ? Math.min(100, Math.round((totalPagado / total) * 1000) / 10) : 0;
 
@@ -2968,15 +3130,39 @@ async function handleBudgetPDF(file){
     if(data.folio && $('#bp-folio')) $('#bp-folio').value = data.folio;
     if(data.paciente && $('#bp-pac') && !$('#bp-pac').value) $('#bp-pac').value = data.paciente;
     if(data.total > 0 && $('#bp-total')) $('#bp-total').value = data.total;
-    if(data.abono > 0 && $('#bp-abono-inicial')) $('#bp-abono-inicial').value = data.abono;
-    if(data.saldo >= 0 && $('#bp-saldo')) $('#bp-saldo').value = data.saldo;
 
     currentModalPasos = data.pasos || [];
+
+    // Si el PDF de Dentalink ya traía fases como "Realizada", agregarlas automáticamente al historial de abonos
+    let sumRealized = 0;
+    currentModalPasos.forEach((p, idx) => {
+      const pasoKey = 'paso_' + (p.numero || (idx + 1));
+      if(p.completado && p.monto > 0){
+        sumRealized += p.monto;
+        const hasAbono = (currentModalAbonos || []).some(a => a.pasoKey === pasoKey);
+        if(!hasAbono){
+          currentModalAbonos.push({
+            id: 'ab_' + uid(),
+            fecha: new Date().toISOString(),
+            monto: p.monto,
+            concepto: `${p.descripcion}`,
+            asesor: user ? user.nombre : 'Miguel',
+            pasoKey: pasoKey
+          });
+        }
+      }
+    });
+
+    const remainingAbono = Math.max(0, data.abono - sumRealized);
+    if($('#bp-abono-inicial')) $('#bp-abono-inicial').value = remainingAbono;
+    if($('#bp-saldo')) $('#bp-saldo').value = data.saldo >= 0 ? data.saldo : Math.max(0, data.total - data.abono);
+
     renderModalPasos();
+    renderModalAbonos();
     recalculateModalBudget();
 
     statusEl.className = 'pdf-status-msg ok';
-    statusEl.innerHTML = `✓ <b>Presupuesto #${esc(data.folio || '')} extraído con éxito</b> · Total: ${fmtMoney(data.total)} · Abonos: ${fmtMoney(data.abono)} · Saldo: ${fmtMoney(data.saldo)}`;
+    statusEl.innerHTML = `✓ <b>Presupuesto #${esc(data.folio || '')} extraído con éxito</b> · Total: ${fmtMoney(data.total)} · Abonos: ${fmtMoney(data.abono)} · Saldo: ${fmtMoney(data.saldo)} · ${currentModalPasos.length} fases clínicas detectadas`;
   } catch(err) {
     console.error('Error parseando PDF Dentalink:', err);
     statusEl.className = 'pdf-status-msg err';
@@ -3007,7 +3193,7 @@ async function saveBudget(budgetId, citaId){
 
   const existing = presupuestos[key] || {};
   const sumAbonos = (currentModalAbonos || []).reduce((acc, a) => acc + (parseFloat(a.monto) || 0), 0);
-  const totalPagado = Math.max(abonoIni, abonoIni + sumAbonos);
+  const totalPagado = abonoIni + sumAbonos;
   const saldo = Math.max(0, total - totalPagado);
 
   const budgetObj = {
