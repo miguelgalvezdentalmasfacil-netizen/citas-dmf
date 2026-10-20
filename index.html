@@ -1242,7 +1242,8 @@ function parseTimeToParts(val){
     }
     const parsedM = parseInt(parts[1], 10);
     if(!isNaN(parsedM)){
-      m = String(parsedM).padStart(2, '0');
+      const roundedM = Math.round(parsedM / 15) * 15;
+      m = roundedM >= 60 ? '00' : String(roundedM).padStart(2, '0');
     }
   }
   return { h12, m, ampm };
@@ -1341,7 +1342,7 @@ function enhanceTimePicker(inp){
       hoursHtml += `<button type="button" class="ctp-val-btn ${isSel?'selected':''}" data-hour="${h}">${hStr}</button>`;
     }
 
-    const minutesList = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+    const minutesList = ['00','15','30','45'];
     let minHtml = '';
     minutesList.forEach(m => {
       const isSel = (String(tempM).padStart(2,'0') === m);
@@ -1462,7 +1463,7 @@ function enhanceTimePicker(inp){
     if(nowBtn){
       const now = new Date();
       let nowH = now.getHours();
-      let nowM = Math.round(now.getMinutes() / 5) * 5;
+      let nowM = Math.round(now.getMinutes() / 15) * 15;
       if(nowM >= 60){ nowM = 0; nowH++; }
       const ampm = nowH >= 12 ? 'PM' : 'AM';
       let h12 = nowH % 12;
