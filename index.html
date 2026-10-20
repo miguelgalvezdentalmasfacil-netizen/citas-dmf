@@ -89,7 +89,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .stat{padding:24px 28px}
 .stat label{display:block;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)}
 .stat b{display:block;font-size:30px;font-weight:300;letter-spacing:-1px;margin-top:6px}
-.stat b.ok{color:var(--ok)} .stat b.bad{color:var(--bad)}
+.stat b.ok{color:var(--ok)} .stat b.bad{color:var(--bad)} .stat b.warn{color:#d97706}
 
 /* Period Navigation Bar (Semana / Mes) */
 .period-nav-container{margin-bottom:18px;position:relative;z-index:25}
@@ -505,8 +505,11 @@ textarea.inp{resize:vertical;min-height:80px}
 .pdf-spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}
 
 /* Modal Budget specifics */
-.grid3-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
-@media (max-width:560px){.grid3-kpis{grid-template-columns:1fr}}
+.modal.modal-budget{max-width:640px;padding:36px}
+.grid3-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px}
+.grid3-kpis .field{display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:0}
+.grid3-kpis label.l{min-height:28px;display:flex;align-items:flex-end;margin-bottom:6px;line-height:1.2}
+@media (max-width:560px){.grid3-kpis{grid-template-columns:1fr}.grid3-kpis label.l{min-height:auto}}
 .bp-progress-box{background:var(--bg-color);border:1px solid var(--border-dark);border-radius:10px;padding:12px 14px;margin-top:14px}
 .bp-progress-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px}
 .bp-pasos-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
@@ -2143,11 +2146,10 @@ function render(){
   if(view === 'presupuestos'){
     const kpis = computeAllBudgetsKpis();
     $('#stats').innerHTML = `
-      <div class="card stat"><label>Presupuestado</label><b>${fmtMoney(kpis.totalPresupuestado)}</b></div>
-      <div class="card stat"><label>Cobrado</label><b class="ok">${fmtMoney(kpis.totalCobrado)}</b></div>
-      <div class="card stat"><label>Por Cobrar</label><b class="bad">${fmtMoney(kpis.totalSaldo)}</b></div>
-      <div class="card stat"><label>En Riesgo</label><b class="bad">${kpis.enRiesgo}</b></div>
-      <div class="card stat"><label>En Tratamiento</label><b class="ok">${kpis.enTratamiento}</b></div>`;
+      <div class="card stat"><label>Pacientes con Plan</label><b>${kpis.total}</b></div>
+      <div class="card stat"><label>En Tratamiento</label><b class="ok">${kpis.enTratamiento}</b></div>
+      <div class="card stat"><label>Solo Valoración</label><b class="warn">${kpis.soloValoracion}</b></div>
+      <div class="card stat"><label>En Riesgo</label><b class="${kpis.enRiesgo > 0 ? 'bad' : ''}">${kpis.enRiesgo}</b></div>`;
     renderPresupuestosView();
     return;
   }
@@ -2695,16 +2697,16 @@ function openBudgetModal(citaId, pKey){
     </div>
 
     <div class="grid3-kpis">
-      <div class="field" style="margin-bottom:0">
-        <label class="l">Total del Plan ($ MXN)</label>
+      <div class="field">
+        <label class="l">Total Presupuesto ($)</label>
         <input class="inp" id="bp-total" type="number" step="0.01" value="${b.total || ''}" placeholder="ej. 24800.00">
       </div>
-      <div class="field" style="margin-bottom:0">
-        <label class="l">Abono Inicial / Valoración</label>
+      <div class="field">
+        <label class="l">Abono Inicial / Consulta</label>
         <input class="inp" id="bp-abono-inicial" type="number" step="0.01" value="${b.abonoInicial !== undefined ? b.abonoInicial : 350}" placeholder="350.00">
       </div>
-      <div class="field" style="margin-bottom:0">
-        <label class="l">Saldo por Pagar</label>
+      <div class="field">
+        <label class="l">Saldo por Pagar ($)</label>
         <input class="inp" id="bp-saldo" type="number" step="0.01" value="${totals.saldo}" readonly style="background:var(--hover);font-weight:600">
       </div>
     </div>
