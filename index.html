@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 :root{
   --bg-color:#F8FAFC; --surface:#FFFFFF; --text-main:#0F172A; --text-muted:#64748B; --text-light:#94A3B8;
@@ -416,6 +417,101 @@ textarea.inp{resize:vertical;min-height:80px}
   .dmf-pdf-document{padding:24px 16px}
 }
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* ============ PRESUPUESTOS & SEMAFORO STYLES ============ */
+.seg button.tab-presupuestos{font-weight:600}
+.seg button.tab-presupuestos.on{background:#0097A7!important;color:#fff!important}
+.badge-alert{background:#e11d48!important;color:#fff!important;animation:pulseBadge 2s infinite}
+@keyframes pulseBadge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* Appointment Row Budget Pill */
+.row-budget-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;font-size:11.5px;cursor:pointer;margin-top:6px;transition:all .15s ease;width:fit-content;max-width:100%;user-select:none}
+.row-budget-pill:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.row-budget-pill.st-riesgo{background:rgba(225,29,72,.1);color:#e11d48;border:1px solid rgba(225,29,72,.3)}
+.row-budget-pill.st-valoracion{background:rgba(217,119,6,.1);color:#d97706;border:1px solid rgba(217,119,6,.3)}
+.row-budget-pill.st-tratamiento{background:rgba(16,185,129,.1);color:#059669;border:1px solid rgba(16,185,129,.3)}
+.row-budget-pill.st-completado{background:rgba(59,130,246,.1);color:#2563eb;border:1px solid rgba(59,130,246,.3)}
+.bp-mini-bar{width:42px;height:5px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden;margin-left:4px}
+:root[data-theme="dark"] .bp-mini-bar{background:rgba(255,255,255,.2)}
+.bp-mini-fill{height:100%;background:currentColor;border-radius:3px;transition:width .3s ease}
+
+/* Presupuestos Dashboard Toolbar & Filters */
+.bp-filter-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.bp-pill-group{display:flex;gap:6px;flex-wrap:wrap}
+.bp-filter-btn{border:1px solid var(--border-dark);background:var(--surface);color:var(--text-muted);padding:6px 14px;border-radius:999px;font-size:12.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s ease}
+.bp-filter-btn:hover{background:var(--hover);color:var(--text-main)}
+.bp-filter-btn.active{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.bp-filter-btn.bad.active{background:#e11d48;color:#fff;border-color:#e11d48}
+.bp-filter-btn.warn.active{background:#d97706;color:#fff;border-color:#d97706}
+.bp-filter-btn.ok.active{background:#10b981;color:#fff;border-color:#10b981}
+.bp-filter-btn.info.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.bp-count{font-size:11px;padding:1px 6px;border-radius:10px;background:rgba(0,0,0,.08);font-weight:600}
+:root[data-theme="dark"] .bp-count{background:rgba(255,255,255,.15)}
+.bp-filter-btn.active .bp-count{background:rgba(255,255,255,.3);color:#fff}
+
+/* Presupuestos Cards Grid */
+.bp-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.bp-card{padding:20px;border-radius:var(--radius-md);display:flex;flex-direction:column;gap:14px;transition:all .15s ease;border:1px solid var(--border-dark);background:var(--surface)}
+.bp-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.bp-card.en_riesgo{border-left:4px solid #e11d48}
+.bp-card.solo_valoracion{border-left:4px solid #d97706}
+.bp-card.en_tratamiento{border-left:4px solid #10b981}
+.bp-card.completado{border-left:4px solid #3b82f6}
+
+.bp-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.bp-patient-name{font-size:16px;font-weight:600;color:var(--text-main);letter-spacing:-.3px}
+.bp-meta-line{font-size:12px;color:var(--text-muted);display:flex;gap:6px;align-items:center;margin-top:2px}
+.bp-status-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.bp-status-badge.st-riesgo{background:rgba(225,29,72,.12);color:#e11d48}
+.bp-status-badge.st-valoracion{background:rgba(217,119,6,.12);color:#d97706}
+.bp-status-badge.st-tratamiento{background:rgba(16,185,129,.12);color:#059669}
+.bp-status-badge.st-completado{background:rgba(59,130,246,.12);color:#2563eb}
+
+.bp-card-info-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--bg-color);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
+.bp-info-lbl{font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:600;display:block;margin-bottom:2px}
+.bp-card-info-row b{font-size:13px;letter-spacing:-.2px}
+
+.bp-card-prog{display:flex;flex-direction:column;gap:5px}
+.bp-prog-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted)}
+.bp-prog-labels b{color:var(--text-main)}
+.progress-bar-wrap{width:100%;height:8px;background:var(--border-dark);border-radius:6px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#0097A7,#22D3EE);border-radius:6px;transition:width .4s ease}
+.bp-card.en_riesgo .progress-bar-fill{background:linear-gradient(90deg,#e11d48,#fb7185)}
+.bp-card.solo_valoracion .progress-bar-fill{background:linear-gradient(90deg,#d97706,#fbbf24)}
+
+.bp-card-citas-row{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;padding:4px 0}
+.bp-card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:10px;border-top:1px solid var(--border)}
+.bp-card-actions .btn{flex:1;text-align:center;justify-content:center}
+.btn-wa-rec{color:#25d366!important;border-color:rgba(37,211,102,.4)!important}
+.btn-wa-rec:hover{background:rgba(37,211,102,.08)!important;border-color:#25d366!important}
+
+/* PDF Dropzone */
+.pdf-dropzone{border:2px dashed #0097a7;background:rgba(0,151,167,.04);border-radius:12px;padding:22px 18px;text-align:center;cursor:pointer;transition:all .15s ease}
+.pdf-dropzone:hover,.pdf-dropzone.dragover{background:rgba(0,151,167,.09);border-color:#00838f;transform:scale(1.01)}
+.pdf-drop-content{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pdf-drop-badge{background:#0097a7;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:2px 8px;border-radius:10px;margin-top:4px}
+.pdf-status-msg{padding:8px 12px;border-radius:8px;font-size:12.5px;margin-top:10px;display:flex;align-items:center;gap:8px}
+.pdf-status-msg.busy{background:rgba(0,151,167,.1);color:#0097a7}
+.pdf-status-msg.ok{background:rgba(16,185,129,.12);color:#059669;border:1px solid rgba(16,185,129,.25)}
+.pdf-status-msg.err{background:rgba(239,68,68,.12);color:#dc2626;border:1px solid rgba(239,68,68,.25)}
+.pdf-spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .8s linear infinite}
+
+/* Modal Budget specifics */
+.grid3-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+@media (max-width:560px){.grid3-kpis{grid-template-columns:1fr}}
+.bp-progress-box{background:var(--bg-color);border:1px solid var(--border-dark);border-radius:10px;padding:12px 14px;margin-top:14px}
+.bp-progress-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px}
+.bp-pasos-list{display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto}
+.bp-paso-item{display:flex;align-items:center;gap:8px;background:var(--bg-color);padding:8px 10px;border-radius:6px;border:1px solid var(--border);font-size:12.5px}
+.bp-paso-item input{background:transparent;border:none;outline:none}
+.bp-abonos-table{background:var(--bg-color);border:1px solid var(--border-dark);border-radius:8px;overflow:hidden;max-height:160px;overflow-y:auto;font-size:12px}
+.bp-abono-row{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border)}
+.bp-abono-row:last-child{border-bottom:none}
+.bp-wa-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:12px 14px;margin-top:14px}
+.bp-wa-txt{font-size:12px;color:var(--text-main);display:flex;flex-direction:column}
+.bp-wa-txt b{color:#15803d}
+.btn-text-sm{background:transparent;border:none;color:#0097a7;font-size:11.5px;font-weight:600;cursor:pointer;padding:2px 6px;border-radius:4px}
+.btn-text-sm:hover{background:rgba(0,151,167,.08)}
 </style>
 </head>
 <body>
@@ -459,6 +555,7 @@ textarea.inp{resize:vertical;min-height:80px}
         <button data-view="semana">Semana <span class="badge" id="b-badge-semana"></span></button>
         <button data-view="mes">Mes <span class="badge" id="b-badge-mes"></span></button>
         <button data-view="todas">Todas</button>
+        <button data-view="presupuestos" class="tab-presupuestos" title="Seguimiento de presupuestos y planes de tratamiento">📊 Presupuestos <span class="badge" id="b-badge-presupuestos"></span></button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <button class="btn out sm btn-filter-toggle" id="b-toggle-filters" title="Buscar por paciente, teléfono o aplicar filtros">
@@ -573,10 +670,72 @@ const HEADERS_SB={
   'Content-Type':'application/json'
 };
 const KEY='dmf_citas_v2';
+const KEY_PRE='dmf_presupuestos_v2';
+let presupuestos={};
+let budgetFilter='todos';
+let currentModalPasos=[];
+let currentModalAbonos=[];
+
+if(window.pdfjsLib){
+  try{
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }catch(e){}
+}
+
+function loadPresupuestosLocal(){
+  try{
+    const raw=localStorage.getItem(KEY_PRE);
+    if(raw) presupuestos=JSON.parse(raw)||{};
+  }catch(e){
+    presupuestos={};
+  }
+}
+loadPresupuestosLocal();
+
+function savePresupuestosLocal(){
+  try{
+    localStorage.setItem(KEY_PRE,JSON.stringify(presupuestos));
+  }catch(e){}
+}
+
+function syncPresupuestosFromCitas(loadedCitas){
+  if(!Array.isArray(loadedCitas))return;
+  loadedCitas.forEach(c=>{
+    if(c&&c.historial&&Array.isArray(c.historial)){
+      c.historial.forEach(h=>{
+        if(h&&h.tipo==='presupuesto_sync'&&h.data&&h.data.folio){
+          const tel=cleanTel(h.data.telefono||c.telefono);
+          const key=tel||patientKey(c.telefono,c.paciente);
+          if(key){
+            const cur=presupuestos[key];
+            const incomingDate=h.data.actualizadoEl||h.f||'';
+            if(!cur||!cur.actualizadoEl||(incomingDate&&incomingDate>=cur.actualizadoEl)){
+              presupuestos[key]={
+                ...h.data,
+                telefono:h.data.telefono||c.telefono||'',
+                paciente:h.data.paciente||c.paciente||''
+              };
+            }
+          }
+        }
+      });
+    }
+  });
+  savePresupuestosLocal();
+}
 
 function toRow(c){
   const asesor = nameOf(c.asesorId);
   const creador = nameOf(c.creadoPor || c.asesorId);
+  let hist = Array.isArray(c.historial) ? [...c.historial] : [];
+  const key = patientKey(c.telefono, c.paciente);
+  const b = presupuestos[key];
+  if(b){
+    const syncIdx = hist.findIndex(h => h && h.tipo === 'presupuesto_sync');
+    const syncItem = { f: b.actualizadoEl || new Date().toISOString(), e: 'Presupuesto #' + (b.folio||''), tipo: 'presupuesto_sync', data: b };
+    if(syncIdx >= 0) hist[syncIdx] = syncItem;
+    else hist.push(syncItem);
+  }
   return {
     id: c.id,
     asesor_id: asesor,
@@ -593,7 +752,7 @@ function toRow(c){
     motivo: c.motivo||'',
     creado_el: c.creadoEl||new Date().toISOString(),
     creado_por: creador,
-    historial: c.historial||[]
+    historial: hist
   };
 }
 
@@ -638,6 +797,7 @@ const DB={
         const rows=await res.json();
         const loaded=rows.map(fromRow);
         localStorage.setItem(KEY,JSON.stringify(loaded));
+        syncPresupuestosFromCitas(loaded);
         setSyncState('ok','En la nube (Sincronizado)');
         return loaded;
       }
@@ -646,7 +806,9 @@ const DB={
       setSyncState('offline','Modo local');
     }
     try{
-      return JSON.parse(localStorage.getItem(KEY))||[];
+      const loaded = JSON.parse(localStorage.getItem(KEY))||[];
+      syncPresupuestosFromCitas(loaded);
+      return loaded;
     }catch(e){
       return [];
     }
@@ -754,7 +916,183 @@ const fmtReg=s=>{
   h=h%12||12;
   return `${day} ${mon}, ${h}:${m}${ampm}`;
 };
-function formatWeekTitle(wStart,wEnd,isStd){
+
+/* ============ BUDGET & TREATMENT PLAN HELPERS ============ */
+const cleanTel = t => String(t||'').replace(/\D/g,'');
+const patientKey = (tel, name) => cleanTel(tel) || String(name||'').trim().toLowerCase();
+const fmtMoney = n => '$' + (parseFloat(n)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function computeBudgetTotals(b){
+  if(!b) return {totalPagado:0, saldo:0, progreso:0};
+  const abonoIni = parseFloat(b.abonoInicial) || 0;
+  const sumAbonos = (b.abonos||[]).reduce((acc,a)=>acc+(parseFloat(a.monto)||0), 0);
+  const totalPagado = Math.max(abonoIni, abonoIni + sumAbonos);
+  const total = parseFloat(b.total) || 0;
+  const saldo = Math.max(0, total - totalPagado);
+  const progreso = (total > 0) ? Math.min(100, Math.round((totalPagado / total) * 1000) / 10) : 0;
+  return { totalPagado, saldo, progreso };
+}
+
+function getPatientCitas(tel, name){
+  const key = patientKey(tel, name);
+  return citas.filter(c => patientKey(c.telefono, c.paciente) === key)
+              .sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+}
+
+function getBudgetSemáforo(b, patientCitas){
+  const totals = computeBudgetTotals(b);
+  if(totals.saldo <= 0 && b.total > 0){
+    return {
+      status:'completado',
+      label:'Completado (100%)',
+      color:'blue',
+      icon:'🔵',
+      badgeClass:'st-completado'
+    };
+  }
+
+  const sorted = [...(patientCitas||[])].sort((x,y)=>(x.fecha+x.hora).localeCompare(y.fecha+y.hora));
+  const today = iso(new Date());
+  const attended = sorted.filter(c => c.estatus === 'Asistió');
+  const future = sorted.filter(c => c.fecha >= today && c.estatus !== 'Canceló');
+
+  const lastAttended = attended[attended.length - 1];
+  const lastDate = lastAttended ? lastAttended.fecha : (b.fechaEmision || today);
+  const daysSinceLast = Math.max(0, Math.floor((new Date(today+'T12:00:00') - new Date(lastDate+'T12:00:00')) / (1000 * 60 * 60 * 24)));
+
+  if(future.length === 0){
+    if(daysSinceLast >= 14){
+      return {
+        status:'en_riesgo',
+        label:`En Riesgo (${daysSinceLast}d sin cita)`,
+        color:'red',
+        icon:'🔴',
+        badgeClass:'st-riesgo',
+        days:daysSinceLast
+      };
+    } else {
+      return {
+        status:'solo_valoracion',
+        label: attended.length <= 1 ? 'Solo Valoración (Sin Cita #2)' : `Sin Cita (${daysSinceLast}d)`,
+        color:'yellow',
+        icon:'🟡',
+        badgeClass:'st-valoracion',
+        days:daysSinceLast
+      };
+    }
+  }
+
+  return {
+    status:'en_tratamiento',
+    label:`En Tratamiento (Próx: ${fmtShort(future[0].fecha)})`,
+    color:'green',
+    icon:'🟢',
+    badgeClass:'st-tratamiento',
+    nextCita:future[0]
+  };
+}
+
+function getMyBudgets(){
+  const all = Object.values(presupuestos);
+  if(!user || user.rol === 'admin') return all;
+  return all.filter(b => nameOf(b.asesorId) === user.nombre || b.asesorId === user.id);
+}
+
+function computeAllBudgetsKpis(){
+  const list = getMyBudgets();
+  let totalPresupuestado = 0;
+  let totalCobrado = 0;
+  let totalSaldo = 0;
+  let enRiesgo = 0;
+  let soloValoracion = 0;
+  let enTratamiento = 0;
+  let completados = 0;
+
+  list.forEach(b => {
+    const totals = computeBudgetTotals(b);
+    totalPresupuestado += (parseFloat(b.total) || 0);
+    totalCobrado += totals.totalPagado;
+    totalSaldo += totals.saldo;
+
+    const patientCitas = getPatientCitas(b.telefono, b.paciente);
+    const sem = getBudgetSemáforo(b, patientCitas);
+    if(sem.status === 'en_riesgo') enRiesgo++;
+    else if(sem.status === 'solo_valoracion') soloValoracion++;
+    else if(sem.status === 'en_tratamiento') enTratamiento++;
+    else if(sem.status === 'completado') completados++;
+  });
+
+  return {
+    totalPresupuestado,
+    totalCobrado,
+    totalSaldo,
+    enRiesgo,
+    soloValoracion,
+    enTratamiento,
+    completados,
+    total: list.length
+  };
+}
+
+function extractDentalinkData(text){
+  const clean = text.replace(/\s+/g, ' ');
+
+  // Folio: Presupuesto n° 4319, #4319, etc.
+  const folioMatch = clean.match(/Presupuesto\s*(?:n[°º]|#|num\.?|núm\.?)?\s*[:\-]?\s*(\d+)/i) 
+                  || text.match(/#\s*(\d{3,7})/);
+  const folio = folioMatch ? folioMatch[1] : '';
+
+  // Patient name: Nombre: Hector Palacios Gonzales
+  const pacMatch = clean.match(/Nombre\s*:\s*([A-Za-záéíóúÁÉÍÓÚñÑ\s]+?)(?=\s*(?:Fecha|RUT|Edad|Tel|Email|Doctor|Tratamiento|$))/i);
+  const paciente = pacMatch ? pacMatch[1].trim() : '';
+
+  // Total presupuesto: Total del presupuesto $ 24,800.00
+  const totalMatch = clean.match(/Total\s+del\s+presupuesto\s+\$?\s*([\d,]+(?:\.\d{2})?)/i)
+                  || clean.match(/Total\s+\$?\s*([\d,]+(?:\.\d{2})?)/i);
+  const totalStr = totalMatch ? totalMatch[1].replace(/,/g, '') : '0';
+  const total = parseFloat(totalStr) || 0;
+
+  // Abonos: Abonos del paciente (-) $ 350.00
+  const abonoMatch = clean.match(/Abonos(?:\s+del\s+paciente)?\s*(?:\(-\)\s*)?\$?\s*([\d,]+(?:\.\d{2})?)/i);
+  const abonoStr = abonoMatch ? abonoMatch[1].replace(/,/g, '') : '0';
+  const abono = parseFloat(abonoStr) || 0;
+
+  // Saldo por pagar: Total por pagar $ 24,450.00
+  const saldoMatch = clean.match(/Total\s+por\s+pagar\s+\$?\s*([\d,]+(?:\.\d{2})?)/i)
+                  || clean.match(/Saldo\s+por\s+pagar\s+\$?\s*([\d,]+(?:\.\d{2})?)/i);
+  const saldoStr = saldoMatch ? saldoMatch[1].replace(/,/g, '') : '';
+  const saldo = saldoStr ? (parseFloat(saldoStr) || 0) : Math.max(0, total - abono);
+
+  // Pasos: PASO 1, PASO 2, PASO 3
+  const pasos = [];
+  const pasoRegex = /PASO\s+(\d+)\s*[:\-–]?\s*([^$]*?)\$?\s*([\d,]+(?:\.\d{2})?)/gi;
+  let pm;
+  while ((pm = pasoRegex.exec(clean)) !== null) {
+    pasos.push({
+      numero: parseInt(pm[1], 10),
+      descripcion: (pm[2] || '').trim() || `Paso ${pm[1]}`,
+      monto: parseFloat(pm[3].replace(/,/g, '')) || 0
+    });
+  }
+
+  return { folio, paciente, total, abono, saldo, pasos };
+}
+
+async function parseDentalinkPDFFile(file){
+  if(!window.pdfjsLib){
+    throw new Error('Librería pdf.js no cargada');
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  for(let i = 1; i <= pdf.numPages; i++){
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const str = content.items.map(it => it.str).join(' ');
+    fullText += '\n' + str;
+  }
+  return extractDentalinkData(fullText);
+}
   const d1=new Date(wStart+'T12:00:00');
   const d2=new Date(wEnd+'T12:00:00');
   const day1=d1.getDate();
@@ -1554,6 +1892,14 @@ function updateBadges(){
   setB('b-badge-manana',cMan.length,cManPend>0);
   setB('b-badge-semana',cSem,false);
   setB('b-badge-mes',cMes,false);
+
+  const myPres = getMyBudgets();
+  const nRiesgo = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_riesgo').length;
+  const elPres = $('#b-badge-presupuestos');
+  if(elPres){
+    elPres.textContent = nRiesgo > 0 ? `${myPres.length} (${nRiesgo}⚠️)` : (myPres.length || '0');
+    elPres.classList.toggle('badge-alert', nRiesgo > 0);
+  }
 }
 
 function renderAviso(){
@@ -1772,10 +2118,24 @@ function render(){
     manana:['Citas de mañana',fmtLong(addDays(t,1))],
     semana:[weekTitle,weekLabel],
     mes:[isCurrMonth?'Citas de este mes':'Citas del mes',mName],
-    todas:['Todas las citas','Historial completo']
+    todas:['Todas las citas','Historial completo'],
+    presupuestos:['Planes de Tratamiento y Presupuestos','Seguimiento clínico y financiero por Asesor Dental']
   };
   $('#h-title').textContent=titles[view][0];
   $('#h-sub').textContent=titles[view][1];
+
+  if(view === 'presupuestos'){
+    const kpis = computeAllBudgetsKpis();
+    $('#stats').innerHTML = `
+      <div class="card stat"><label>Presupuestado</label><b>${fmtMoney(kpis.totalPresupuestado)}</b></div>
+      <div class="card stat"><label>Cobrado</label><b class="ok">${fmtMoney(kpis.totalCobrado)}</b></div>
+      <div class="card stat"><label>Por Cobrar</label><b class="bad">${fmtMoney(kpis.totalSaldo)}</b></div>
+      <div class="card stat"><label>En Riesgo</label><b class="bad">${kpis.enRiesgo}</b></div>
+      <div class="card stat"><label>En Tratamiento</label><b class="ok">${kpis.enTratamiento}</b></div>`;
+    renderPresupuestosView();
+    return;
+  }
+
   const l=currentList();
   const n=e=>l.filter(c=>c.estatus===e).length;
   const asis=n('Asistió'),no=n('No asistió'),tasa=(asis+no)?Math.round(asis/(asis+no)*100)+'%':'—';
@@ -1806,6 +2166,162 @@ function render(){
   enhanceAllTimePickers();
   syncAllCustomPickers();
 }
+
+function renderPresupuestosView(){
+  const myPres = getMyBudgets();
+  let list = myPres;
+
+  if(budgetFilter === 'en_riesgo'){
+    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_riesgo');
+  } else if(budgetFilter === 'solo_valoracion'){
+    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'solo_valoracion');
+  } else if(budgetFilter === 'en_tratamiento'){
+    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_tratamiento');
+  } else if(budgetFilter === 'completado'){
+    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'completado');
+  }
+
+  const q = $('#f-q') ? $('#f-q').value.toLowerCase().trim() : '';
+  if(q){
+    list = list.filter(b => (b.paciente||'').toLowerCase().includes(q) || (b.telefono||'').includes(q) || (b.folio||'').includes(q));
+  }
+
+  const as = $('#f-as') ? $('#f-as').value : '';
+  if(as){
+    list = list.filter(b => nameOf(b.asesorId) === nameOf(as) || b.asesorId === as);
+  }
+
+  const cAll = myPres.length;
+  const cRiesgo = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_riesgo').length;
+  const cVal = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'solo_valoracion').length;
+  const cTrat = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_tratamiento').length;
+  const cComp = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'completado').length;
+
+  let html = `
+    <div class="bp-filter-toolbar">
+      <div class="bp-pill-group">
+        <button class="bp-filter-btn ${budgetFilter==='todos'?'active':''}" data-act="filter-presupuesto" data-filter="todos">
+          Todos <span class="bp-count">${cAll}</span>
+        </button>
+        <button class="bp-filter-btn bad ${budgetFilter==='en_riesgo'?'active':''}" data-act="filter-presupuesto" data-filter="en_riesgo" title="Pacientes con más de 14 días sin cita agendada">
+          🔴 En Riesgo <span class="bp-count">${cRiesgo}</span>
+        </button>
+        <button class="bp-filter-btn warn ${budgetFilter==='solo_valoracion'?'active':''}" data-act="filter-presupuesto" data-filter="solo_valoracion" title="Pacientes que solo asistieron a valoración ($350) y aún no inician tratamiento">
+          🟡 Solo Valoración <span class="bp-count">${cVal}</span>
+        </button>
+        <button class="bp-filter-btn ok ${budgetFilter==='en_tratamiento'?'active':''}" data-act="filter-presupuesto" data-filter="en_tratamiento" title="Pacientes con citas agendadas o en tratamiento activo">
+          🟢 En Tratamiento <span class="bp-count">${cTrat}</span>
+        </button>
+        <button class="bp-filter-btn info ${budgetFilter==='completado'?'active':''}" data-act="filter-presupuesto" data-filter="completado" title="Presupuestos 100% cubiertos">
+          🔵 Completados <span class="bp-count">${cComp}</span>
+        </button>
+      </div>
+      <button class="btn sm btn-teal" data-act="budget" title="Registrar o adjuntar un nuevo presupuesto Dentalink">+ Adjuntar Presupuesto</button>
+    </div>
+  `;
+
+  if(!list.length){
+    html += `
+      <div class="card empty" style="padding:48px 24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:12px">📄</div>
+        <div style="font-weight:600;font-size:16px;margin-bottom:6px">No hay presupuestos en esta categoría</div>
+        <div class="sub nocap" style="margin-bottom:20px">Adjunta el presupuesto de Dentalink en formato PDF para comenzar el seguimiento automático de este paciente.</div>
+        <button class="btn btn-teal" data-act="budget">+ Adjuntar Presupuesto Dentalink</button>
+      </div>
+    `;
+    $('#content').innerHTML = html;
+    return;
+  }
+
+  html += `<div class="bp-cards-grid">`;
+  list.forEach(b => {
+    html += budgetCardHTML(b);
+  });
+  html += `</div>`;
+  $('#content').innerHTML = html;
+}
+
+function budgetCardHTML(b){
+  const totals = computeBudgetTotals(b);
+  const patientCitas = getPatientCitas(b.telefono, b.paciente);
+  const sem = getBudgetSemáforo(b, patientCitas);
+  const attendedCount = patientCitas.filter(c => c.estatus === 'Asistió').length;
+
+  const today = iso(new Date());
+  const future = patientCitas.filter(c => c.fecha >= today && c.estatus !== 'Canceló').sort((x,y)=>(x.fecha+x.hora).localeCompare(y.fecha+y.hora));
+  const nextCitaTxt = future.length > 0 
+    ? `📅 Próxima: <b>${fmtShort(future[0].fecha)} ${esc(future[0].hora)}</b>`
+    : `<span style="color:var(--bad);font-weight:600">⚠️ Sin próxima cita agendada</span>`;
+
+  const pKey = patientKey(b.telefono, b.paciente);
+
+  return `
+    <div class="card bp-card ${sem.status}">
+      <div class="bp-card-head">
+        <div>
+          <div class="bp-patient-name">${esc(b.paciente)}</div>
+          <div class="bp-meta-line">
+            <span>📞 <b>${esc(b.telefono)}</b></span>
+            <span>·</span>
+            <span>Asesor: <b>${esc(nameOf(b.asesorId))}</b></span>
+          </div>
+        </div>
+        <div class="bp-status-badge ${sem.badgeClass}">${sem.icon} ${sem.label}</div>
+      </div>
+      
+      <div class="bp-card-info-row">
+        <div>
+          <span class="bp-info-lbl">Folio</span>
+          <b>#${esc(b.folio || 'S/N')}</b>
+        </div>
+        <div>
+          <span class="bp-info-lbl">Total Plan</span>
+          <b>${fmtMoney(b.total)}</b>
+        </div>
+        <div>
+          <span class="bp-info-lbl">Pagado</span>
+          <b class="text-ok">${fmtMoney(totals.totalPagado)}</b>
+        </div>
+        <div>
+          <span class="bp-info-lbl">Saldo Restante</span>
+          <b class="text-bad">${fmtMoney(totals.saldo)}</b>
+        </div>
+      </div>
+
+      <div class="bp-card-prog">
+        <div class="bp-prog-labels">
+          <span>Progreso cubierto</span>
+          <b>${totals.progreso}% (${fmtMoney(totals.totalPagado)} de ${fmtMoney(b.total)})</b>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width:${totals.progreso}%"></div>
+        </div>
+      </div>
+
+      <div class="bp-card-citas-row">
+        <span>Historial: <b>${attendedCount} citas asistidas</b></span>
+        <span>·</span>
+        <span>${nextCitaTxt}</span>
+      </div>
+
+      <div class="bp-card-actions">
+        <button class="btn out sm" data-act="budget" data-key="${esc(pKey)}" title="Ver o editar el plan de tratamiento">
+          Plan y Abonos
+        </button>
+        <button class="btn out sm" data-act="addabono" data-key="${esc(pKey)}" title="Registrar nuevo abono de pago">
+          + Abono
+        </button>
+        <button class="btn out sm btn-wa-rec" data-act="waseguimiento" data-key="${esc(pKey)}" title="Enviar mensaje de seguimiento por WhatsApp al paciente">
+          💬 WhatsApp
+        </button>
+        <button class="btn sm btn-teal" data-act="agendardesdebp" data-pac="${esc(b.paciente)}" data-tel="${esc(b.telefono)}" data-as="${esc(b.asesorId)}" data-fol="${esc(b.folio||'')}">
+          + Agendar Cita
+        </button>
+      </div>
+    </div>
+  `;
+}
+
 function rowHTML(c){
   const t=iso(new Date());
   let wa='';
@@ -1829,6 +2345,27 @@ function rowHTML(c){
         <span>Alta: <b>${esc(regTxt)}</b></span>
         ${creator?`<span class="reg-sep">·</span><span>por <b>${esc(creator)}</b></span>`:''}
       </div>`:'';
+
+  const pKey = patientKey(c.telefono, c.paciente);
+  const b = presupuestos[pKey];
+  const pCitas = getPatientCitas(c.telefono, c.paciente);
+  const vIdx = pCitas.findIndex(x => x.id === c.id);
+  const vNum = vIdx >= 0 ? vIdx + 1 : 1;
+  const isValora = (c.tratamiento || '').toLowerCase().includes('valora');
+  const visitBadge = (vNum === 1 && isValora) ? 'Cita #1 (Valoración)' : `Cita #${vNum}`;
+
+  let budgetHtml = '';
+  if(b){
+    const totals = computeBudgetTotals(b);
+    const sem = getBudgetSemáforo(b, pCitas);
+    budgetHtml = `
+      <div class="row-budget-pill ${sem.badgeClass}" data-act="budget" data-id="${c.id}" data-key="${esc(pKey)}" title="Presupuesto #${esc(b.folio)}: Pagado ${fmtMoney(totals.totalPagado)} de ${fmtMoney(b.total)}. Clic para ver plan completo.">
+        <span>${sem.icon}</span>
+        <span><b>Presupuesto #${esc(b.folio || 'S/N')}</b>: ${fmtMoney(totals.totalPagado)} / ${fmtMoney(b.total)} (${totals.progreso}%)</span>
+        <div class="bp-mini-bar"><div class="bp-mini-fill" style="width:${totals.progreso}%"></div></div>
+      </div>`;
+  }
+
   return `<div class="row">
     <div class="time">
       <div class="row-hora">${esc(c.hora)}</div>
@@ -1838,16 +2375,20 @@ function rowHTML(c){
       <b>${esc(c.paciente)}</b>
       <span class="m">${esc(c.telefono)}${wa}</span>
       ${regHtml}
+      ${budgetHtml}
     </div>
     <div class="what">
       <b>${esc(c.tratamiento)}</b>
-      <span class="m">${esc(c.sucursal)} · <b>${esc(c.tipo||'Nueva')}</b> · ${esc(c.origen||'—')} · Asesor: <b>${esc(nameOf(c.asesorId))}</b></span>
+      <span class="m">${esc(c.sucursal)} · <b>${esc(visitBadge)}</b> · ${esc(c.tipo||'Nueva')} · ${esc(c.origen||'—')} · Asesor: <b>${esc(nameOf(c.asesorId))}</b></span>
     </div>
     <div class="st">
       <span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>
       ${c.motivo?`<span class="m" style="margin-top:4px">${esc(c.motivo)}</span>`:''}
     </div>
     <div class="act">
+      <button class="btn out sm ${b ? 'btn-teal' : ''}" data-act="budget" data-id="${c.id}" data-key="${esc(pKey)}" title="${b ? 'Ver o editar plan de tratamiento y presupuesto' : 'Adjuntar presupuesto Dentalink'}">
+        ${b ? 'Presupuesto' : '+ Presupuesto'}
+      </button>
       <button class="btn out sm" data-act="status" data-id="${c.id}">Estatus</button>
       <button class="btn out sm" data-act="edit" data-id="${c.id}">Editar</button>
     </div>
@@ -1933,12 +2474,41 @@ function statusForm(id){
 }
 function extra(c){
   const box=$('#st-extra');if(!box)return;
-  if(stSel==='Reagendó')box.innerHTML=`<div class="grid2"><div class="field"><label class="l">Nueva fecha</label><input class="inp" id="s-fec" type="date" value="${addDays(c.fecha,1)}"></div><div class="field"><label class="l">Nueva hora</label><input class="inp" id="s-hor" type="time" value="${c.hora}"></div></div><div class="field"><label class="l">Motivo</label><input class="inp" id="s-mot" placeholder="Opcional" value="${esc(c.motivo)}"></div>`;
-  else if(stSel==='No asistió'||stSel==='Canceló')box.innerHTML=`<div class="field"><label class="l">Motivo</label><input class="inp" id="s-mot" placeholder="Opcional" value="${esc(c.motivo)}"></div>`;
-  else box.innerHTML='';
+  if(stSel==='Reagendó'){
+    box.innerHTML=`<div class="grid2"><div class="field"><label class="l">Nueva fecha</label><input class="inp" id="s-fec" type="date" value="${addDays(c.fecha,1)}"></div><div class="field"><label class="l">Nueva hora</label><input class="inp" id="s-hor" type="time" value="${c.hora}"></div></div><div class="field"><label class="l">Motivo</label><input class="inp" id="s-mot" placeholder="Opcional" value="${esc(c.motivo)}"></div>`;
+  } else if(stSel==='No asistió'||stSel==='Canceló'){
+    box.innerHTML=`<div class="field"><label class="l">Motivo</label><input class="inp" id="s-mot" placeholder="Opcional" value="${esc(c.motivo)}"></div>`;
+  } else if(stSel==='Asistió'){
+    const pKey = patientKey(c.telefono, c.paciente);
+    const b = presupuestos[pKey];
+    let bInfo = '';
+    if(b){
+      const totals = computeBudgetTotals(b);
+      bInfo = `<div style="font-size:11.5px;color:var(--text-muted);margin-top:6px">Presupuesto activo #${esc(b.folio||'S/N')}: Pagado <b>${fmtMoney(totals.totalPagado)}</b> de <b>${fmtMoney(b.total)}</b> (Saldo restante: <b class="text-bad">${fmtMoney(totals.saldo)}</b>)</div>`;
+    }
+    box.innerHTML = `
+      <div style="background:rgba(0,151,167,.06);border:1px dashed #0097a7;border-radius:10px;padding:12px 14px;margin-top:10px">
+        <label class="l" style="color:#0097a7;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M16 10H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H8"/></svg>
+          ¿El paciente realizó algún abono hoy? (Opcional)
+        </label>
+        <div class="grid2">
+          <div class="field" style="margin-bottom:0">
+            <input class="inp" id="s-abono-monto" type="number" step="0.01" placeholder="Monto $ ej. 1500">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <input class="inp" id="s-abono-concepto" placeholder="Concepto ej. Anticipo Paso 1 - Resinas">
+          </div>
+        </div>
+        ${bInfo}
+      </div>`;
+  } else {
+    box.innerHTML='';
+  }
   enhanceAllDatePickers(box);
   enhanceAllTimePickers(box);
 }
+
 async function saveStatus(id){
   const c=citas.find(x=>x.id===id),mot=$('#s-mot')?$('#s-mot').value.trim():'';
   const now=new Date().toISOString();
@@ -1951,11 +2521,567 @@ async function saveStatus(id){
       citas.push(nuevaCita);
     }
   }
+
+  // Si marcó Asistió y capturó abono:
+  if(stSel==='Asistió' && $('#s-abono-monto')){
+    const abMonto = parseFloat($('#s-abono-monto').value) || 0;
+    if(abMonto > 0){
+      const pKey = patientKey(c.telefono, c.paciente);
+      let b = presupuestos[pKey];
+      const abConcepto = $('#s-abono-concepto')?.value.trim() || 'Abono en consulta';
+      const abAsesor = user ? user.nombre : nameOf(c.asesorId);
+
+      if(!b){
+        b = {
+          id: 'pres_' + uid(),
+          telefono: c.telefono || '',
+          paciente: c.paciente || '',
+          asesorId: nameOf(c.asesorId),
+          folio: '',
+          total: abMonto,
+          abonoInicial: 0,
+          saldo: 0,
+          fechaEmision: iso(new Date()),
+          pasos: [],
+          abonos: [],
+          actualizadoEl: now
+        };
+      }
+      if(!Array.isArray(b.abonos)) b.abonos = [];
+      b.abonos.push({
+        id: 'ab_' + uid(),
+        fecha: now,
+        monto: abMonto,
+        concepto: abConcepto,
+        asesor: abAsesor,
+        citaId: c.id
+      });
+      const totals = computeBudgetTotals(b);
+      b.saldo = totals.saldo;
+      b.actualizadoEl = now;
+      presupuestos[pKey] = b;
+      savePresupuestosLocal();
+
+      if(!Array.isArray(c.historial)) c.historial = [];
+      c.historial.push({
+        f: now,
+        e: `Abono de ${fmtMoney(abMonto)} (${abConcepto})`,
+        tipo: 'presupuesto_sync',
+        data: b
+      });
+    }
+  }
+
   c.estatus=stSel;c.motivo=stSel==='Asistió'||stSel==='Pendiente'?'':mot;
   c.historial=(c.historial||[]).concat({f:now,e:stSel});
   persist();closeModal();render();
   await DB.upsert(c);
   if(nuevaCita) await DB.upsert(nuevaCita);
+}
+
+/* ============ PRESUPUESTOS MODALS & ACTIONS ============ */
+function openBudgetModal(citaId, pKey){
+  let c = citaId ? citas.find(x => x.id === citaId) : null;
+  const key = pKey || (c ? patientKey(c.telefono, c.paciente) : '');
+  let b = (key && presupuestos[key]) ? presupuestos[key] : null;
+
+  if(!b && c){
+    const isValora = (c.tratamiento||'').toLowerCase().includes('valora');
+    b = {
+      id: 'pres_' + uid(),
+      folio: '',
+      telefono: c.telefono || '',
+      paciente: c.paciente || '',
+      asesorId: nameOf(c.asesorId),
+      total: 0,
+      abonoInicial: isValora ? 350 : 0,
+      saldo: 0,
+      fechaEmision: c.fecha || iso(new Date()),
+      pasos: [],
+      abonos: isValora ? [{
+        id: 'ab_ini',
+        fecha: (c.fecha || iso(new Date())) + 'T12:00:00Z',
+        monto: 350,
+        concepto: 'Cita de Valoración inicial',
+        asesor: nameOf(c.asesorId),
+        citaId: c.id
+      }] : [],
+      notas: ''
+    };
+  } else if(!b){
+    b = {
+      id: 'pres_' + uid(),
+      folio: '',
+      telefono: '',
+      paciente: '',
+      asesorId: user ? user.nombre : 'Miguel',
+      total: 0,
+      abonoInicial: 350,
+      saldo: 0,
+      fechaEmision: iso(new Date()),
+      pasos: [],
+      abonos: [],
+      notas: ''
+    };
+  }
+
+  currentModalPasos = Array.isArray(b.pasos) ? JSON.parse(JSON.stringify(b.pasos)) : [];
+  currentModalAbonos = Array.isArray(b.abonos) ? JSON.parse(JSON.stringify(b.abonos)) : [];
+  const totals = computeBudgetTotals(b);
+
+  openModal(`
+    <div class="m-icon" style="background:rgba(0,151,167,.12);color:#0097a7">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+    </div>
+    <h2>Plan de Tratamiento y Presupuesto</h2>
+    <div class="sub nocap">Control clínico y financiero de presupuestos Dentalink para Asesores Dentales</div>
+
+    <!-- Dropzone PDF -->
+    <div class="pdf-dropzone" id="budget-pdf-dropzone" style="margin-top:14px">
+      <input type="file" id="budget-pdf-file" accept=".pdf" class="hidden">
+      <div class="pdf-drop-content">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0097a7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <div style="font-weight:600;font-size:13.5px;color:var(--text-main)">Adjuntar Presupuesto Dentalink (PDF)</div>
+        <div style="font-size:12px;color:var(--text-muted)">Arrastra el PDF aquí o haz clic para seleccionarlo</div>
+        <div class="pdf-drop-badge">Extracción Inteligente con pdf.js</div>
+      </div>
+    </div>
+    <div id="budget-pdf-status" class="hidden"></div>
+
+    <!-- Datos del Paciente y Presupuesto -->
+    <div class="grid2" style="margin-top:16px">
+      <div class="field">
+        <label class="l">Paciente</label>
+        <input class="inp" id="bp-pac" value="${esc(b.paciente)}" placeholder="Nombre completo del paciente">
+      </div>
+      <div class="field">
+        <label class="l">Teléfono</label>
+        <input class="inp" id="bp-tel" inputmode="tel" value="${esc(b.telefono)}" placeholder="664 000 0000">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="l">N.° de Presupuesto (Folio Dentalink)</label>
+        <input class="inp" id="bp-folio" value="${esc(b.folio)}" placeholder="ej. 4319">
+      </div>
+      <div class="field">
+        <label class="l">Asesor Dental Responsable</label>
+        <select class="inp" id="bp-as">
+          ${USUARIOS.map(u => `<option value="${esc(u.nombre)}" ${(nameOf(b.asesorId)===u.nombre||b.asesorId===u.id)?'selected':''}>${esc(u.nombre)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <div class="grid3-kpis">
+      <div class="field" style="margin-bottom:0">
+        <label class="l">Total del Plan ($ MXN)</label>
+        <input class="inp" id="bp-total" type="number" step="0.01" value="${b.total || ''}" placeholder="ej. 24800.00">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="l">Abono Inicial / Valoración</label>
+        <input class="inp" id="bp-abono-inicial" type="number" step="0.01" value="${b.abonoInicial !== undefined ? b.abonoInicial : 350}" placeholder="350.00">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="l">Saldo por Pagar</label>
+        <input class="inp" id="bp-saldo" type="number" step="0.01" value="${totals.saldo}" readonly style="background:var(--hover);font-weight:600">
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="bp-progress-box">
+      <div class="bp-progress-labels">
+        <span>Progreso cubierto del presupuesto</span>
+        <b id="bp-progreso-txt">${totals.progreso}% (${fmtMoney(totals.totalPagado)} de ${fmtMoney(b.total)})</b>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="bp-progreso-bar" style="width:${totals.progreso}%"></div>
+      </div>
+    </div>
+
+    <!-- Pasos / Fases detectados -->
+    <div class="field" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <label class="l" style="margin-bottom:0">Fases o Pasos del Tratamiento</label>
+        <button type="button" class="btn-text-sm" id="btn-add-paso">+ Agregar Paso</button>
+      </div>
+      <div id="bp-pasos-list" class="bp-pasos-list"></div>
+    </div>
+
+    <!-- Abonos registrados -->
+    <div class="field" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <label class="l" style="margin-bottom:0">Historial de Abonos del Paciente</label>
+        <button type="button" class="btn sm btn-teal" id="btn-add-abono-inline" style="padding:3px 9px;font-size:11.5px">+ Registrar Abono</button>
+      </div>
+      <div id="bp-abonos-table" class="bp-abonos-table"></div>
+    </div>
+
+    <div class="field" style="margin-top:12px">
+      <label class="l">Notas u Observaciones del Tratamiento</label>
+      <textarea class="inp" id="bp-notas" placeholder="Anotaciones de seguimiento clínico, convenios o facilidades de pago">${esc(b.notas||'')}</textarea>
+    </div>
+
+    <!-- WhatsApp Banner -->
+    <div class="bp-wa-banner">
+      <div class="bp-wa-txt">
+        <b>Seguimiento Directo por WhatsApp</b>
+        <span>Envía un mensaje pre-redactado con los datos del presupuesto al paciente con 1 clic</span>
+      </div>
+      <button type="button" class="btn sm" id="btn-wa-modal" style="background:#25D366;color:#fff;border-color:#25D366;display:inline-flex;align-items:center;gap:6px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+        WhatsApp
+      </button>
+    </div>
+
+    <div class="err" id="bp-err"></div>
+    <div class="m-actions">
+      <button class="btn out" data-act="close">Cancelar</button>
+      ${b.folio?`<button class="btn out sm" data-act="delbudget" data-id="${b.id}" style="color:var(--bad);border-color:var(--bad)">Eliminar Presupuesto</button>`:''}
+      <button class="btn btn-teal" data-act="savebudget" data-id="${b.id||''}" data-cid="${citaId||''}">Guardar Presupuesto</button>
+    </div>
+  `, 'modal-budget');
+
+  renderModalPasos();
+  renderModalAbonos();
+
+  const dropzone = $('#budget-pdf-dropzone');
+  const fileInp = $('#budget-pdf-file');
+  if(dropzone && fileInp){
+    dropzone.onclick = () => fileInp.click();
+    dropzone.ondragover = e => { e.preventDefault(); dropzone.classList.add('dragover'); };
+    dropzone.ondragleave = e => { e.preventDefault(); dropzone.classList.remove('dragover'); };
+    dropzone.ondrop = e => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]){
+        handleBudgetPDF(e.dataTransfer.files[0]);
+      }
+    };
+    fileInp.onchange = () => {
+      if(fileInp.files && fileInp.files[0]){
+        handleBudgetPDF(fileInp.files[0]);
+      }
+    };
+  }
+
+  $('#bp-total')?.addEventListener('input', recalculateModalBudget);
+  $('#bp-abono-inicial')?.addEventListener('input', recalculateModalBudget);
+
+  $('#btn-add-paso')?.addEventListener('click', () => {
+    currentModalPasos.push({
+      numero: currentModalPasos.length + 1,
+      descripcion: `Paso ${currentModalPasos.length + 1}`,
+      monto: 0
+    });
+    renderModalPasos();
+  });
+
+  $('#btn-add-abono-inline')?.addEventListener('click', () => {
+    const montoStr = prompt('Monto del abono ($ MXN):', '1000');
+    if(!montoStr) return;
+    const monto = parseFloat(montoStr) || 0;
+    if(monto <= 0) return alert('Monto inválido.');
+    const concepto = prompt('Concepto del abono:', 'Abono a tratamiento') || 'Abono';
+    currentModalAbonos.push({
+      id: 'ab_' + uid(),
+      fecha: new Date().toISOString(),
+      monto: monto,
+      concepto: concepto,
+      asesor: user ? user.nombre : 'Miguel'
+    });
+    renderModalAbonos();
+    recalculateModalBudget();
+  });
+
+  $('#btn-wa-modal')?.addEventListener('click', () => {
+    const pac = $('#bp-pac')?.value.trim() || b.paciente;
+    const tel = $('#bp-tel')?.value.trim() || b.telefono;
+    const fol = $('#bp-folio')?.value.trim() || b.folio;
+    const as = $('#bp-as')?.value || b.asesorId;
+    sendBudgetWhatsApp(b.id, tel, fol, pac, as);
+  });
+}
+
+function renderModalPasos(){
+  const listEl = $('#bp-pasos-list');
+  if(!listEl) return;
+  if(!currentModalPasos.length){
+    listEl.innerHTML = `<div style="font-size:12px;color:var(--text-light);padding:8px 4px;font-style:italic">No se han registrado fases específicas (se desglosan del presupuesto de Dentalink)</div>`;
+    return;
+  }
+  listEl.innerHTML = currentModalPasos.map((p, idx) => `
+    <div class="bp-paso-item">
+      <span style="font-weight:600;color:var(--text-muted);min-width:54px">Paso ${p.numero || (idx+1)}:</span>
+      <input type="text" style="flex:1;font-size:12.5px" value="${esc(p.descripcion)}" onchange="currentModalPasos[${idx}].descripcion=this.value.trim()" placeholder="Descripción">
+      <span style="font-size:12px;color:var(--text-muted)">$</span>
+      <input type="number" step="0.01" style="width:90px;font-weight:600;font-size:12.5px;text-align:right" value="${p.monto||0}" onchange="currentModalPasos[${idx}].monto=parseFloat(this.value)||0;recalculateModalBudget()" placeholder="0.00">
+      <button type="button" class="btn-text-sm" style="color:var(--bad)" onclick="currentModalPasos.splice(${idx},1);renderModalPasos();recalculateModalBudget()">✕</button>
+    </div>
+  `).join('');
+}
+
+function renderModalAbonos(){
+  const tableEl = $('#bp-abonos-table');
+  if(!tableEl) return;
+  if(!currentModalAbonos.length){
+    tableEl.innerHTML = `<div style="padding:12px;font-size:12px;color:var(--text-light);text-align:center">No hay abonos adicionales registrados para este paciente</div>`;
+    return;
+  }
+  tableEl.innerHTML = currentModalAbonos.map((a, idx) => `
+    <div class="bp-abono-row">
+      <div>
+        <b>${fmtMoney(a.monto)}</b>
+        <span style="color:var(--text-muted);margin-left:6px">${esc(a.concepto || 'Abono')}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:8px">
+        <span>${fmtShort(a.fecha ? a.fecha.slice(0,10) : iso(new Date()))} · Por <b>${esc(a.asesor || 'Asesor')}</b></span>
+        <button type="button" class="btn-text-sm" style="color:var(--bad);padding:0 4px" onclick="currentModalAbonos.splice(${idx},1);renderModalAbonos();recalculateModalBudget()">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function recalculateModalBudget(){
+  const total = parseFloat($('#bp-total')?.value) || 0;
+  const abonoIni = parseFloat($('#bp-abono-inicial')?.value) || 0;
+  const sumAbonos = (currentModalAbonos || []).reduce((acc,a)=>acc+(parseFloat(a.monto)||0), 0);
+  const totalPagado = Math.max(abonoIni, abonoIni + sumAbonos);
+  const saldo = Math.max(0, total - totalPagado);
+  const pct = (total > 0) ? Math.min(100, Math.round((totalPagado / total) * 1000) / 10) : 0;
+
+  if($('#bp-saldo')) $('#bp-saldo').value = saldo.toFixed(2);
+  if($('#bp-progreso-txt')) $('#bp-progreso-txt').textContent = `${pct}% cubierto (${fmtMoney(totalPagado)} de ${fmtMoney(total)})`;
+  if($('#bp-progreso-bar')) $('#bp-progreso-bar').style.width = `${pct}%`;
+}
+
+async function handleBudgetPDF(file){
+  const statusEl = $('#budget-pdf-status');
+  if(!statusEl) return;
+  statusEl.classList.remove('hidden');
+  statusEl.className = 'pdf-status-msg busy';
+  statusEl.innerHTML = '<span class="pdf-spinner"></span> Leyendo datos de Dentalink con pdf.js...';
+
+  try {
+    const data = await parseDentalinkPDFFile(file);
+
+    if(data.folio && $('#bp-folio')) $('#bp-folio').value = data.folio;
+    if(data.paciente && $('#bp-pac') && !$('#bp-pac').value) $('#bp-pac').value = data.paciente;
+    if(data.total > 0 && $('#bp-total')) $('#bp-total').value = data.total;
+    if(data.abono > 0 && $('#bp-abono-inicial')) $('#bp-abono-inicial').value = data.abono;
+    if(data.saldo >= 0 && $('#bp-saldo')) $('#bp-saldo').value = data.saldo;
+
+    currentModalPasos = data.pasos || [];
+    renderModalPasos();
+    recalculateModalBudget();
+
+    statusEl.className = 'pdf-status-msg ok';
+    statusEl.innerHTML = `✓ <b>Presupuesto #${esc(data.folio || '')} extraído con éxito</b> · Total: ${fmtMoney(data.total)} · Abonos: ${fmtMoney(data.abono)} · Saldo: ${fmtMoney(data.saldo)}`;
+  } catch(err) {
+    console.error('Error parseando PDF Dentalink:', err);
+    statusEl.className = 'pdf-status-msg err';
+    statusEl.innerHTML = `⚠️ No se pudo extraer el texto automáticamente (${esc(err.message)}). Puedes capturar los montos manualmente abajo.`;
+  }
+}
+
+async function saveBudget(budgetId, citaId){
+  const folio = $('#bp-folio')?.value.trim();
+  const total = parseFloat($('#bp-total')?.value) || 0;
+  const abonoIni = parseFloat($('#bp-abono-inicial')?.value) || 0;
+  const pac = $('#bp-pac') ? $('#bp-pac').value.trim() : '';
+  const tel = $('#bp-tel') ? $('#bp-tel').value.trim() : '';
+  const as = $('#bp-as') ? $('#bp-as').value.trim() : (user ? user.nombre : 'Miguel');
+  const notas = $('#bp-notas')?.value.trim() || '';
+  const fecha = iso(new Date());
+
+  if(!folio && total <= 0){
+    $('#bp-err').textContent = 'Por favor ingresa al menos el folio o el total del presupuesto.';
+    return;
+  }
+
+  const key = patientKey(tel, pac);
+  if(!key){
+    $('#bp-err').textContent = 'Falta el nombre o teléfono del paciente.';
+    return;
+  }
+
+  const existing = presupuestos[key] || {};
+  const sumAbonos = (currentModalAbonos || []).reduce((acc, a) => acc + (parseFloat(a.monto) || 0), 0);
+  const totalPagado = Math.max(abonoIni, abonoIni + sumAbonos);
+  const saldo = Math.max(0, total - totalPagado);
+
+  const budgetObj = {
+    ...existing,
+    id: budgetId || existing.id || ('pres_' + uid()),
+    folio: folio || existing.folio || '',
+    telefono: tel || existing.telefono || '',
+    paciente: pac || existing.paciente || '',
+    asesorId: as || existing.asesorId || (user ? user.nombre : 'Miguel'),
+    total: total,
+    abonoInicial: abonoIni,
+    saldo: saldo,
+    fechaEmision: existing.fechaEmision || fecha,
+    pasos: currentModalPasos || existing.pasos || [],
+    abonos: currentModalAbonos || existing.abonos || [],
+    notas: notas,
+    actualizadoEl: new Date().toISOString()
+  };
+
+  presupuestos[key] = budgetObj;
+  savePresupuestosLocal();
+
+  let targetCita = citaId ? citas.find(c => c.id === citaId) : null;
+  if(!targetCita){
+    targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === key);
+  }
+
+  closeModal();
+  render();
+
+  if(targetCita){
+    if(!Array.isArray(targetCita.historial)) targetCita.historial = [];
+    const syncIdx = targetCita.historial.findIndex(h => h && h.tipo === 'presupuesto_sync');
+    const syncItem = { f: budgetObj.actualizadoEl, e: 'Presupuesto #' + budgetObj.folio, tipo: 'presupuesto_sync', data: budgetObj };
+    if(syncIdx >= 0) targetCita.historial[syncIdx] = syncItem;
+    else targetCita.historial.push(syncItem);
+    persist();
+    await DB.upsert(targetCita);
+  }
+}
+
+async function deleteBudget(budgetId){
+  if(!confirm('¿Deseas eliminar este presupuesto y su historial de abonos permanentemente?')) return;
+  const entry = Object.entries(presupuestos).find(([k, b]) => b.id === budgetId);
+  if(entry){
+    const [key, b] = entry;
+    delete presupuestos[key];
+    savePresupuestosLocal();
+    const targetCitas = citas.filter(c => patientKey(c.telefono, c.paciente) === key);
+    targetCitas.forEach(c => {
+      if(Array.isArray(c.historial)){
+        c.historial = c.historial.filter(h => h?.tipo !== 'presupuesto_sync');
+        DB.upsert(c);
+      }
+    });
+  }
+  closeModal();
+  render();
+}
+
+function openAddAbonoModal(pKey){
+  const b = presupuestos[pKey];
+  if(!b) return;
+  const totals = computeBudgetTotals(b);
+
+  openModal(`
+    <div class="m-icon" style="background:rgba(16,185,129,.12);color:#10b981">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v12M16 10H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H8"/>
+      </svg>
+    </div>
+    <h2>Registrar Abono a Presupuesto</h2>
+    <div class="sub nocap">Paciente: <b>${esc(b.paciente)}</b> · Presupuesto <b>#${esc(b.folio || 'S/N')}</b></div>
+
+    <div class="field" style="margin-top:14px">
+      <div style="background:var(--hover);border-radius:10px;padding:12px;display:flex;justify-content:space-around;font-size:13px;border:1px solid var(--border)">
+        <div>Total: <b>${fmtMoney(b.total)}</b></div>
+        <div>Pagado: <b class="text-ok">${fmtMoney(totals.totalPagado)}</b></div>
+        <div>Saldo Restante: <b class="text-bad">${fmtMoney(totals.saldo)}</b></div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:12px">
+      <div class="field">
+        <label class="l">Monto del Abono ($ MXN)</label>
+        <input class="inp" id="ab-monto" type="number" step="0.01" placeholder="ej. 2500.00" autofocus>
+      </div>
+      <div class="field">
+        <label class="l">Fecha</label>
+        <input class="inp" id="ab-fecha" type="date" value="${iso(new Date())}">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="l">Concepto o Paso</label>
+        <input class="inp" id="ab-concepto" placeholder="ej. Pago Paso 1 - Resinas">
+      </div>
+      <div class="field">
+        <label class="l">Asesor que recibe</label>
+        <select class="inp" id="ab-asesor">
+          ${USUARIOS.map(u => `<option value="${esc(u.nombre)}" ${(user && user.nombre===u.nombre)?'selected':''}>${esc(u.nombre)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <div class="err" id="ab-err"></div>
+    <div class="m-actions">
+      <button class="btn out" data-act="close">Cancelar</button>
+      <button class="btn btn-teal" data-act="saveabono" data-key="${esc(pKey)}">Registrar Abono</button>
+    </div>
+  `);
+}
+
+async function saveAbono(pKey){
+  const b = presupuestos[pKey];
+  if(!b) return;
+  const monto = parseFloat($('#ab-monto')?.value) || 0;
+  const fecha = $('#ab-fecha')?.value || iso(new Date());
+  const concepto = $('#ab-concepto')?.value.trim() || 'Abono a tratamiento';
+  const asesor = $('#ab-asesor')?.value || (user ? user.nombre : 'Miguel');
+
+  if(monto <= 0){
+    $('#ab-err').textContent = 'Ingresa un monto válido mayor a 0.';
+    return;
+  }
+
+  if(!Array.isArray(b.abonos)) b.abonos = [];
+  b.abonos.push({
+    id: 'ab_' + uid(),
+    fecha: fecha + 'T12:00:00Z',
+    monto: monto,
+    concepto: concepto,
+    asesor: asesor
+  });
+
+  const totals = computeBudgetTotals(b);
+  b.saldo = totals.saldo;
+  b.actualizadoEl = new Date().toISOString();
+  presupuestos[pKey] = b;
+  savePresupuestosLocal();
+
+  const targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === pKey);
+  closeModal();
+  render();
+
+  if(targetCita){
+    if(!Array.isArray(targetCita.historial)) targetCita.historial = [];
+    const syncIdx = targetCita.historial.findIndex(h => h && h.tipo === 'presupuesto_sync');
+    const syncItem = { f: b.actualizadoEl, e: `Abono de ${fmtMoney(monto)} a Presupuesto #${b.folio}`, tipo: 'presupuesto_sync', data: b };
+    if(syncIdx >= 0) targetCita.historial[syncIdx] = syncItem;
+    else targetCita.historial.push(syncItem);
+    persist();
+    await DB.upsert(targetCita);
+  }
+}
+
+function sendBudgetWhatsApp(budgetId, tel, folio, paciente, asesor){
+  const clean = cleanTel(tel);
+  if(!clean){
+    alert('El paciente no tiene un número de teléfono registrado.');
+    return;
+  }
+  const pName = (paciente || '').split(' ')[0] || 'Paciente';
+  const asName = asesor || (user ? user.nombre : 'Dental Más Fácil');
+  const folTxt = folio ? ` con folio #${folio}` : '';
+
+  const msg = `Hola ${pName}, te saludamos de Dental Más Fácil. Te escribe tu asesor dental ${asName}. Vemos que tienes activo tu plan de tratamiento${folTxt}. ¿Te apoyamos a agendar tu siguiente cita para dar seguimiento a tu salud dental y continuar con tus avances? ¡Estamos a tus órdenes!`;
+
+  window.open(`https://wa.me/52${clean}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 function exportCSV(){
@@ -2780,6 +3906,34 @@ document.addEventListener('click',e=>{
     case'status':statusForm(id);break;
     case'save':saveCita(id);break;
     case'savest':saveStatus(id);break;
+    case'budget':openBudgetModal(id, t.dataset.key);break;
+    case'savebudget':saveBudget(id, t.dataset.cid);break;
+    case'delbudget':deleteBudget(id);break;
+    case'addabono':openAddAbonoModal(t.dataset.key);break;
+    case'saveabono':saveAbono(t.dataset.key);break;
+    case'filter-presupuesto':budgetFilter=t.dataset.filter||'todos';renderPresupuestosView();break;
+    case'waseguimiento':{
+      const b=presupuestos[t.dataset.key];
+      if(b) sendBudgetWhatsApp(b.id, b.telefono, b.folio, b.paciente, b.asesorId);
+      break;
+    }
+    case'agendardesdebp':{
+      const pac=t.dataset.pac||'';
+      const tel=t.dataset.tel||'';
+      const as=t.dataset.as||(user?user.nombre:'Miguel');
+      const fol=t.dataset.fol||'';
+      citaForm();
+      setTimeout(()=>{
+        if($('#c-pac')) $('#c-pac').value=pac;
+        if($('#c-tel')) $('#c-tel').value=tel;
+        if($('#c-as')) $('#c-as').value=as;
+        if($('#c-tip')) $('#c-tip').value='Reagenda';
+        if($('#c-tra')) $('#c-tra').value='Tratamiento';
+        if($('#c-not')) $('#c-not').value=fol?`Seguimiento de Presupuesto #${fol}`:'Seguimiento de tratamiento';
+        syncAllCustomSelects();
+      },50);
+      break;
+    }
     case'delete':
       if(confirm('¿Deseas eliminar esta cita permanentemente del sistema?')){
         DB.delete(id);
