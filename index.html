@@ -1139,27 +1139,28 @@ function computeAllBudgetsKpis(){
 function extractDentalinkData(text){
   const clean = text.replace(/\s+/g, ' ');
 
-  // Folio: Presupuesto n° 4319, #4319, etc.
-  const folioMatch = clean.match(/Presupuesto\s*(?:n[°º]|#|num\.?|núm\.?)?\s*[:\-]?\s*(\d+)/i) 
-                  || text.match(/#\s*(\d{3,7})/);
+  // Folio: Presupuesto nº 4860, PDT.: nº 4860, #4860, etc.
+  const folioMatch = clean.match(/(?:Presupuesto|PDT\.?|Folio)\s*(?:n[°ºo]|#|num\.?|núm\.?)?\s*[:\-]?\s*(\d+)/i) 
+                  || clean.match(/#\s*(\d{3,7})/);
   const folio = folioMatch ? folioMatch[1] : '';
 
-  // Patient name: Nombre: Hector Palacios Gonzales
-  const pacMatch = clean.match(/Nombre\s*:\s*([A-Za-záéíóúÁÉÍÓÚñÑ\s]+?)(?=\s*(?:Fecha|RUT|Edad|Tel|Email|Doctor|Tratamiento|$))/i);
+  // Patient name: Nombre: HECTOR JAVIER FONSECA PANTOJA
+  const pacMatch = clean.match(/(?:Paciente\s*:\s*)?Nombre\s*:\s*([A-Za-záéíóúÁÉÍÓÚñÑ\s]+?)(?=\s*(?:Fecha|RUT|CURP|Edad|Tel|Email|Doctor|Convenio|Tratamiento|$))/i)
+                || clean.match(/Paciente\s*:\s*([A-Za-záéíóúÁÉÍÓÚñÑ\s]+?)(?=\s*(?:Fecha|RUT|CURP|Edad|Tel|Email|Doctor|Convenio|Tratamiento|$))/i);
   const paciente = pacMatch ? pacMatch[1].trim() : '';
 
-  // Total presupuesto: Total del presupuesto $ 24,800.00
+  // Total presupuesto: Total del presupuesto $ 17,750.00
   const totalMatch = clean.match(/Total\s+del\s+presupuesto\s+\$?\s*([\d,]+(?:\.\d{2})?)/i)
                   || clean.match(/Total\s+\$?\s*([\d,]+(?:\.\d{2})?)/i);
   const totalStr = totalMatch ? totalMatch[1].replace(/,/g, '') : '0';
   const total = parseFloat(totalStr) || 0;
 
-  // Abonos: Abonos del paciente (-) $ 350.00
+  // Abonos: Abonos del paciente (-) $ 550.00
   const abonoMatch = clean.match(/Abonos(?:\s+del\s+paciente)?\s*(?:\(-\)\s*)?\$?\s*([\d,]+(?:\.\d{2})?)/i);
   const abonoStr = abonoMatch ? abonoMatch[1].replace(/,/g, '') : '0';
   const abono = parseFloat(abonoStr) || 0;
 
-  // Saldo por pagar: Total por pagar $ 24,450.00
+  // Saldo por pagar: Total por pagar $ 17,200.00
   const saldoMatch = clean.match(/Total\s+por\s+pagar\s+\$?\s*([\d,]+(?:\.\d{2})?)/i)
                   || clean.match(/Saldo\s+por\s+pagar\s+\$?\s*([\d,]+(?:\.\d{2})?)/i);
   const saldoStr = saldoMatch ? saldoMatch[1].replace(/,/g, '') : '';
@@ -1167,16 +1168,16 @@ function extractDentalinkData(text){
 
   // Fases o procedimientos clínicos del presupuesto de Dentalink
   const pasos = [];
-  const tableMatch = clean.match(/Detalle\s+del\s+Presupuesto\s*:\s*(?:Estado\s+Procedimientos\s+Cl[íi]nicos\s+Pieza\(s\)\s+Subtotal\s+Dcto\.\s+Total)?\s*(.*?)\s*(?:Resumen\s+del\s+Presupuesto|Estado\s+de\s+cuenta|Total\s+del\s+presupuesto|Dr\.)/i);
+  const tableMatch = clean.match(/Detalle\s+del\s+Presupuesto\s*:\s*(?:Estado\s+Procedimientos\s+Cl[íi]nicos\s+Pieza\(s\)\s+Subtotal\s+Dcto\.\s+Total)?\s*(.*?)\s*(?:Resumen\s+del\s+Presupuesto|Estado\s+de\s+cuenta|Total\s+del\s+presupuesto(?:\s+\$|\s*:)|Firma\s+Paciente)/i);
   const tableChunk = tableMatch ? tableMatch[1].trim() : clean;
 
-  const itemRegex = /(Realizada|Pendiente|En\s+proceso|En\s+tratamiento|Planificada|Realizado)\s+(.*?)\s+\$?([\d,]+(?:\.\d{2})?)\s+[\d\.]+\%\s+\$?([\d,]+(?:\.\d{2})?)(?=\s+(?:Realizada|Pendiente|En\s+proceso|En\s+tratamiento|Planificada|Realizado)|$)/gi;
+  const itemRegex = /(Realizada|Realizado|Pendiente|Planificada|Planificado|Presupuestada|Presupuestado|En\s+tratamiento|En\s+proceso|En\s+curso|Iniciada|Iniciado)\s+(.*?)\s+\$?[\d,]+(?:\.\d{2})?\s+(?:[\d\.]+\%|\-|\$?[\d,]+(?:\.\d{2})?)\s+\$?([\d,]+(?:\.\d{2})?)(?=\s+(?:Realizada|Realizado|Pendiente|Planificada|Planificado|Presupuestada|Presupuestado|En\s+tratamiento|En\s+proceso|En\s+curso|Iniciada|Iniciado)|$)/gi;
   let m;
   let num = 1;
   while ((m = itemRegex.exec(tableChunk)) !== null) {
     const estadoRaw = m[1].trim();
     let rawDesc = m[2].trim();
-    const rowTotal = parseFloat(m[4].replace(/,/g, '')) || 0;
+    const rowTotal = parseFloat(m[3].replace(/,/g, '')) || 0;
 
     let cleanDesc = rawDesc;
     let piezas = '';
