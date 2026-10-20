@@ -48,8 +48,29 @@ button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit
 .nav-right{display:flex;align-items:center;gap:10px}
 .pill-date{background:var(--bg-color);border:1px solid var(--border-dark);padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;color:var(--text-muted);white-space:nowrap}
 .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border-dark);background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--text-muted);transition:all .15s ease}
-.icon-btn:hover{background:var(--hover);border-color:var(--text-main);color:var(--text-main)}
+.icon-btn:hover, .icon-btn[aria-expanded="true"]{background:var(--hover);border-color:var(--text-main);color:var(--text-main)}
 .icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* Settings dropdown */
+.settings-wrap{position:relative}
+.settings-dropdown{position:absolute;right:0;top:calc(100% + 10px);width:260px;background:var(--surface);border:1px solid var(--border-dark);border-radius:18px;box-shadow:0 14px 38px rgba(0,0,0,.1),0 2px 8px rgba(0,0,0,.04);padding:8px;z-index:100;animation:settingsPop .15s ease-out}
+:root[data-theme="dark"] .settings-dropdown{box-shadow:0 16px 42px rgba(0,0,0,.5),0 2px 10px rgba(0,0,0,.3)}
+@keyframes settingsPop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.settings-user-header{display:flex;align-items:center;gap:12px;padding:8px 10px 10px}
+.settings-avatar{width:38px;height:38px;border-radius:50%;background:var(--btn-bg);color:var(--btn-text);font-weight:600;font-size:15px;display:grid;place-items:center;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.settings-user-info{min-width:0;flex:1}
+.settings-user-name{font-size:14px;font-weight:600;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.settings-user-role{font-size:11px;font-weight:500;color:var(--text-muted);display:inline-block;background:var(--border);padding:2px 8px;border-radius:10px;margin-top:3px;line-height:1.3}
+.settings-divider{height:1px;background:var(--border-dark);margin:6px 2px}
+.settings-actions{display:flex;flex-direction:column;gap:2px}
+.settings-item{width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border:0;background:transparent;border-radius:10px;font-size:13px;font-weight:500;color:var(--text-main);text-align:left;cursor:pointer;transition:all .15s ease}
+.settings-item svg{width:16px;height:16px;color:var(--text-muted);stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:color .15s ease}
+.settings-item:hover{background:var(--hover);color:var(--text-main)}
+.settings-item:hover svg{color:var(--text-main)}
+.settings-item-danger{color:#EF4444}
+.settings-item-danger svg{color:#EF4444;stroke:#EF4444}
+.settings-item-danger:hover{background:var(--bad-bg);color:#DC2626}
+.settings-item-danger:hover svg{color:#DC2626;stroke:#DC2626}
 
 /* Layout */
 .wrap{max-width:1080px;margin:0 auto;padding:40px 32px 80px}
@@ -550,7 +571,36 @@ textarea.inp{resize:vertical;min-height:80px}
       </div>
       <div class="pill-date" id="clock"></div>
       <button class="icon-btn" id="b-theme" title="Tema"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
-      <button class="icon-btn" id="b-out" title="Salir"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
+      <div class="settings-wrap">
+        <button class="icon-btn" id="b-settings" title="Configuración y cuenta" aria-label="Configuración y cuenta" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <div id="settings-menu" class="settings-dropdown hidden">
+          <div class="settings-user-header">
+            <div class="settings-avatar" id="menu-user-avatar">U</div>
+            <div class="settings-user-info">
+              <div class="settings-user-name" id="menu-user-name">Usuario</div>
+              <div class="settings-user-role" id="menu-user-role">Asesor Dental</div>
+            </div>
+          </div>
+          <div class="settings-divider"></div>
+          <div class="settings-actions">
+            <button class="settings-item" id="b-pdf" data-act="pdf-modal" title="Descargar reportes en PDF">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <span>Descargar Reporte PDF</span>
+            </button>
+            <button class="settings-item" id="b-csv" data-act="csv" title="Exportar citas a CSV">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Exportar CSV</span>
+            </button>
+          </div>
+          <div class="settings-divider"></div>
+          <button class="settings-item settings-item-danger" id="b-out" title="Cerrar sesión actual">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Cerrar sesión</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
   <main class="wrap">
@@ -568,17 +618,12 @@ textarea.inp{resize:vertical;min-height:80px}
         <button data-view="todas">Todas</button>
         <button data-view="presupuestos" class="tab-presupuestos">Presupuestos <span class="badge" id="b-badge-presupuestos"></span></button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div>
         <button class="btn out sm btn-filter-toggle" id="b-toggle-filters" title="Buscar por paciente, teléfono o aplicar filtros">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="btn-filter-txt">Buscar / Filtros</span>
           <span class="filter-badge-count hidden" id="b-filter-count"></span>
         </button>
-        <button class="btn sm btn-teal" id="b-pdf" data-act="pdf-modal" title="Descargar reportes semanales, quincenales o mensuales en PDF" style="display:inline-flex;align-items:center;gap:6px">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          Descargar Reporte PDF
-        </button>
-        <button class="btn out sm hidden" id="b-csv" data-act="csv">Exportar CSV</button>
       </div>
     </div>
     <div id="period-nav-box" class="period-nav-container"></div>
@@ -1870,6 +1915,10 @@ function showLogin(){
   $('#lg-user').innerHTML=USUARIOS.map(u=>`<option value="${u.id}" ${u.id===last?'selected':''}>${esc(u.nombre)}${u.rol==='admin'?' (gerente)':''}</option>`).join('');
   $('#lg-pin').value='';$('#lg-err').textContent='';
   enhanceAllSelects($('#login'));
+  const sm=$('#settings-menu');
+  if(sm) sm.classList.add('hidden');
+  const bs=$('#b-settings');
+  if(bs) bs.setAttribute('aria-expanded','false');
 }
 function doLogin(){
   const u=USUARIOS.find(x=>x.id===$('#lg-user').value);
@@ -1877,12 +1926,22 @@ function doLogin(){
     user=u;sessionStorage.setItem('dmf_user',u.id);localStorage.setItem('dmf_last_user',u.id);startApp();
   }else $('#lg-err').textContent='PIN incorrecto';
 }
+function updateSettingsUserInfo(){
+  if(!user) return;
+  const av=$('#menu-user-avatar');
+  const nm=$('#menu-user-name');
+  const rl=$('#menu-user-role');
+  if(av) av.textContent=(user.nombre||'U').charAt(0).toUpperCase();
+  if(nm) nm.textContent=user.nombre||'Usuario';
+  if(rl) rl.textContent=user.rol==='admin'?'Gerente':'Asesor Dental';
+}
 function startApp(){
   $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
   const admin=user.rol==='admin';
   if($('#f-as-wrap')) $('#f-as-wrap').classList.toggle('hidden',!admin);
   $('#f-as').classList.toggle('hidden',!admin);
-  $('#b-csv').classList.remove('hidden');
+  if($('#b-csv')) $('#b-csv').classList.remove('hidden');
+  updateSettingsUserInfo();
   $('#f-st').innerHTML=opts(ESTATUS,'','Todos los estatus');
   $('#f-suc').innerHTML=opts(SUCURSALES,'','Todas las sucursales');
   if($('#f-tip')) $('#f-tip').innerHTML=opts(TIPOS,'','Todos los tipos');
@@ -3966,7 +4025,14 @@ document.addEventListener('click',e=>{
       extra(citas.find(c=>c.id===document.querySelector('[data-act=savest]').dataset.id));break;
   }
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='Enter'&&!$('#login').classList.contains('hidden'))doLogin()});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeModal();
+    const sm=$('#settings-menu'), bs=$('#b-settings');
+    if(sm&&!sm.classList.contains('hidden')){sm.classList.add('hidden');if(bs)bs.setAttribute('aria-expanded','false')}
+  }
+  if(e.key==='Enter'&&!$('#login').classList.contains('hidden'))doLogin();
+});
 function checkFiltersActive(){
   const q=$('#f-q')?.value.trim()||'';
   const d=$('#f-date')?.value||'';
@@ -4076,8 +4142,34 @@ if($('#f-date')){
   });
 }
 $('#lg-btn').onclick=doLogin;
-$('#b-out').onclick=()=>{sessionStorage.removeItem('dmf_user');user=null;showLogin()};
+if($('#b-out')) $('#b-out').onclick=()=>{sessionStorage.removeItem('dmf_user');user=null;showLogin()};
 $('#b-theme').onclick=()=>{const d=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=d;try{localStorage.setItem('dmf_theme',d)}catch(e){}};
+
+// Menú de configuración y perfil
+const bSettings=$('#b-settings'), settingsMenu=$('#settings-menu');
+if(bSettings&&settingsMenu){
+  bSettings.addEventListener('click',e=>{
+    e.stopPropagation();
+    const isClosed=settingsMenu.classList.contains('hidden');
+    settingsMenu.classList.toggle('hidden',!isClosed);
+    bSettings.setAttribute('aria-expanded',String(isClosed));
+  });
+  settingsMenu.addEventListener('click',e=>{
+    const btn=e.target.closest('button');
+    if(btn){
+      settingsMenu.classList.add('hidden');
+      bSettings.setAttribute('aria-expanded','false');
+    }
+  });
+}
+document.addEventListener('click',e=>{
+  if(settingsMenu&&!settingsMenu.classList.contains('hidden')){
+    if(!settingsMenu.contains(e.target)&&e.target!==bSettings&&!bSettings.contains(e.target)){
+      settingsMenu.classList.add('hidden');
+      if(bSettings) bSettings.setAttribute('aria-expanded','false');
+    }
+  }
+});
 
 /* ============ INIT ============ */
 (async function(){
