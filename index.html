@@ -2084,11 +2084,20 @@ function openReportModal(){
   } else if(view==='mes'){
     repConfig.period='mes';
     repConfig.monthRef=selectedMonthRef.slice(0,7);
+  } else if(view==='todas'){
+    repConfig.period='mes';
+    repConfig.monthRef=iso(new Date()).slice(0,7);
   }
   if(user.rol==='admin'){
-    repConfig.asesor=($('#f-as')&&$('#f-as').value)?$('#f-as').value:'todos';
+    const fAsVal = ($('#f-as') && $('#f-as').value) ? $('#f-as').value : '';
+    if(fAsVal){
+      const foundU = USUARIOS.find(u => u.nombre.toLowerCase() === fAsVal.toLowerCase() || u.id === fAsVal);
+      repConfig.asesor = foundU ? foundU.id : 'todos';
+    } else {
+      repConfig.asesor = 'todos';
+    }
   } else {
-    repConfig.asesor=user.id;
+    repConfig.asesor = user.id;
   }
 
   const html=`
@@ -2114,7 +2123,7 @@ function openReportModal(){
           <label class="rep-field-label">Asesor:</label>
           <select class="inp sm" id="rep-asesor-sel">
             <option value="todos" ${repConfig.asesor==='todos'?'selected':''}>Todos los Asesores (Consolidado general)</option>
-            ${USUARIOS.map(u=>`<option value="${u.id}" ${repConfig.asesor===u.id?'selected':''}>${esc(u.nombre)}${u.rol==='admin'?' (Gerente)':''}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
+            ${USUARIOS.map(u=>`<option value="${u.id}" ${(repConfig.asesor===u.id||repConfig.asesor===u.nombre)?'selected':''}>${esc(u.nombre)}${u.rol==='admin'?' (Gerente)':''}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -2378,6 +2387,22 @@ function bindReportModalEvents(){
   if(btnPr) btnPr.onclick=printReport;
 }
 
+function citaMatchesAsesor(c, asesorVal){
+  if(!asesorVal || asesorVal === 'todos') return true;
+  const u = USUARIOS.find(x => x.id === asesorVal || x.nombre.toLowerCase() === String(asesorVal).toLowerCase());
+  const targetName = u ? u.nombre.toLowerCase() : String(asesorVal).toLowerCase();
+  const targetId = u ? u.id.toLowerCase() : '';
+
+  const cAsesor = String(c.asesorId || '').toLowerCase();
+  const cAsesorName = nameOf(c.asesorId).toLowerCase();
+  const cCreador = nameOf(c.creadoPor || '').toLowerCase();
+
+  return (targetId && cAsesor === targetId) ||
+         cAsesor === targetName ||
+         cAsesorName === targetName ||
+         cCreador === targetName;
+}
+
 function renderPdfPreview(){
   const box=$('#pdf-printable-area');
   if(!box)return;
@@ -2396,7 +2421,7 @@ function renderPdfPreview(){
     return dVal>=startDate&&dVal<=endDate;
   });
   if(repConfig.asesor!=='todos'){
-    list=list.filter(c=>c.asesorId===repConfig.asesor);
+    list=list.filter(c=>citaMatchesAsesor(c, repConfig.asesor));
   }
 
   if(repConfig.type==='atendidos'){
@@ -2521,12 +2546,25 @@ function renderPdfPreview(){
   const concl=asis+no;
   const tasa=concl>0?Math.round((asis/concl)*100)+'%':(tot>0?'0%':'—');
 
-  const adList=(repConfig.asesor==='todos')?USUARIOS:USUARIOS.filter(u=>u.id===repConfig.asesor);
+  const allKnownUsers = [...USUARIOS];
+  const knownNames = new Set(allKnownUsers.map(u => u.nombre.toLowerCase()));
+  citas.forEach(c => {
+    const aName = nameOf(c.asesorId);
+    if(aName && aName !== '—' && !knownNames.has(aName.toLowerCase())){
+      knownNames.add(aName.toLowerCase());
+      allKnownUsers.push({ id: aName, nombre: aName, rol: 'asesor' });
+    }
+  });
+
+  const adList = (repConfig.asesor === 'todos')
+    ? allKnownUsers
+    : allKnownUsers.filter(u => u.id === repConfig.asesor || u.nombre.toLowerCase() === String(repConfig.asesor).toLowerCase());
+
   let sumT=0,sumA=0,sumN=0,sumP=0,sumO=0;
   const adRows=adList.map(u=>{
     const uCitas=citas.filter(c=>{
       const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
-      return dVal>=startDate&&dVal<=endDate&&c.asesorId===u.id;
+      return dVal>=startDate && dVal<=endDate && citaMatchesAsesor(c, u.id);
     });
     const uT=uCitas.length;
     const uA=uCitas.filter(c=>c.estatus==='Asistió').length;
