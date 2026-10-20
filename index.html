@@ -1013,7 +1013,8 @@ const fmtMoney = n => '$' + (parseFloat(n)||0).toLocaleString('es-MX',{minimumFr
 function computeBudgetTotals(b){
   if(!b) return {totalPagado:0, saldo:0, progreso:0};
   const abonoIni = parseFloat(b.abonoInicial) || 0;
-  const sumAbonos = (b.abonos||[]).reduce((acc,a)=>acc+(parseFloat(a.monto)||0), 0);
+  const cleanAbonos = (b.abonos||[]).filter(a => a.id !== 'ab_ini' && a.concepto !== 'Cita de Valoración inicial');
+  const sumAbonos = cleanAbonos.reduce((acc,a)=>acc+(parseFloat(a.monto)||0), 0);
   const totalPagado = abonoIni + sumAbonos;
   const total = parseFloat(b.total) || 0;
   const saldo = Math.max(0, total - totalPagado);
@@ -1048,9 +1049,10 @@ function getBudgetSemáforo(b, patientCitas){
   const lastDate = lastAttended ? lastAttended.fecha : (b.fechaEmision || today);
   const daysSinceLast = Math.max(0, Math.floor((new Date(today+'T12:00:00') - new Date(lastDate+'T12:00:00')) / (1000 * 60 * 60 * 24)));
 
+  const cleanAbonos = (b.abonos||[]).filter(a => a.id !== 'ab_ini' && a.concepto !== 'Cita de Valoración inicial');
   const hasTratamientoActivo = (Array.isArray(b.pasos) && b.pasos.some(p => p.completado))
-                            || ((b.abonos||[]).length > 0)
-                            || (totals.totalPagado > (b.abonoInicial || 350));
+                            || (cleanAbonos.length > 0)
+                            || (totals.totalPagado > (b.abonoInicial || 0));
 
   if(future.length === 0){
     if(daysSinceLast >= 14){
@@ -2376,7 +2378,7 @@ function renderPresupuestosView(){
         <button class="bp-filter-btn bad ${budgetFilter==='en_riesgo'?'active':''}" data-act="filter-presupuesto" data-filter="en_riesgo" title="Pacientes con más de 14 días sin cita agendada">
           <span class="bp-dot red"></span> En Riesgo <span class="bp-count">${cRiesgo}</span>
         </button>
-        <button class="bp-filter-btn warn ${budgetFilter==='solo_valoracion'?'active':''}" data-act="filter-presupuesto" data-filter="solo_valoracion" title="Pacientes que solo asistieron a valoración ($350) y aún no inician tratamiento">
+        <button class="bp-filter-btn warn ${budgetFilter==='solo_valoracion'?'active':''}" data-act="filter-presupuesto" data-filter="solo_valoracion" title="Pacientes que solo asistieron a valoración y aún no inician tratamiento">
           <span class="bp-dot yellow"></span> Solo Valoración <span class="bp-count">${cVal}</span>
         </button>
         <button class="bp-filter-btn ok ${budgetFilter==='en_tratamiento'?'active':''}" data-act="filter-presupuesto" data-filter="en_tratamiento" title="Pacientes con citas agendadas o en tratamiento activo">
@@ -2778,7 +2780,6 @@ function openBudgetModal(citaId, pKey){
   let b = (key && presupuestos[key]) ? presupuestos[key] : null;
 
   if(!b && c){
-    const isValora = (c.tratamiento||'').toLowerCase().includes('valora');
     b = {
       id: 'pres_' + uid(),
       folio: '',
@@ -2786,18 +2787,11 @@ function openBudgetModal(citaId, pKey){
       paciente: c.paciente || '',
       asesorId: nameOf(c.asesorId),
       total: 0,
-      abonoInicial: isValora ? 350 : 0,
+      abonoInicial: 0,
       saldo: 0,
       fechaEmision: c.fecha || iso(new Date()),
       pasos: [],
-      abonos: isValora ? [{
-        id: 'ab_ini',
-        fecha: (c.fecha || iso(new Date())) + 'T12:00:00Z',
-        monto: 350,
-        concepto: 'Cita de Valoración inicial',
-        asesor: nameOf(c.asesorId),
-        citaId: c.id
-      }] : [],
+      abonos: [],
       notas: ''
     };
   } else if(!b){
@@ -2808,7 +2802,7 @@ function openBudgetModal(citaId, pKey){
       paciente: '',
       asesorId: user ? user.nombre : 'Miguel',
       total: 0,
-      abonoInicial: 350,
+      abonoInicial: 0,
       saldo: 0,
       fechaEmision: iso(new Date()),
       pasos: [],
@@ -2818,7 +2812,7 @@ function openBudgetModal(citaId, pKey){
   }
 
   currentModalPasos = Array.isArray(b.pasos) ? JSON.parse(JSON.stringify(b.pasos)) : [];
-  currentModalAbonos = Array.isArray(b.abonos) ? JSON.parse(JSON.stringify(b.abonos)) : [];
+  currentModalAbonos = (Array.isArray(b.abonos) ? JSON.parse(JSON.stringify(b.abonos)) : []).filter(a => a.id !== 'ab_ini' && a.concepto !== 'Cita de Valoración inicial');
   const totals = computeBudgetTotals(b);
 
   openModal(`
@@ -2875,8 +2869,8 @@ function openBudgetModal(citaId, pKey){
         <input class="inp" id="bp-total" type="number" step="0.01" value="${b.total || ''}" placeholder="ej. 24800.00">
       </div>
       <div class="field">
-        <label class="l">Abono Inicial / Consulta</label>
-        <input class="inp" id="bp-abono-inicial" type="number" step="0.01" value="${b.abonoInicial !== undefined ? b.abonoInicial : 350}" placeholder="350.00">
+        <label class="l">Abono Inicial ($)</label>
+        <input class="inp" id="bp-abono-inicial" type="number" step="0.01" value="${b.abonoInicial || 0}" placeholder="0.00">
       </div>
       <div class="field">
         <label class="l">Saldo por Pagar ($)</label>
@@ -3133,6 +3127,7 @@ async function handleBudgetPDF(file){
     if(data.total > 0 && $('#bp-total')) $('#bp-total').value = data.total;
 
     currentModalPasos = data.pasos || [];
+    currentModalAbonos = (currentModalAbonos || []).filter(a => a.id !== 'ab_ini' && a.concepto !== 'Cita de Valoración inicial');
 
     // Si el PDF de Dentalink ya traía fases como "Realizada", agregarlas automáticamente al historial de abonos
     let sumRealized = 0;
