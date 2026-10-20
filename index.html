@@ -2293,7 +2293,6 @@ function renderPresupuestosView(){
           <span class="bp-dot blue"></span> Completados <span class="bp-count">${cComp}</span>
         </button>
       </div>
-      <button class="btn sm btn-teal" data-act="budget" title="Registrar o adjuntar un nuevo presupuesto Dentalink">+ Adjuntar Presupuesto</button>
     </div>
   `;
 
@@ -2306,8 +2305,7 @@ function renderPresupuestosView(){
           </svg>
         </div>
         <div style="font-weight:600;font-size:16px;margin-bottom:6px">No hay presupuestos en esta categoría</div>
-        <div class="sub nocap" style="margin-bottom:20px">Adjunta el presupuesto de Dentalink en formato PDF para comenzar el seguimiento automático de este paciente.</div>
-        <button class="btn btn-teal" data-act="budget">+ Adjuntar Presupuesto Dentalink</button>
+        <div class="sub nocap" style="margin-bottom:10px">Los presupuestos se adjuntan directamente desde la cita del paciente.</div>
       </div>
     `;
     $('#content').innerHTML = html;
@@ -2917,7 +2915,7 @@ function renderModalAbonos(){
         <span style="color:var(--text-muted);margin-left:6px">${esc(a.concepto || 'Abono')}</span>
       </div>
       <div style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:8px">
-        <span>${fmtShort(a.fecha ? a.fecha.slice(0,10) : iso(new Date()))} · Por <b>${esc(a.asesor || 'Asesor')}</b></span>
+        <span>${fmtShort(a.fecha ? a.fecha.slice(0,10) : iso(new Date()))} · Asesor: <b>${esc(a.asesor || 'Asesor')}</b></span>
         <button type="button" class="btn-text-sm" style="color:var(--bad);padding:0 4px" onclick="currentModalAbonos.splice(${idx},1);renderModalAbonos();recalculateModalBudget()">✕</button>
       </div>
     </div>
@@ -3089,7 +3087,7 @@ function openAddAbonoModal(pKey){
         <input class="inp" id="ab-concepto" placeholder="ej. Pago Paso 1 - Resinas">
       </div>
       <div class="field">
-        <label class="l">Asesor que recibe</label>
+        <label class="l">Asesor</label>
         <select class="inp" id="ab-asesor">
           ${USUARIOS.map(u => `<option value="${esc(u.nombre)}" ${(user && user.nombre===u.nombre)?'selected':''}>${esc(u.nombre)}</option>`).join('')}
         </select>
