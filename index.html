@@ -423,10 +423,14 @@ textarea.inp{resize:vertical;min-height:80px}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ============ PRESUPUESTOS & SEMAFORO STYLES ============ */
-.seg button.tab-presupuestos{font-weight:600}
+.seg button.tab-presupuestos{font-weight:500}
 .seg button.tab-presupuestos.on{background:#0097A7!important;color:#fff!important}
-.badge-alert{background:#e11d48!important;color:#fff!important;animation:pulseBadge 2s infinite}
-@keyframes pulseBadge{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.badge-alert{background:#e11d48!important;color:#fff!important}
+.bp-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.bp-dot.red{background:#e11d48}
+.bp-dot.yellow{background:#d97706}
+.bp-dot.green{background:#10b981}
+.bp-dot.blue{background:#3b82f6}
 
 /* Appointment Row Budget Pill */
 .row-budget-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;font-size:11.5px;cursor:pointer;margin-top:6px;transition:all .15s ease;width:fit-content;max-width:100%;user-select:none}
@@ -559,7 +563,7 @@ textarea.inp{resize:vertical;min-height:80px}
         <button data-view="semana">Semana <span class="badge" id="b-badge-semana"></span></button>
         <button data-view="mes">Mes <span class="badge" id="b-badge-mes"></span></button>
         <button data-view="todas">Todas</button>
-        <button data-view="presupuestos" class="tab-presupuestos" title="Seguimiento de presupuestos y planes de tratamiento">📊 Presupuestos <span class="badge" id="b-badge-presupuestos"></span></button>
+        <button data-view="presupuestos" class="tab-presupuestos">Presupuestos <span class="badge" id="b-badge-presupuestos"></span></button>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <button class="btn out sm btn-filter-toggle" id="b-toggle-filters" title="Buscar por paciente, teléfono o aplicar filtros">
@@ -945,7 +949,7 @@ function getBudgetSemáforo(b, patientCitas){
       status:'completado',
       label:'Completado (100%)',
       color:'blue',
-      icon:'🔵',
+      icon:'<span class="bp-dot blue"></span>',
       badgeClass:'st-completado'
     };
   }
@@ -965,7 +969,7 @@ function getBudgetSemáforo(b, patientCitas){
         status:'en_riesgo',
         label:`En Riesgo (${daysSinceLast}d sin cita)`,
         color:'red',
-        icon:'🔴',
+        icon:'<span class="bp-dot red"></span>',
         badgeClass:'st-riesgo',
         days:daysSinceLast
       };
@@ -974,7 +978,7 @@ function getBudgetSemáforo(b, patientCitas){
         status:'solo_valoracion',
         label: attended.length <= 1 ? 'Solo Valoración (Sin Cita #2)' : `Sin Cita (${daysSinceLast}d)`,
         color:'yellow',
-        icon:'🟡',
+        icon:'<span class="bp-dot yellow"></span>',
         badgeClass:'st-valoracion',
         days:daysSinceLast
       };
@@ -985,7 +989,7 @@ function getBudgetSemáforo(b, patientCitas){
     status:'en_tratamiento',
     label:`En Tratamiento (Próx: ${fmtShort(future[0].fecha)})`,
     color:'green',
-    icon:'🟢',
+    icon:'<span class="bp-dot green"></span>',
     badgeClass:'st-tratamiento',
     nextCita:future[0]
   };
@@ -1909,7 +1913,7 @@ function updateBadges(){
   const nRiesgo = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_riesgo').length;
   const elPres = $('#b-badge-presupuestos');
   if(elPres){
-    elPres.textContent = nRiesgo > 0 ? `${myPres.length} (${nRiesgo}⚠️)` : (myPres.length || '0');
+    elPres.textContent = myPres.length || '0';
     elPres.classList.toggle('badge-alert', nRiesgo > 0);
   }
 }
@@ -2216,16 +2220,16 @@ function renderPresupuestosView(){
           Todos <span class="bp-count">${cAll}</span>
         </button>
         <button class="bp-filter-btn bad ${budgetFilter==='en_riesgo'?'active':''}" data-act="filter-presupuesto" data-filter="en_riesgo" title="Pacientes con más de 14 días sin cita agendada">
-          🔴 En Riesgo <span class="bp-count">${cRiesgo}</span>
+          <span class="bp-dot red"></span> En Riesgo <span class="bp-count">${cRiesgo}</span>
         </button>
         <button class="bp-filter-btn warn ${budgetFilter==='solo_valoracion'?'active':''}" data-act="filter-presupuesto" data-filter="solo_valoracion" title="Pacientes que solo asistieron a valoración ($350) y aún no inician tratamiento">
-          🟡 Solo Valoración <span class="bp-count">${cVal}</span>
+          <span class="bp-dot yellow"></span> Solo Valoración <span class="bp-count">${cVal}</span>
         </button>
         <button class="bp-filter-btn ok ${budgetFilter==='en_tratamiento'?'active':''}" data-act="filter-presupuesto" data-filter="en_tratamiento" title="Pacientes con citas agendadas o en tratamiento activo">
-          🟢 En Tratamiento <span class="bp-count">${cTrat}</span>
+          <span class="bp-dot green"></span> En Tratamiento <span class="bp-count">${cTrat}</span>
         </button>
         <button class="bp-filter-btn info ${budgetFilter==='completado'?'active':''}" data-act="filter-presupuesto" data-filter="completado" title="Presupuestos 100% cubiertos">
-          🔵 Completados <span class="bp-count">${cComp}</span>
+          <span class="bp-dot blue"></span> Completados <span class="bp-count">${cComp}</span>
         </button>
       </div>
       <button class="btn sm btn-teal" data-act="budget" title="Registrar o adjuntar un nuevo presupuesto Dentalink">+ Adjuntar Presupuesto</button>
@@ -2235,7 +2239,11 @@ function renderPresupuestosView(){
   if(!list.length){
     html += `
       <div class="card empty" style="padding:48px 24px;text-align:center">
-        <div style="font-size:32px;margin-bottom:12px">📄</div>
+        <div style="margin-bottom:12px;color:var(--text-light);display:flex;justify-content:center">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
         <div style="font-weight:600;font-size:16px;margin-bottom:6px">No hay presupuestos en esta categoría</div>
         <div class="sub nocap" style="margin-bottom:20px">Adjunta el presupuesto de Dentalink en formato PDF para comenzar el seguimiento automático de este paciente.</div>
         <button class="btn btn-teal" data-act="budget">+ Adjuntar Presupuesto Dentalink</button>
@@ -2262,8 +2270,8 @@ function budgetCardHTML(b){
   const today = iso(new Date());
   const future = patientCitas.filter(c => c.fecha >= today && c.estatus !== 'Canceló').sort((x,y)=>(x.fecha+x.hora).localeCompare(y.fecha+y.hora));
   const nextCitaTxt = future.length > 0 
-    ? `📅 Próxima: <b>${fmtShort(future[0].fecha)} ${esc(future[0].hora)}</b>`
-    : `<span style="color:var(--bad);font-weight:600">⚠️ Sin próxima cita agendada</span>`;
+    ? `Próxima cita: <b>${fmtShort(future[0].fecha)} · ${esc(future[0].hora)}</b>`
+    : `<span style="color:var(--bad);font-weight:500">Sin próxima cita</span>`;
 
   const pKey = patientKey(b.telefono, b.paciente);
 
@@ -2273,12 +2281,12 @@ function budgetCardHTML(b){
         <div>
           <div class="bp-patient-name">${esc(b.paciente)}</div>
           <div class="bp-meta-line">
-            <span>📞 <b>${esc(b.telefono)}</b></span>
+            <span>${esc(b.telefono)}</span>
             <span>·</span>
             <span>Asesor: <b>${esc(nameOf(b.asesorId))}</b></span>
           </div>
         </div>
-        <div class="bp-status-badge ${sem.badgeClass}">${sem.icon} ${sem.label}</div>
+        <div class="bp-status-badge ${sem.badgeClass}">${sem.icon} <span>${sem.label}</span></div>
       </div>
       
       <div class="bp-card-info-row">
@@ -2324,7 +2332,7 @@ function budgetCardHTML(b){
           + Abono
         </button>
         <button class="btn out sm btn-wa-rec" data-act="waseguimiento" data-key="${esc(pKey)}" title="Enviar mensaje de seguimiento por WhatsApp al paciente">
-          💬 WhatsApp
+          WhatsApp
         </button>
         <button class="btn sm btn-teal" data-act="agendardesdebp" data-pac="${esc(b.paciente)}" data-tel="${esc(b.telefono)}" data-as="${esc(b.asesorId)}" data-fol="${esc(b.folio||'')}">
           + Agendar Cita
@@ -2896,7 +2904,7 @@ async function handleBudgetPDF(file){
   } catch(err) {
     console.error('Error parseando PDF Dentalink:', err);
     statusEl.className = 'pdf-status-msg err';
-    statusEl.innerHTML = `⚠️ No se pudo extraer el texto automáticamente (${esc(err.message)}). Puedes capturar los montos manualmente abajo.`;
+    statusEl.innerHTML = `No se pudo extraer el texto automáticamente (${esc(err.message)}). Puedes capturar los montos manualmente abajo.`;
   }
 }
 
