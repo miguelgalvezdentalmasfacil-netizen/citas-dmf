@@ -1028,9 +1028,17 @@ function getPatientCitas(tel, name){
               .sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
 }
 
-function getBudgetSemáforo(b, patientCitas){
+function getBudgetSemáforo(b){
   const totals = computeBudgetTotals(b);
-  if(totals.saldo <= 0 && b.total > 0){
+  const total = parseFloat(b?.total) || 0;
+  const saldo = totals.saldo;
+  const progreso = totals.progreso;
+  const pasos = Array.isArray(b?.pasos) ? b.pasos : [];
+  const compCount = pasos.filter(p => p.completado).length;
+  const totalPasos = pasos.length;
+
+  // 1. Completado: Saldo cubierto al 100% o todas las fases completadas
+  if((total > 0 && saldo <= 0) || (totalPasos > 0 && compCount === totalPasos)){
     return {
       status:'completado',
       label:'Completado (100%)',
@@ -1040,59 +1048,27 @@ function getBudgetSemáforo(b, patientCitas){
     };
   }
 
-  const sorted = [...(patientCitas||[])].sort((x,y)=>(x.fecha+x.hora).localeCompare(y.fecha+y.hora));
-  const today = iso(new Date());
-  const attended = sorted.filter(c => c.estatus === 'Asistió');
-  const future = sorted.filter(c => c.fecha >= today && c.estatus !== 'Canceló');
-
-  const lastAttended = attended[attended.length - 1];
-  const lastDate = lastAttended ? lastAttended.fecha : (b.fechaEmision || today);
-  const daysSinceLast = Math.max(0, Math.floor((new Date(today+'T12:00:00') - new Date(lastDate+'T12:00:00')) / (1000 * 60 * 60 * 24)));
-
-  const cleanAbonos = (b.abonos||[]).filter(a => a.id !== 'ab_ini' && a.concepto !== 'Cita de Valoración inicial');
-  const hasTratamientoActivo = (Array.isArray(b.pasos) && b.pasos.some(p => p.completado))
-                            || (cleanAbonos.length > 0)
-                            || (totals.totalPagado > (b.abonoInicial || 0));
-
-  if(future.length === 0){
-    if(daysSinceLast >= 14){
-      return {
-        status:'en_riesgo',
-        label:`En Riesgo (${daysSinceLast}d sin cita)`,
-        color:'red',
-        icon:'<span class="bp-dot red"></span>',
-        badgeClass:'st-riesgo',
-        days:daysSinceLast
-      };
-    } else {
-      if(hasTratamientoActivo){
-        return {
-          status:'en_tratamiento',
-          label:`En Tratamiento (${daysSinceLast}d sin cita)`,
-          color:'green',
-          icon:'<span class="bp-dot green"></span>',
-          badgeClass:'st-tratamiento',
-          days:daysSinceLast
-        };
-      }
-      return {
-        status:'solo_valoracion',
-        label: attended.length <= 1 ? 'Solo Valoración (Sin Cita #2)' : `Sin Cita (${daysSinceLast}d)`,
-        color:'yellow',
-        icon:'<span class="bp-dot yellow"></span>',
-        badgeClass:'st-valoracion',
-        days:daysSinceLast
-      };
-    }
+  // 2. En Tratamiento: Tiene algún abono pagado o alguna fase clínica marcada con check
+  if(totals.totalPagado > 0 || compCount > 0){
+    const label = totalPasos > 0
+      ? `En Tratamiento (${compCount}/${totalPasos} fases · ${progreso}%)`
+      : `En Tratamiento (${progreso}% pagado)`;
+    return {
+      status:'en_tratamiento',
+      label: label,
+      color:'green',
+      icon:'<span class="bp-dot green"></span>',
+      badgeClass:'st-tratamiento'
+    };
   }
 
+  // 3. Pendiente de inicio: Presupuesto emitido sin abonos ni fases iniciadas
   return {
-    status:'en_tratamiento',
-    label:`En Tratamiento (Próx: ${fmtShort(future[0].fecha)})`,
-    color:'green',
-    icon:'<span class="bp-dot green"></span>',
-    badgeClass:'st-tratamiento',
-    nextCita:future[0]
+    status:'pendiente',
+    label:'Pendiente de Inicio (0%)',
+    color:'yellow',
+    icon:'<span class="bp-dot yellow"></span>',
+    badgeClass:'st-valoracion'
   };
 }
 
@@ -1107,9 +1083,8 @@ function computeAllBudgetsKpis(){
   let totalPresupuestado = 0;
   let totalCobrado = 0;
   let totalSaldo = 0;
-  let enRiesgo = 0;
-  let soloValoracion = 0;
   let enTratamiento = 0;
+  let pendientes = 0;
   let completados = 0;
 
   list.forEach(b => {
@@ -1118,21 +1093,18 @@ function computeAllBudgetsKpis(){
     totalCobrado += totals.totalPagado;
     totalSaldo += totals.saldo;
 
-    const patientCitas = getPatientCitas(b.telefono, b.paciente);
-    const sem = getBudgetSemáforo(b, patientCitas);
-    if(sem.status === 'en_riesgo') enRiesgo++;
-    else if(sem.status === 'solo_valoracion') soloValoracion++;
-    else if(sem.status === 'en_tratamiento') enTratamiento++;
+    const sem = getBudgetSemáforo(b);
+    if(sem.status === 'en_tratamiento') enTratamiento++;
     else if(sem.status === 'completado') completados++;
+    else pendientes++;
   });
 
   return {
     totalPresupuestado,
     totalCobrado,
     totalSaldo,
-    enRiesgo,
-    soloValoracion,
     enTratamiento,
+    pendientes,
     completados,
     total: list.length
   };
@@ -2067,11 +2039,10 @@ function updateBadges(){
   setB('b-badge-mes',cMes,false);
 
   const myPres = getMyBudgets();
-  const nRiesgo = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_riesgo').length;
   const elPres = $('#b-badge-presupuestos');
   if(elPres){
     elPres.textContent = myPres.length || '0';
-    elPres.classList.toggle('badge-alert', nRiesgo > 0);
+    elPres.classList.remove('badge-alert');
   }
 }
 
@@ -2302,8 +2273,8 @@ function render(){
     $('#stats').innerHTML = `
       <div class="card stat"><label>Pacientes con Plan</label><b>${kpis.total}</b></div>
       <div class="card stat"><label>En Tratamiento</label><b class="ok">${kpis.enTratamiento}</b></div>
-      <div class="card stat"><label>Solo Valoración</label><b class="warn">${kpis.soloValoracion}</b></div>
-      <div class="card stat"><label>En Riesgo</label><b class="${kpis.enRiesgo > 0 ? 'bad' : ''}">${kpis.enRiesgo}</b></div>`;
+      <div class="card stat"><label>Pendientes de Inicio</label><b class="warn">${kpis.pendientes}</b></div>
+      <div class="card stat"><label>Completados</label><b style="color:var(--brand-teal,#0097a7)">${kpis.completados}</b></div>`;
     renderPresupuestosView();
     return;
   }
@@ -2343,14 +2314,12 @@ function renderPresupuestosView(){
   const myPres = getMyBudgets();
   let list = myPres;
 
-  if(budgetFilter === 'en_riesgo'){
-    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_riesgo');
-  } else if(budgetFilter === 'solo_valoracion'){
-    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'solo_valoracion');
-  } else if(budgetFilter === 'en_tratamiento'){
-    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_tratamiento');
+  if(budgetFilter === 'en_tratamiento'){
+    list = list.filter(b => getBudgetSemáforo(b).status === 'en_tratamiento');
+  } else if(budgetFilter === 'pendiente' || budgetFilter === 'solo_valoracion'){
+    list = list.filter(b => getBudgetSemáforo(b).status === 'pendiente');
   } else if(budgetFilter === 'completado'){
-    list = list.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'completado');
+    list = list.filter(b => getBudgetSemáforo(b).status === 'completado');
   }
 
   const q = $('#f-q') ? $('#f-q').value.toLowerCase().trim() : '';
@@ -2364,10 +2333,9 @@ function renderPresupuestosView(){
   }
 
   const cAll = myPres.length;
-  const cRiesgo = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_riesgo').length;
-  const cVal = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'solo_valoracion').length;
-  const cTrat = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'en_tratamiento').length;
-  const cComp = myPres.filter(b => getBudgetSemáforo(b, getPatientCitas(b.telefono, b.paciente)).status === 'completado').length;
+  const cTrat = myPres.filter(b => getBudgetSemáforo(b).status === 'en_tratamiento').length;
+  const cPend = myPres.filter(b => getBudgetSemáforo(b).status === 'pendiente').length;
+  const cComp = myPres.filter(b => getBudgetSemáforo(b).status === 'completado').length;
 
   let html = `
     <div class="bp-filter-toolbar">
@@ -2375,14 +2343,11 @@ function renderPresupuestosView(){
         <button class="bp-filter-btn ${budgetFilter==='todos'?'active':''}" data-act="filter-presupuesto" data-filter="todos">
           Todos <span class="bp-count">${cAll}</span>
         </button>
-        <button class="bp-filter-btn bad ${budgetFilter==='en_riesgo'?'active':''}" data-act="filter-presupuesto" data-filter="en_riesgo" title="Pacientes con más de 14 días sin cita agendada">
-          <span class="bp-dot red"></span> En Riesgo <span class="bp-count">${cRiesgo}</span>
-        </button>
-        <button class="bp-filter-btn warn ${budgetFilter==='solo_valoracion'?'active':''}" data-act="filter-presupuesto" data-filter="solo_valoracion" title="Pacientes que solo asistieron a valoración y aún no inician tratamiento">
-          <span class="bp-dot yellow"></span> Solo Valoración <span class="bp-count">${cVal}</span>
-        </button>
-        <button class="bp-filter-btn ok ${budgetFilter==='en_tratamiento'?'active':''}" data-act="filter-presupuesto" data-filter="en_tratamiento" title="Pacientes con citas agendadas o en tratamiento activo">
+        <button class="bp-filter-btn ok ${budgetFilter==='en_tratamiento'?'active':''}" data-act="filter-presupuesto" data-filter="en_tratamiento" title="Pacientes con abonos o fases en progreso">
           <span class="bp-dot green"></span> En Tratamiento <span class="bp-count">${cTrat}</span>
+        </button>
+        <button class="bp-filter-btn warn ${budgetFilter==='pendiente'||budgetFilter==='solo_valoracion'?'active':''}" data-act="filter-presupuesto" data-filter="pendiente" title="Presupuestos emitidos aún sin abono ni fases realizadas">
+          <span class="bp-dot yellow"></span> Pendientes <span class="bp-count">${cPend}</span>
         </button>
         <button class="bp-filter-btn info ${budgetFilter==='completado'?'active':''}" data-act="filter-presupuesto" data-filter="completado" title="Presupuestos 100% cubiertos">
           <span class="bp-dot blue"></span> Completados <span class="bp-count">${cComp}</span>
@@ -2417,16 +2382,7 @@ function renderPresupuestosView(){
 
 function budgetCardHTML(b){
   const totals = computeBudgetTotals(b);
-  const patientCitas = getPatientCitas(b.telefono, b.paciente);
-  const sem = getBudgetSemáforo(b, patientCitas);
-  const attendedCount = patientCitas.filter(c => c.estatus === 'Asistió').length;
-
-  const today = iso(new Date());
-  const future = patientCitas.filter(c => c.fecha >= today && c.estatus !== 'Canceló').sort((x,y)=>(x.fecha+x.hora).localeCompare(y.fecha+y.hora));
-  const nextCitaTxt = future.length > 0 
-    ? `Próxima cita: <b>${fmtShort(future[0].fecha)} · ${esc(future[0].hora)}</b>`
-    : `<span style="color:var(--bad);font-weight:500">Sin próxima cita</span>`;
-
+  const sem = getBudgetSemáforo(b);
   const pKey = patientKey(b.telefono, b.paciente);
 
   return `
@@ -2487,12 +2443,6 @@ function budgetCardHTML(b){
         </div>
       ` : ''}
 
-      <div class="bp-card-citas-row">
-        <span>Historial: <b>${attendedCount} citas asistidas</b></span>
-        <span>·</span>
-        <span>${nextCitaTxt}</span>
-      </div>
-
       <div class="bp-card-actions">
         <button class="btn out sm" data-act="budget" data-key="${esc(pKey)}" title="Ver o editar el plan de tratamiento">
           Plan y Abonos
@@ -2502,9 +2452,6 @@ function budgetCardHTML(b){
         </button>
         <button class="btn out sm btn-wa-rec" data-act="waseguimiento" data-key="${esc(pKey)}" title="Enviar mensaje de seguimiento por WhatsApp al paciente">
           WhatsApp
-        </button>
-        <button class="btn sm btn-teal" data-act="agendardesdebp" data-pac="${esc(b.paciente)}" data-tel="${esc(b.telefono)}" data-as="${esc(b.asesorId)}" data-fol="${esc(b.folio||'')}">
-          + Agendar Cita
         </button>
       </div>
     </div>
@@ -2545,7 +2492,7 @@ function rowHTML(c){
   let budgetHtml = '';
   if(b){
     const totals = computeBudgetTotals(b);
-    const sem = getBudgetSemáforo(b, pCitas);
+    const sem = getBudgetSemáforo(b);
     budgetHtml = `
       <div class="row-budget-pill ${sem.badgeClass}" data-act="budget" data-id="${c.id}" data-key="${esc(pKey)}" title="Presupuesto #${esc(b.folio)}: Pagado ${fmtMoney(totals.totalPagado)} de ${fmtMoney(b.total)}. Clic para ver plan completo.">
         ${sem.icon}
@@ -4193,23 +4140,6 @@ document.addEventListener('click',e=>{
     case'waseguimiento':{
       const b=presupuestos[t.dataset.key];
       if(b) sendBudgetWhatsApp(b.id, b.telefono, b.folio, b.paciente, b.asesorId);
-      break;
-    }
-    case'agendardesdebp':{
-      const pac=t.dataset.pac||'';
-      const tel=t.dataset.tel||'';
-      const as=t.dataset.as||(user?user.nombre:'Miguel');
-      const fol=t.dataset.fol||'';
-      citaForm();
-      setTimeout(()=>{
-        if($('#c-pac')) $('#c-pac').value=pac;
-        if($('#c-tel')) $('#c-tel').value=tel;
-        if($('#c-as')) $('#c-as').value=as;
-        if($('#c-tip')) $('#c-tip').value='Reagenda';
-        if($('#c-tra')) $('#c-tra').value='Tratamiento';
-        if($('#c-not')) $('#c-not').value=fol?`Seguimiento de Presupuesto #${fol}`:'Seguimiento de tratamiento';
-        syncAllCustomSelects();
-      },50);
       break;
     }
     case'delete':
