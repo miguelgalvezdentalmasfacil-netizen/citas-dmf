@@ -82,6 +82,9 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .seg{display:inline-flex;background:var(--surface);border:1px solid var(--border-dark);border-radius:9999px;padding:4px;gap:2px}
 .seg button{border:0;background:transparent;padding:8px 18px;border-radius:9999px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s ease}
 .seg button.on{background:var(--btn-bg);color:var(--btn-text)}
+.seg.seg-sm{border-radius:10px;padding:3px;gap:3px;background:var(--bg-color)}
+.seg.seg-sm button{padding:6px 12px;font-size:12px;border-radius:8px}
+.seg.seg-sm button.on{background:var(--btn-bg);color:var(--btn-text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .badge{display:inline-block;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;margin-left:4px;background:var(--border-dark);color:var(--text-muted);vertical-align:middle;line-height:1.2}
 .seg button.on .badge{background:rgba(255,255,255,.25);color:#fff}
 :root[data-theme="dark"] .seg button.on .badge{background:rgba(0,0,0,.3);color:#0f172a}
@@ -772,6 +775,41 @@ let budgetFilter='todos';
 let currentModalPasos=[];
 let currentModalAbonos=[];
 
+/* ============ GOOGLE SHEETS ASISTENCIA SYNC ============ */
+const APPS_SCRIPT_ASISTENCIA_URL='https://script.google.com/macros/s/AKfycbxhpf81qAVA9j9Tg9SPRa8E9JxxVyLLYOqN6h54XQ92FpcDRcJquw6UwvYgDtXxSX1y/exec';
+
+function mapClinicaSheets(sucursal){
+  if(!sucursal) return 'Tijuana';
+  const s = String(sucursal).toLowerCase();
+  if(s.includes('obregón') || s.includes('obregon')) return 'Mexicali - Obregón';
+  if(s.includes('villa verde') || s.includes('villaverde')) return 'Mexicali - Villa Verde';
+  if(s.includes('ensenada')) return 'Ensenada';
+  return 'Tijuana';
+}
+
+function mapOrigenSheets(origen, asesor){
+  const hasAsesor = asesor && asesor !== '—' && asesor !== 'Sin asignar';
+  const isConvenio = (origen === 'Convenio');
+  if(isConvenio){
+    return hasAsesor ? 'Por asesor, Convenio' : 'Cuenta propia, Convenio';
+  }
+  return hasAsesor ? 'Por asesor' : 'Cuenta propia';
+}
+
+async function enviarAsistenciaASheets(payload){
+  if(!APPS_SCRIPT_ASISTENCIA_URL) return;
+  try{
+    await fetch(APPS_SCRIPT_ASISTENCIA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    console.log('Asistencia enviada a Google Sheets exitosamente', payload);
+  }catch(err){
+    console.warn('Error al enviar asistencia a Google Sheets:', err);
+  }
+}
+
 function cleanTel(t){ return String(t||'').replace(/\D/g,''); }
 function patientKey(tel, name){ return cleanTel(tel) || String(name||'').trim().toLowerCase(); }
 
@@ -1267,6 +1305,25 @@ const addMonths=(s,n)=>{const d=new Date(s+'T12:00:00');d.setMonth(d.getMonth()+
 const uid=()=>'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
 const opts=(arr,sel,ph)=>(ph?`<option value="">${ph}</option>`:'')+arr.map(a=>`<option ${a===sel?'selected':''}>${esc(a)}</option>`).join('');
 const pillCls=e=>e==='Asistió'?'ok':(e==='No asistió'||e==='Canceló')?'bad':(e==='Confirmada'||e==='Confirmó'||e==='Confirma')?'conf':e==='Pendiente'?'pend':'';
+
+function showToast(msg, type='ok'){
+  let toast = $('#global-toast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'global-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0f172a;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 10px 25px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;z-index:9999;transition:all .3s ease;opacity:0;transform:translateY(10px);pointer-events:none;';
+    document.body.appendChild(toast);
+  }
+  const icon = type==='ok' ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  toast.innerHTML = `${icon}<span>${msg}</span>`;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateY(0)';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(()=>{
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+  }, 4000);
+}
 
 /* ============ UNIVERSAL CUSTOM SELECT ============ */
 function closeAllCustomDropdowns(){
@@ -2527,6 +2584,7 @@ function rowHTML(c){
     </div>
     <div class="st">
       <span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>
+      ${(c.estatus==='Asistió' && (c.sheetsAsistenciaEnviada||(c.historial||[]).some(h=>h&&h.sheetsSync))) ? `<span class="reg-meta" style="margin-top:4px;color:#0ea5e9!important;border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.08);cursor:default" title="Asistencia sincronizada en Google Sheets"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><b>Sheets</b></span>` : ''}
       ${c.motivo?`<span class="m" style="margin-top:4px">${esc(c.motivo)}</span>`:''}
     </div>
     <div class="act">
@@ -2600,9 +2658,9 @@ async function saveCita(id){
   if(target) await DB.upsert(target);
 }
 
-let stSel=null;
+let stSel=null, selPaquete='Individual';
 function statusForm(id){
-  const c=citas.find(x=>x.id===id);stSel=c.estatus;
+  const c=citas.find(x=>x.id===id);stSel=c.estatus;selPaquete=c.paquete||'Individual';
   const cls={'Asistió':'ok','No asistió':'bad','Confirmada':'conf','Confirmó':'conf','Confirma':'conf'};
   openModal(`
     <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
@@ -2628,7 +2686,35 @@ function extra(c){
       const totals = computeBudgetTotals(b);
       bInfo = `<div style="font-size:11.5px;color:var(--text-muted);margin-top:6px">Presupuesto activo #${esc(b.folio||'S/N')}: Pagado <b>${fmtMoney(totals.totalPagado)}</b> de <b>${fmtMoney(b.total)}</b> (Saldo restante: <b class="text-bad">${fmtMoney(totals.saldo)}</b>)</div>`;
     }
+    const yaEnviada = !!c.sheetsAsistenciaEnviada || (c.historial||[]).some(h => h && h.sheetsSync);
+    const curPaq = selPaquete || c.paquete || 'Individual';
     box.innerHTML = `
+      <div style="background:var(--hover);border:1px solid var(--border-dark);border-radius:10px;padding:12px 14px;margin-top:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="l" style="margin-bottom:0;display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-main)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Sincronizar Asistencia a Google Sheets
+          </label>
+          ${yaEnviada ? '<span style="font-size:11px;color:#10b981;font-weight:600;display:flex;align-items:center;gap:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Ya registrado</span>' : '<span style="font-size:11px;color:#0ea5e9;font-weight:600">Automático</span>'}
+        </div>
+        <div>
+          <label style="font-size:11.5px;color:var(--text-muted);display:block;margin-bottom:5px">Paquete de Asistencia:</label>
+          <div class="seg seg-sm" id="seg-paquete" style="width:100%;display:flex">
+            <button type="button" class="paq-btn ${curPaq==='Individual'?'on':''}" data-paq="Individual" style="flex:1">Individual</button>
+            <button type="button" class="paq-btn ${curPaq==='Dual'?'on':''}" data-paq="Dual" style="flex:1">Dual</button>
+            <button type="button" class="paq-btn ${curPaq==='Familiar'?'on':''}" data-paq="Familiar" style="flex:1">Familiar</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-dark)">
+          <span style="font-size:11.5px;color:var(--text-muted)">
+            Sucursal: <b>${esc(c.sucursal||'—')}</b> · Asesor: <b>${esc(nameOf(c.asesorId))}</b>
+          </span>
+          <label style="font-size:11.5px;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-main);font-weight:500;user-select:none">
+            <input type="checkbox" id="s-sync-sheets" ${yaEnviada ? '' : 'checked'} style="accent-color:#0097a7;width:15px;height:15px">
+            <span>${yaEnviada ? 'Reenviar a Sheets' : 'Enviar a Sheets'}</span>
+          </label>
+        </div>
+      </div>` + `
       <div style="background:rgba(0,151,167,.06);border:1px dashed #0097a7;border-radius:10px;padding:12px 14px;margin-top:10px">
         <label class="l" style="color:#0097a7;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:6px">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M16 10H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H8"/></svg>
@@ -2647,6 +2733,15 @@ function extra(c){
   } else {
     box.innerHTML='';
   }
+  const paqBtns = box.querySelectorAll('.paq-btn');
+  paqBtns.forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      paqBtns.forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      selPaquete = btn.dataset.paq;
+    };
+  });
   enhanceAllDatePickers(box);
   enhanceAllTimePickers(box);
 }
@@ -2712,6 +2807,38 @@ async function saveStatus(id){
         data: b
       });
     }
+  }
+
+  // Si marcó Asistió y está activo el envío a Google Sheets:
+  if(stSel==='Asistió' && $('#s-sync-sheets') && $('#s-sync-sheets').checked){
+    const paq = selPaquete || 'Individual';
+    const aNombre = nameOf(c.asesorId);
+    const cSucursal = mapClinicaSheets(c.sucursal);
+    const cOrigen = mapOrigenSheets(c.origen, aNombre);
+    const sheetsId = Date.now();
+    const sheetsPayload = {
+      id: sheetsId,
+      fecha: c.fecha,
+      nombre: c.paciente,
+      clinica: cSucursal,
+      asesor: (aNombre && aNombre !== '—') ? aNombre : 'Sin asignar',
+      paquete: paq,
+      origen: cOrigen
+    };
+
+    c.sheetsAsistenciaEnviada = true;
+    c.paquete = paq;
+    if(!Array.isArray(c.historial)) c.historial = [];
+    c.historial.push({
+      f: now,
+      e: `Asistencia enviada a Sheets (${paq} · ${cSucursal})`,
+      sheetsSync: true,
+      sheetsId: sheetsId,
+      paquete: paq
+    });
+
+    enviarAsistenciaASheets(sheetsPayload);
+    showToast(`Asistencia registrada en Google Sheets (${paq})`);
   }
 
   c.estatus=stSel;c.motivo=(stSel==='Asistió'||stSel==='Pendiente'||stSel==='Confirmada'||stSel==='Confirmó'||stSel==='Confirma')?'':mot;
