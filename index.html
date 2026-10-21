@@ -491,7 +491,7 @@ textarea.inp{resize:vertical;min-height:80px}
 .bp-filter-btn.active .bp-count{background:rgba(255,255,255,.28);color:#fff}
 
 /* Presupuestos Cards Grid */
-.bp-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.bp-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
 .bp-card{padding:20px;border-radius:var(--radius-md);display:flex;flex-direction:column;gap:14px;transition:all .15s ease;border:1px solid var(--border-dark);background:var(--surface)}
 .bp-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.06)}
 .bp-card.en_riesgo{border-left:4px solid #e11d48}
@@ -499,10 +499,13 @@ textarea.inp{resize:vertical;min-height:80px}
 .bp-card.en_tratamiento{border-left:4px solid #10b981}
 .bp-card.completado{border-left:4px solid #3b82f6}
 
-.bp-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.bp-patient-name{font-size:16px;font-weight:600;color:var(--text-main);letter-spacing:-.3px}
-.bp-meta-line{font-size:12px;color:var(--text-muted);display:flex;gap:6px;align-items:center;margin-top:2px}
-.bp-status-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:12px;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.bp-card-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;width:100%}
+.bp-patient-name{font-size:17px;font-weight:700;color:var(--text-main);letter-spacing:-.2px;line-height:1.25;text-align:center;width:100%}
+.bp-meta-line{font-size:12.5px;color:var(--text-muted);display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.bp-meta-tel{font-weight:500;white-space:nowrap}
+.bp-meta-sep{color:var(--text-light)}
+.bp-meta-asesor{white-space:nowrap}
+.bp-status-badge{font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:14px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;margin-top:2px}
 .bp-status-badge.st-riesgo{background:rgba(225,29,72,.12);color:#e11d48}
 .bp-status-badge.st-valoracion{background:rgba(217,119,6,.12);color:#d97706}
 .bp-status-badge.st-tratamiento{background:rgba(16,185,129,.12);color:#059669}
@@ -510,7 +513,7 @@ textarea.inp{resize:vertical;min-height:80px}
 
 .bp-card-info-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--bg-color);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
 .bp-info-lbl{font-size:10px;text-transform:uppercase;color:var(--text-muted);font-weight:600;display:block;margin-bottom:2px}
-.bp-card-info-row b{font-size:13px;letter-spacing:-.2px}
+.bp-card-info-row b{font-size:12.5px;letter-spacing:-.2px;white-space:nowrap}
 
 .bp-card-prog{display:flex;flex-direction:column;gap:5px}
 .bp-prog-labels{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-muted)}
@@ -2388,13 +2391,11 @@ function budgetCardHTML(b){
   return `
     <div class="card bp-card ${sem.status}">
       <div class="bp-card-head">
-        <div>
-          <div class="bp-patient-name">${esc(b.paciente)}</div>
-          <div class="bp-meta-line">
-            <span>${esc(b.telefono)}</span>
-            <span>·</span>
-            <span>Asesor: <b>${esc(nameOf(b.asesorId))}</b></span>
-          </div>
+        <div class="bp-patient-name">${esc(b.paciente)}</div>
+        <div class="bp-meta-line">
+          <span class="bp-meta-tel">${esc(b.telefono)}</span>
+          <span class="bp-meta-sep">·</span>
+          <span class="bp-meta-asesor">Asesor: <b>${esc(nameOf(b.asesorId))}</b></span>
         </div>
         <div class="bp-status-badge ${sem.badgeClass}">${sem.icon} <span>${sem.label}</span></div>
       </div>
