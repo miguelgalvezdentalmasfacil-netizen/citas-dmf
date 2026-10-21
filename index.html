@@ -342,6 +342,7 @@ textarea.inp{resize:vertical;min-height:80px}
 .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .pill.ok{background:var(--ok-bg);color:var(--ok)}
 .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.conf{background:rgba(0,151,167,.12);color:#0097a7;border-color:rgba(0,151,167,.3)}
 .pill.pend{background:transparent;border-color:var(--border-dark)}
 .empty{padding:64px 24px;text-align:center;color:var(--text-muted);font-weight:300}
 
@@ -356,7 +357,7 @@ textarea.inp{resize:vertical;min-height:80px}
 .opt{border:1px solid var(--border-dark);background:transparent;padding:14px;border-radius:var(--radius-md);cursor:pointer;font-weight:500;font-size:14px;transition:all .15s ease;text-align:center}
 .opt:hover{background:var(--hover);border-color:var(--text-main)}
 .opt.on{border-color:var(--text-main);background:var(--hover)}
-.opt.ok.on{border-color:var(--ok);color:var(--ok)} .opt.bad.on{border-color:var(--bad);color:var(--bad)}
+.opt.ok.on{border-color:var(--ok);color:var(--ok)} .opt.bad.on{border-color:var(--bad);color:var(--bad)} .opt.conf.on{border-color:#0097a7;color:#0097a7;background:rgba(0,151,167,.08)}
 .m-actions{display:flex;gap:10px;margin-top:8px}
 .m-actions .btn{flex:1}
 .hist{margin-top:22px;padding-top:18px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted);font-weight:300}
@@ -741,7 +742,7 @@ const SUCURSALES=['Tijuana','Mexicali Obregón','Mexicali Villa Verde','Ensenada
 const TRATAMIENTOS=['Valoración','Limpieza dental','Ortodoncia (brackets)','Alineadores','Endodoncia','Extracción','Resina','Corona','Implante','Blanqueamiento','Prótesis','Otro'];
 const TIPOS=['Nueva','Reagenda'];
 const ORIGENES=['Publicidad Externa','Publicidad Interna','Convenio'];
-const ESTATUS=['Pendiente','Asistió','No asistió','Reagendó','Canceló'];
+const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
 const USUARIOS=[
   {id:'u1',nombre:'Miguel',rol:'admin',pin:'1234'},
@@ -1265,7 +1266,7 @@ const getMonthRange=s=>{const d=new Date(s+'T12:00:00');const y=d.getFullYear(),
 const addMonths=(s,n)=>{const d=new Date(s+'T12:00:00');d.setMonth(d.getMonth()+n);return iso(d)};
 const uid=()=>'c_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
 const opts=(arr,sel,ph)=>(ph?`<option value="">${ph}</option>`:'')+arr.map(a=>`<option ${a===sel?'selected':''}>${esc(a)}</option>`).join('');
-const pillCls=e=>e==='Asistió'?'ok':e==='No asistió'?'bad':e==='Pendiente'?'pend':'';
+const pillCls=e=>e==='Asistió'?'ok':(e==='No asistió'||e==='Canceló')?'bad':(e==='Confirmada'||e==='Confirmó'||e==='Confirma')?'conf':e==='Pendiente'?'pend':'';
 
 /* ============ UNIVERSAL CUSTOM SELECT ============ */
 function closeAllCustomDropdowns(){
@@ -2602,7 +2603,7 @@ async function saveCita(id){
 let stSel=null;
 function statusForm(id){
   const c=citas.find(x=>x.id===id);stSel=c.estatus;
-  const cls={'Asistió':'ok','No asistió':'bad'};
+  const cls={'Asistió':'ok','No asistió':'bad','Confirmada':'conf','Confirmó':'conf','Confirma':'conf'};
   openModal(`
     <div class="m-icon"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
     <h2>${esc(c.paciente)}</h2><div class="sub nocap">${esc(fmtShort(c.fecha))} · ${esc(c.hora)} · ${esc(c.tratamiento)}</div>
@@ -2713,7 +2714,7 @@ async function saveStatus(id){
     }
   }
 
-  c.estatus=stSel;c.motivo=stSel==='Asistió'||stSel==='Pendiente'?'':mot;
+  c.estatus=stSel;c.motivo=(stSel==='Asistió'||stSel==='Pendiente'||stSel==='Confirmada'||stSel==='Confirmó'||stSel==='Confirma')?'':mot;
   c.historial=(c.historial||[]).concat({f:now,e:stSel});
   persist();closeModal();render();
   await DB.upsert(c);
@@ -3892,7 +3893,7 @@ function renderPdfPreview(){
   const tot=list.length;
   const asis=list.filter(c=>c.estatus==='Asistió').length;
   const no=list.filter(c=>c.estatus==='No asistió').length;
-  const pend=list.filter(c=>c.estatus==='Pendiente').length;
+  const pend=list.filter(c=>c.estatus==='Pendiente'||c.estatus==='Confirmada'||c.estatus==='Confirmó'||c.estatus==='Confirma').length;
   const otr=list.filter(c=>c.estatus==='Reagendó'||c.estatus==='Canceló').length;
   const concl=asis+no;
   const tasa=concl>0?Math.round((asis/concl)*100)+'%':(tot>0?'0%':'—');
@@ -3920,7 +3921,7 @@ function renderPdfPreview(){
     const uT=uCitas.length;
     const uA=uCitas.filter(c=>c.estatus==='Asistió').length;
     const uN=uCitas.filter(c=>c.estatus==='No asistió').length;
-    const uP=uCitas.filter(c=>c.estatus==='Pendiente').length;
+    const uP=uCitas.filter(c=>c.estatus==='Pendiente'||c.estatus==='Confirmada'||c.estatus==='Confirmó'||c.estatus==='Confirma').length;
     const uO=uCitas.filter(c=>c.estatus==='Reagendó'||c.estatus==='Canceló').length;
     sumT+=uT;sumA+=uA;sumN+=uN;sumP+=uP;sumO+=uO;
     const uC=uA+uN;
@@ -4098,7 +4099,7 @@ function printReport(){
   .pdf-section-title{font-size:13px;font-weight:700;color:#0f172a;margin:20px 0 8px;text-transform:uppercase;letter-spacing:.5px}
   .text-ok{color:#0097a7!important}.text-bad{color:#e11d48!important}.text-pend{color:#d97706!important}
   .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600}
-  .pill.ok{background:#ECFDF5;color:#10B981}.pill.bad{background:#FEF2F2;color:#EF4444}.pill.pend{background:#F1F5F9;color:#64748B}
+  .pill.ok{background:#ECFDF5;color:#10B981}.pill.bad{background:#FEF2F2;color:#EF4444}.pill.conf{background:#E0F7FA;color:#00838F}.pill.pend{background:#F1F5F9;color:#64748B}
   @page{size:letter portrait;margin:1cm}
   @media print{body{padding:0}}
 </style>
