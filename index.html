@@ -745,6 +745,7 @@ const SUCURSALES=['Tijuana','Mexicali Obregón','Mexicali Villa Verde','Ensenada
 const TRATAMIENTOS=['Valoración','Limpieza dental','Ortodoncia (brackets)','Alineadores','Endodoncia','Extracción','Resina','Corona','Implante','Blanqueamiento','Prótesis','Otro'];
 const TIPOS=['Nueva','Reagenda'];
 const ORIGENES=['Publicidad Externa','Publicidad Interna','Convenio'];
+const PAQUETES=['Individual','Dual','Familiar'];
 const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
 const USUARIOS=[
@@ -860,6 +861,12 @@ function toRow(c){
   const creador = nameOf(c.creadoPor || c.asesorId);
   let hist = Array.isArray(c.historial) ? [...c.historial] : [];
   const key = patientKey(c.telefono, c.paciente);
+  if(c.paquete){
+    const paqIdx = hist.findIndex(h => h && h.tipo === 'paquete_info');
+    const paqItem = { f: c.creadoEl || new Date().toISOString(), e: 'Paquete: ' + c.paquete, tipo: 'paquete_info', paquete: c.paquete };
+    if(paqIdx >= 0) hist[paqIdx] = paqItem;
+    else hist.push(paqItem);
+  }
   const b = presupuestos[key];
   if(b){
     const syncIdx = hist.findIndex(h => h && h.tipo === 'presupuesto_sync');
@@ -906,6 +913,7 @@ function fromRow(r){
     motivo: r.motivo||'',
     creadoEl: r.creado_el?new Date(r.creado_el).toISOString():new Date().toISOString(),
     creadoPor: creador,
+    paquete: (Array.isArray(r.historial)?(r.historial.find(h=>h&&(h.tipo==='paquete_info'||h.paquete))||{}).paquete:null) || r.paquete || 'Individual',
     historial: Array.isArray(r.historial)?r.historial:[]
   };
 }
@@ -2561,6 +2569,7 @@ function rowHTML(c){
 
   const whatParts = [];
   if(c.sucursal) whatParts.push(`<span class="what-branch">${esc(c.sucursal)}</span>`);
+  if(c.paquete && c.paquete !== 'Individual') whatParts.push(`<span class="reg-meta" style="color:#0ea5e9!important;border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.08);padding:1px 6px"><b>${esc(c.paquete)}</b></span>`);
   if(visitText) whatParts.push(`<span class="what-type">${esc(visitText)}</span>`);
   const asesorName = c.asesorId ? nameOf(c.asesorId) : '';
   if(asesorName) whatParts.push(`<span class="what-advisor">Asesor: <b>${esc(asesorName)}</b></span>`);
@@ -2599,7 +2608,7 @@ function openModal(h, cls){const m=$('#modal');m.innerHTML=`<div class="modal ${
 function closeModal(){$('#modal').classList.add('hidden');$('#modal').innerHTML='';closeAllCustomDropdowns();}
 
 function citaForm(id){
-  const c=citas.find(x=>x.id===id)||{fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',tipo:'Nueva',origen:'',notas:'',asesorId:user?user.nombre:'Miguel'};
+  const c=citas.find(x=>x.id===id)||{fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',paquete:'Individual',tipo:'Nueva',origen:'',notas:'',asesorId:user?user.nombre:'Miguel'};
   const selAsesor=c.asesorId?nameOf(c.asesorId):(user?user.nombre:'Miguel');
   openModal(`
     <h2>${id?'Editar cita':'Nueva cita'}</h2><div class="sub nocap">Captura la información del paciente.</div>
@@ -2614,6 +2623,9 @@ function citaForm(id){
     </div>
     <div class="grid2">
       <div class="field"><label class="l">Tratamiento</label><select class="inp" id="c-tra">${opts(TRATAMIENTOS,c.tratamiento,'Seleccionar')}</select></div>
+      <div class="field"><label class="l">Paquete</label><select class="inp" id="c-paq">${opts(PAQUETES,c.paquete||'Individual')}</select></div>
+    </div>
+    <div class="grid2">
       <div class="field"><label class="l">Tipo de cita</label><select class="inp" id="c-tip">${opts(TIPOS,c.tipo)}</select></div>
     </div>
     <div class="grid2">
@@ -2637,7 +2649,7 @@ function citaForm(id){
 }
 async function saveCita(id){
   const v=k=>$('#'+k).value.trim();
-  const d={paciente:v('c-pac'),telefono:v('c-tel'),sucursal:v('c-suc'),fecha:v('c-fec'),hora:v('c-hor'),tratamiento:v('c-tra'),tipo:v('c-tip'),origen:v('c-ori'),notas:v('c-not')};
+  const d={paciente:v('c-pac'),telefono:v('c-tel'),sucursal:v('c-suc'),fecha:v('c-fec'),hora:v('c-hor'),tratamiento:v('c-tra'),paquete:$('#c-paq')?$('#c-paq').value:'Individual',tipo:v('c-tip'),origen:v('c-ori'),notas:v('c-not')};
   if(!d.paciente||!d.telefono||!d.sucursal||!d.fecha||!d.hora||!d.tratamiento){$('#c-err').textContent='Completa paciente, teléfono, sucursal, fecha, hora y tratamiento.';return}
   const asesorNombre=($('#c-as')&&$('#c-as').value)?$('#c-as').value.trim():(user?user.nombre:'Miguel');
   const creadorNombre=user?user.nombre:asesorNombre;
@@ -2687,34 +2699,17 @@ function extra(c){
       bInfo = `<div style="font-size:11.5px;color:var(--text-muted);margin-top:6px">Presupuesto activo #${esc(b.folio||'S/N')}: Pagado <b>${fmtMoney(totals.totalPagado)}</b> de <b>${fmtMoney(b.total)}</b> (Saldo restante: <b class="text-bad">${fmtMoney(totals.saldo)}</b>)</div>`;
     }
     const yaEnviada = !!c.sheetsAsistenciaEnviada || (c.historial||[]).some(h => h && h.sheetsSync);
-    const curPaq = selPaquete || c.paquete || 'Individual';
+    const curPaq = c.paquete || 'Individual';
     box.innerHTML = `
-      <div style="background:var(--hover);border:1px solid var(--border-dark);border-radius:10px;padding:12px 14px;margin-top:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <label class="l" style="margin-bottom:0;display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text-main)">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            Sincronizar Asistencia a Google Sheets
-          </label>
-          ${yaEnviada ? '<span style="font-size:11px;color:#10b981;font-weight:600;display:flex;align-items:center;gap:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Ya registrado</span>' : '<span style="font-size:11px;color:#0ea5e9;font-weight:600">Automático</span>'}
+      <div style="background:var(--hover);border:1px solid var(--border-dark);border-radius:10px;padding:11px 14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:12px;color:var(--text-muted)">
+          Paquete: <b style="color:var(--text-main);font-size:13px">${esc(curPaq)}</b> · Sucursal: <b>${esc(c.sucursal||'—')}</b>
         </div>
-        <div>
-          <label style="font-size:11.5px;color:var(--text-muted);display:block;margin-bottom:5px">Paquete de Asistencia:</label>
-          <div class="seg seg-sm" id="seg-paquete" style="width:100%;display:flex">
-            <button type="button" class="paq-btn ${curPaq==='Individual'?'on':''}" data-paq="Individual" style="flex:1">Individual</button>
-            <button type="button" class="paq-btn ${curPaq==='Dual'?'on':''}" data-paq="Dual" style="flex:1">Dual</button>
-            <button type="button" class="paq-btn ${curPaq==='Familiar'?'on':''}" data-paq="Familiar" style="flex:1">Familiar</button>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border-dark)">
-          <span style="font-size:11.5px;color:var(--text-muted)">
-            Sucursal: <b>${esc(c.sucursal||'—')}</b> · Asesor: <b>${esc(nameOf(c.asesorId))}</b>
-          </span>
-          <label style="font-size:11.5px;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-main);font-weight:500;user-select:none">
-            <input type="checkbox" id="s-sync-sheets" ${yaEnviada ? '' : 'checked'} style="accent-color:#0097a7;width:15px;height:15px">
-            <span>${yaEnviada ? 'Reenviar a Sheets' : 'Enviar a Sheets'}</span>
-          </label>
-        </div>
-      </div>` + `
+        <span style="font-size:11.5px;color:#0ea5e9;font-weight:600;display:flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          ${yaEnviada ? 'Ya registrado en Sheets' : 'Se enviará a Sheets automáticamente'}
+        </span>
+      </div>
       <div style="background:rgba(0,151,167,.06);border:1px dashed #0097a7;border-radius:10px;padding:12px 14px;margin-top:10px">
         <label class="l" style="color:#0097a7;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:6px">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M16 10H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H8"/></svg>
@@ -2733,15 +2728,7 @@ function extra(c){
   } else {
     box.innerHTML='';
   }
-  const paqBtns = box.querySelectorAll('.paq-btn');
-  paqBtns.forEach(btn => {
-    btn.onclick = (e) => {
-      e.preventDefault();
-      paqBtns.forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      selPaquete = btn.dataset.paq;
-    };
-  });
+
   enhanceAllDatePickers(box);
   enhanceAllTimePickers(box);
 }
@@ -2810,8 +2797,8 @@ async function saveStatus(id){
   }
 
   // Si marcó Asistió y está activo el envío a Google Sheets:
-  if(stSel==='Asistió' && $('#s-sync-sheets') && $('#s-sync-sheets').checked){
-    const paq = selPaquete || 'Individual';
+  if(stSel==='Asistió'){
+    const paq = c.paquete || 'Individual';
     const aNombre = nameOf(c.asesorId);
     const cSucursal = mapClinicaSheets(c.sucursal);
     const cOrigen = mapOrigenSheets(c.origen, aNombre);
@@ -2838,7 +2825,7 @@ async function saveStatus(id){
     });
 
     enviarAsistenciaASheets(sheetsPayload);
-    showToast(`Asistencia registrada en Google Sheets (${paq})`);
+    showToast(`Asistencia enviada a Google Sheets (${paq})`);
   }
 
   c.estatus=stSel;c.motivo=(stSel==='Asistió'||stSel==='Pendiente'||stSel==='Confirmada'||stSel==='Confirmó'||stSel==='Confirma')?'':mot;
