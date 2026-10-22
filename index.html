@@ -802,6 +802,7 @@ async function enviarAsistenciaASheets(payload){
   try{
     await fetch(APPS_SCRIPT_ASISTENCIA_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     });
@@ -2593,7 +2594,6 @@ function rowHTML(c){
     </div>
     <div class="st">
       <span class="pill ${pillCls(c.estatus)}">${esc(c.estatus)}</span>
-      ${(c.estatus==='Asistió' && (c.sheetsAsistenciaEnviada||(c.historial||[]).some(h=>h&&h.sheetsSync))) ? `<span class="reg-meta" style="margin-top:4px;color:#0ea5e9!important;border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.08);cursor:default" title="Asistencia sincronizada en Google Sheets"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><b>Sheets</b></span>` : ''}
       ${c.motivo?`<span class="m" style="margin-top:4px">${esc(c.motivo)}</span>`:''}
     </div>
     <div class="act">
@@ -2698,18 +2698,7 @@ function extra(c){
       const totals = computeBudgetTotals(b);
       bInfo = `<div style="font-size:11.5px;color:var(--text-muted);margin-top:6px">Presupuesto activo #${esc(b.folio||'S/N')}: Pagado <b>${fmtMoney(totals.totalPagado)}</b> de <b>${fmtMoney(b.total)}</b> (Saldo restante: <b class="text-bad">${fmtMoney(totals.saldo)}</b>)</div>`;
     }
-    const yaEnviada = !!c.sheetsAsistenciaEnviada || (c.historial||[]).some(h => h && h.sheetsSync);
-    const curPaq = c.paquete || 'Individual';
     box.innerHTML = `
-      <div style="background:var(--hover);border:1px solid var(--border-dark);border-radius:10px;padding:11px 14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:12px;color:var(--text-muted)">
-          Paquete: <b style="color:var(--text-main);font-size:13px">${esc(curPaq)}</b> · Sucursal: <b>${esc(c.sucursal||'—')}</b>
-        </div>
-        <span style="font-size:11.5px;color:#0ea5e9;font-weight:600;display:flex;align-items:center;gap:5px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          ${yaEnviada ? 'Ya registrado en Sheets' : 'Se enviará a Sheets automáticamente'}
-        </span>
-      </div>
       <div style="background:rgba(0,151,167,.06);border:1px dashed #0097a7;border-radius:10px;padding:12px 14px;margin-top:10px">
         <label class="l" style="color:#0097a7;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:6px">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M16 10H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H8"/></svg>
@@ -2815,17 +2804,8 @@ async function saveStatus(id){
 
     c.sheetsAsistenciaEnviada = true;
     c.paquete = paq;
-    if(!Array.isArray(c.historial)) c.historial = [];
-    c.historial.push({
-      f: now,
-      e: `Asistencia enviada a Sheets (${paq} · ${cSucursal})`,
-      sheetsSync: true,
-      sheetsId: sheetsId,
-      paquete: paq
-    });
 
     enviarAsistenciaASheets(sheetsPayload);
-    showToast(`Asistencia enviada a Google Sheets (${paq})`);
   }
 
   c.estatus=stSel;c.motivo=(stSel==='Asistió'||stSel==='Pendiente'||stSel==='Confirmada'||stSel==='Confirmó'||stSel==='Confirma')?'':mot;
