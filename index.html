@@ -875,6 +875,15 @@ function toRow(c){
     if(syncIdx >= 0) hist[syncIdx] = syncItem;
     else hist.push(syncItem);
   }
+  if(c.sheetsId || c.sheetsAsistenciaEnviada){
+    const sIdx = hist.findIndex(h => h && h.tipo === 'sheets_sync_info');
+    const sItem = { f: new Date().toISOString(), tipo: 'sheets_sync_info', sheetsId: c.sheetsId || ('dmf_' + c.id), sent: !!c.sheetsAsistenciaEnviada };
+    if(sIdx >= 0) hist[sIdx] = sItem;
+    else hist.push(sItem);
+  } else {
+    const sIdx = hist.findIndex(h => h && h.tipo === 'sheets_sync_info');
+    if(sIdx >= 0) hist.splice(sIdx, 1);
+  }
   return {
     id: c.id,
     asesor_id: asesor,
@@ -898,6 +907,7 @@ function toRow(c){
 function fromRow(r){
   const asesor = nameOf(r.asesor_id);
   const creador = nameOf(r.creado_por || r.asesor_id);
+  const sInfo = Array.isArray(r.historial) ? r.historial.find(h => h && h.tipo === 'sheets_sync_info') : null;
   return {
     id: r.id || ('c_' + (r.telefono||'').replace(/\D/g,'') + '_' + (r.fecha||'') + '_' + (r.hora||'').replace(':','')),
     asesorId: asesor,
@@ -915,6 +925,8 @@ function fromRow(r){
     creadoEl: r.creado_el?new Date(r.creado_el).toISOString():new Date().toISOString(),
     creadoPor: creador,
     paquete: (Array.isArray(r.historial)?(r.historial.find(h=>h&&(h.tipo==='paquete_info'||h.paquete))||{}).paquete:null) || r.paquete || 'Individual',
+    sheetsId: (sInfo ? sInfo.sheetsId : null) || r.sheetsId || (r.estatus === 'Asistió' ? ('dmf_' + r.id) : null),
+    sheetsAsistenciaEnviada: (sInfo ? sInfo.sent : false) || (r.estatus === 'Asistió'),
     historial: Array.isArray(r.historial)?r.historial:[]
   };
 }
@@ -2644,7 +2656,7 @@ function citaForm(id){
       ${c.creadoEl?`<b>Fecha de registro:</b> ${new Date(c.creadoEl).toLocaleString('es-MX')} · Registrada por: <b>${esc(nameOf(c.creadoPor||c.asesorId))}</b><br>`:''}
       <b>Fecha de la cita:</b> ${fmtLong(c.fecha)} a las ${esc(c.hora)} · Asesor: <b>${esc(nameOf(c.asesorId))}</b><br>
       <b>Historial de cambios:</b><br>
-      ${(c.historial||[]).map(h=>`${esc(h.e)} · ${new Date(h.f).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`).join('<br>')}
+      ${(c.historial||[]).filter(h=>h&&h.e&&!h.tipo).map(h=>`${esc(h.e)} · ${new Date(h.f).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}`).join('<br>')}
     </div>`:''}`);
 }
 async function saveCita(id){
@@ -2785,13 +2797,24 @@ async function saveStatus(id){
     }
   }
 
+  // Si antes tenía Asistió y ahora cambia a otro estatus (ej. No asistió, Canceló, Reagendó, Pendiente):
+  if(c.estatus==='Asistió' && stSel!=='Asistió'){
+    const sheetsId = c.sheetsId || ('dmf_' + c.id);
+    enviarAsistenciaASheets({
+      accion: 'eliminar',
+      id: sheetsId
+    });
+    c.sheetsAsistenciaEnviada = false;
+    c.sheetsId = null;
+  }
+
   // Si marcó Asistió y está activo el envío a Google Sheets:
   if(stSel==='Asistió'){
     const paq = c.paquete || 'Individual';
     const aNombre = nameOf(c.asesorId);
     const cSucursal = mapClinicaSheets(c.sucursal);
     const cOrigen = mapOrigenSheets(c.origen, aNombre);
-    const sheetsId = Date.now();
+    const sheetsId = c.sheetsId || ('dmf_' + c.id);
     const sheetsPayload = {
       id: sheetsId,
       fecha: c.fecha,
@@ -2803,6 +2826,7 @@ async function saveStatus(id){
     };
 
     c.sheetsAsistenciaEnviada = true;
+    c.sheetsId = sheetsId;
     c.paquete = paq;
 
     enviarAsistenciaASheets(sheetsPayload);
@@ -4239,6 +4263,11 @@ document.addEventListener('click',e=>{
     }
     case'delete':
       if(confirm('¿Deseas eliminar esta cita permanentemente del sistema?')){
+        const cDel = citas.find(c => c.id === id);
+        if(cDel && (cDel.estatus === 'Asistió' || cDel.sheetsId || cDel.sheetsAsistenciaEnviada)){
+          const sheetsId = cDel.sheetsId || ('dmf_' + cDel.id);
+          enviarAsistenciaASheets({ accion: 'eliminar', id: sheetsId });
+        }
         DB.delete(id);
         closeModal();
       }
