@@ -413,6 +413,10 @@ textarea.inp{resize:vertical;min-height:80px}
 .modal.modal-report{max-width:960px;width:95%;max-height:92vh;overflow-y:auto;padding:32px 28px}
 .rep-config-card{background:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:20px 22px;margin-bottom:20px}
 .rep-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+@media (max-width:768px){
+  #seg-rep-type{flex-wrap:wrap;border-radius:14px!important;gap:4px!important;padding:4px!important}
+  #seg-rep-type button{flex:1 1 calc(50% - 4px)!important;border-radius:8px!important;padding:8px 6px!important;font-size:12px!important}
+}
 .rep-field{margin-bottom:14px}
 .rep-field:last-child{margin-bottom:0}
 .rep-field-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:8px;display:block}
@@ -3585,32 +3589,44 @@ function openReportModal(){
     </div>
 
     <div class="rep-config-card">
-      <div class="rep-grid-2">
-        <div>
-          <label class="rep-field-label">Tipo de Reporte:</label>
-          <div class="seg" id="seg-rep-type" style="width:100%;display:flex">
-            <button class="${repConfig.type==='atendidos'?'on':''}" data-type="atendidos" style="flex:1" title="Solo pacientes que asistieron a su cita">Pacientes Atendidos</button>
-            <button class="${repConfig.type==='citas'?'on':''}" data-type="citas" style="flex:1" title="Control de todas las citas agendadas y sus estatus">Control de Citas</button>
-            <button class="${repConfig.type==='ejecutivo'?'on':''}" data-type="ejecutivo" style="flex:1" title="Métricas de asistencia, citas agendadas vs pacientes y resumen por asesor">Reporte Ejecutivo</button>
-            <button class="${repConfig.type==='presupuestos'?'on':''}" data-type="presupuestos" style="flex:1" title="Control de presupuestos, abonos recibidos y progreso financiero">Presupuestos</button>
-          </div>
-        </div>
-        <div>
-          <label class="rep-field-label">Asesor:</label>
-          <select class="inp sm" id="rep-asesor-sel">
-            <option value="todos" ${repConfig.asesor==='todos'?'selected':''}>Todos los Asesores (Consolidado general)</option>
-            ${USUARIOS.map(u=>`<option value="${u.id}" ${(repConfig.asesor===u.id||repConfig.asesor===u.nombre)?'selected':''}>${esc(u.nombre)}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
-          </select>
+      <div class="rep-field" style="margin-bottom:16px">
+        <label class="rep-field-label">Tipo de Reporte:</label>
+        <div class="seg" id="seg-rep-type" style="width:100%;display:flex">
+          <button class="${repConfig.type==='atendidos'?'on':''}" data-type="atendidos" style="flex:1;white-space:nowrap;padding:10px 14px;display:inline-flex;align-items:center;justify-content:center;gap:6px" title="Solo pacientes que asistieron a su cita">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>Pacientes Atendidos</span>
+          </button>
+          <button class="${repConfig.type==='citas'?'on':''}" data-type="citas" style="flex:1;white-space:nowrap;padding:10px 14px;display:inline-flex;align-items:center;justify-content:center;gap:6px" title="Control de todas las citas agendadas y sus estatus">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/></svg>
+            <span>Control de Citas</span>
+          </button>
+          <button class="${repConfig.type==='ejecutivo'?'on':''}" data-type="ejecutivo" style="flex:1;white-space:nowrap;padding:10px 14px;display:inline-flex;align-items:center;justify-content:center;gap:6px" title="Métricas de asistencia, citas agendadas vs pacientes y resumen por asesor">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            <span>Reporte Ejecutivo</span>
+          </button>
+          <button class="${repConfig.type==='presupuestos'?'on':''}" data-type="presupuestos" style="flex:1;white-space:nowrap;padding:10px 14px;display:inline-flex;align-items:center;justify-content:center;gap:6px" title="Control de presupuestos, abonos recibidos y progreso financiero">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <span>Presupuestos y Progreso</span>
+          </button>
         </div>
       </div>
 
-      <div class="rep-field">
-        <label class="rep-field-label">Frecuencia / Período:</label>
-        <div class="seg" id="seg-rep-period" style="width:100%;display:flex">
-          <button class="${repConfig.period==='semana'?'on':''}" data-p="semana" style="flex:1">Semanal</button>
-          <button class="${repConfig.period==='quincena'?'on':''}" data-p="quincena" style="flex:1">Quincenal</button>
-          <button class="${repConfig.period==='mes'?'on':''}" data-p="mes" style="flex:1">Mensual</button>
-          <button class="${repConfig.period==='rango'?'on':''}" data-p="rango" style="flex:1">Personalizado</button>
+      <div class="rep-grid-2" style="margin-bottom:14px;align-items:flex-end">
+        <div>
+          <label class="rep-field-label">Frecuencia / Período:</label>
+          <div class="seg" id="seg-rep-period" style="width:100%;display:flex">
+            <button class="${repConfig.period==='semana'?'on':''}" data-p="semana" style="flex:1">Semanal</button>
+            <button class="${repConfig.period==='quincena'?'on':''}" data-p="quincena" style="flex:1">Quincenal</button>
+            <button class="${repConfig.period==='mes'?'on':''}" data-p="mes" style="flex:1">Mensual</button>
+            <button class="${repConfig.period==='rango'?'on':''}" data-p="rango" style="flex:1">Personalizado</button>
+          </div>
+        </div>
+        <div>
+          <label class="rep-field-label">Asesor responsable:</label>
+          <select class="inp" id="rep-asesor-sel" style="width:100%">
+            <option value="todos" ${repConfig.asesor==='todos'?'selected':''}>Todos los Asesores (Consolidado general)</option>
+            ${USUARIOS.map(u=>`<option value="${u.id}" ${(repConfig.asesor===u.id||repConfig.asesor===u.nombre)?'selected':''}>${esc(u.nombre)}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
+          </select>
         </div>
       </div>
 
@@ -3652,7 +3668,24 @@ function openReportModal(){
   openModal(html,'modal-report');
   bindReportModalEvents();
   updateReportSuboptions();
+  updateDateBasisLabels();
   renderPdfPreview();
+}
+
+function updateDateBasisLabels(){
+  const seg=$('#seg-rep-date-basis');
+  if(!seg)return;
+  const isPres=(repConfig.type==='presupuestos');
+  const btnCita=seg.querySelector('[data-basis="cita"]');
+  const btnReg=seg.querySelector('[data-basis="registro"]');
+  if(btnCita){
+    btnCita.textContent=isPres?'Por Fecha de Emisión del Presupuesto':'Por Fecha de la Cita (cuándo es la cita)';
+    btnCita.title=isPres?'Filtra por la fecha en que se emitió el presupuesto':'Filtra por la fecha en que el paciente tiene su cita';
+  }
+  if(btnReg){
+    btnReg.textContent=isPres?'Por Fecha de Abonos / Movimientos':'Por Fecha de Registro (cuándo se agendó)';
+    btnReg.title=isPres?'Filtra por la fecha en que se registraron abonos o pagos':'Filtra por la fecha en que el asesor registró la cita en sistema';
+  }
 }
 
 function updateReportSuboptions(){
@@ -3821,6 +3854,7 @@ function bindReportModalEvents(){
       segType.querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',btn.dataset.type===repConfig.type));
       const helpBox=$('#rep-type-help');
       if(helpBox) helpBox.innerHTML=getRepTypeHelpText();
+      updateDateBasisLabels();
       renderPdfPreview();
     };
   }
