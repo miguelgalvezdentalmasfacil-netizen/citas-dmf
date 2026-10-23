@@ -750,9 +750,7 @@ const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Ca
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
 const USUARIOS=[
   {id:'u1',nombre:'Miguel',rol:'admin',pin:'1234'},
-  {id:'u2',nombre:'Edgar',rol:'asesor',pin:'1234'},
-  {id:'u3',nombre:'Asesor 3',rol:'asesor',pin:'1234'},
-  {id:'u4',nombre:'Asesor 4',rol:'asesor',pin:'1234'}
+  {id:'u2',nombre:'Edgar',rol:'asesor',pin:'1234'}
 ];
 
 function nameOf(id){
@@ -2060,7 +2058,7 @@ function persist(){localStorage.setItem(KEY,JSON.stringify(citas))}
 function showLogin(){
   $('#app').classList.add('hidden');$('#login').classList.remove('hidden');
   const last=localStorage.getItem('dmf_last_user');
-  $('#lg-user').innerHTML=USUARIOS.map(u=>`<option value="${u.id}" ${u.id===last?'selected':''}>${esc(u.nombre)}${u.rol==='admin'?' (gerente)':''}</option>`).join('');
+  $('#lg-user').innerHTML=USUARIOS.map(u=>`<option value="${u.id}" ${u.id===last?'selected':''}>${esc(u.nombre)}</option>`).join('');
   $('#lg-pin').value='';$('#lg-err').textContent='';
   enhanceAllSelects($('#login'));
   const sm=$('#settings-menu');
@@ -2081,7 +2079,7 @@ function updateSettingsUserInfo(){
   const rl=$('#menu-user-role');
   if(av) av.textContent=(user.nombre||'U').charAt(0).toUpperCase();
   if(nm) nm.textContent=user.nombre||'Usuario';
-  if(rl) rl.textContent=user.rol==='admin'?'Gerente':'Asesor Dental';
+  if(rl) rl.textContent='Asesor Dental';
 }
 function startApp(){
   $('#login').classList.add('hidden');$('#app').classList.remove('hidden');
@@ -3593,7 +3591,7 @@ function openReportModal(){
           <label class="rep-field-label">Asesor:</label>
           <select class="inp sm" id="rep-asesor-sel">
             <option value="todos" ${repConfig.asesor==='todos'?'selected':''}>Todos los Asesores (Consolidado general)</option>
-            ${USUARIOS.map(u=>`<option value="${u.id}" ${(repConfig.asesor===u.id||repConfig.asesor===u.nombre)?'selected':''}>${esc(u.nombre)}${u.rol==='admin'?' (Gerente)':''}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
+            ${USUARIOS.map(u=>`<option value="${u.id}" ${(repConfig.asesor===u.id||repConfig.asesor===u.nombre)?'selected':''}>${esc(u.nombre)}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -4046,7 +4044,7 @@ function renderPdfPreview(){
     const uPct=uC>0?Math.round((uA/uC)*100)+'%':'—';
     return `
       <tr>
-        <td style="text-align:left;font-weight:600">${esc(u.nombre)}${u.rol==='admin'?' <span style="font-size:10px;color:#64748b">(Gerente)</span>':''}</td>
+        <td style="text-align:left;font-weight:600">${esc(u.nombre)}</td>
         <td style="text-align:center"><b>${uT}</b></td>
         <td style="text-align:center;font-weight:600;color:#0097A7">${uA}</td>
         <td style="text-align:center;color:#E11D48">${uN}</td>
