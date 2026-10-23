@@ -3466,6 +3466,8 @@ function getRepTypeHelpText(){
     return '<b>Regla Dental Fácil:</b> En este reporte <u>solo se incluyen pacientes que asistieron</u> a su cita. (Las citas que no asistieron o están pendientes se consultan en Control de Citas).';
   } else if(repConfig.type==='citas'){
     return 'Muestra el control de <u>todas las citas agendadas</u> en el período (pendientes, asistió, no asistió, reagendadas, canceladas).';
+  } else if(repConfig.type==='presupuestos'){
+    return 'Control financiero de <u>presupuestos y progreso de pagos</u>: muestra el total presupuestado, pagos/abonos realizados, saldo restante y porcentaje de avance por paciente y asesor.';
   } else {
     return 'Consolida el número de <u>citas agendadas</u> vs <u>pacientes que asistieron</u> con métricas y desglose por asesor.';
   }
@@ -3525,6 +3527,7 @@ function getReportFilename(){
   let typeTag='Pacientes_Atendidos';
   if(repConfig.type==='citas') typeTag='Control_Citas';
   else if(repConfig.type==='ejecutivo') typeTag='Reporte_Ejecutivo';
+  else if(repConfig.type==='presupuestos') typeTag='Presupuestos_Progreso';
   const asesorTag=repConfig.asesor==='todos'?'Todos_Asesores':(nameOf(repConfig.asesor).replace(/\s+/g,'_')||'Asesor');
   const basisTag=repConfig.dateBasis==='registro'?'Por_Registro':'Por_Cita';
   let periodTag='';
@@ -3555,6 +3558,10 @@ function openReportModal(){
   } else if(view==='todas'){
     repConfig.period='mes';
     repConfig.monthRef=iso(new Date()).slice(0,7);
+  } else if(view==='presupuestos'){
+    repConfig.type='presupuestos';
+    repConfig.period='mes';
+    repConfig.monthRef=selectedMonthRef?selectedMonthRef.slice(0,7):iso(new Date()).slice(0,7);
   }
   if(user.rol==='admin'){
     const fAsVal = ($('#f-as') && $('#f-as').value) ? $('#f-as').value : '';
@@ -3585,6 +3592,7 @@ function openReportModal(){
             <button class="${repConfig.type==='atendidos'?'on':''}" data-type="atendidos" style="flex:1" title="Solo pacientes que asistieron a su cita">Pacientes Atendidos</button>
             <button class="${repConfig.type==='citas'?'on':''}" data-type="citas" style="flex:1" title="Control de todas las citas agendadas y sus estatus">Control de Citas</button>
             <button class="${repConfig.type==='ejecutivo'?'on':''}" data-type="ejecutivo" style="flex:1" title="Métricas de asistencia, citas agendadas vs pacientes y resumen por asesor">Reporte Ejecutivo</button>
+            <button class="${repConfig.type==='presupuestos'?'on':''}" data-type="presupuestos" style="flex:1" title="Control de presupuestos, abonos recibidos y progreso financiero">Presupuestos</button>
           </div>
         </div>
         <div>
@@ -3890,6 +3898,205 @@ function renderPdfPreview(){
   });
   if(repConfig.asesor!=='todos'){
     list=list.filter(c=>citaMatchesAsesor(c, repConfig.asesor));
+  }
+
+  if(repConfig.type==='presupuestos'){
+    let bList=Object.values(presupuestos||{});
+    if(repConfig.asesor!=='todos'){
+      const u=USUARIOS.find(x=>x.id===repConfig.asesor||x.nombre.toLowerCase()===String(repConfig.asesor).toLowerCase());
+      const target=u?u.nombre.toLowerCase():String(repConfig.asesor).toLowerCase();
+      bList=bList.filter(b=>(b.asesorId&&b.asesorId.toLowerCase()===target)||(nameOf(b.asesorId).toLowerCase()===target));
+    }
+
+    bList=bList.filter(b=>{
+      const emision=(b.fechaEmision||'').slice(0,10);
+      const updated=(b.actualizadoEl||'').slice(0,10);
+      const hasAbonoInPeriod=(b.abonos||[]).some(a=>{
+        const aFec=(a.fecha||'').slice(0,10);
+        return aFec>=startDate&&aFec<=endDate;
+      });
+
+      if(basisIsReg){
+        if(updated && updated>=startDate && updated<=endDate) return true;
+        if(hasAbonoInPeriod) return true;
+        if(!updated && emision && emision>=startDate && emision<=endDate) return true;
+      } else {
+        if(emision && emision>=startDate && emision<=endDate) return true;
+        if(!emision && updated && updated>=startDate && updated<=endDate) return true;
+        if(hasAbonoInPeriod) return true;
+      }
+      return false;
+    });
+
+    bList.sort((a,b)=>(b.actualizadoEl||b.fechaEmision||'').localeCompare(a.actualizadoEl||a.fechaEmision||''));
+
+    let sumPresupuestado=0, sumPagado=0, sumSaldo=0;
+    let countTratamiento=0, countCompletados=0, countPendientes=0;
+
+    bList.forEach(b=>{
+      const t=computeBudgetTotals(b);
+      sumPresupuestado+=(parseFloat(b.total)||0);
+      sumPagado+=t.totalPagado;
+      sumSaldo+=t.saldo;
+      const sem=getBudgetSemáforo(b);
+      if(sem.status==='completado') countCompletados++;
+      else if(sem.status==='en_tratamiento') countTratamiento++;
+      else countPendientes++;
+    });
+
+    const pctGlobal=(sumPresupuestado>0)?Math.min(100,Math.round((sumPagado/sumPresupuestado)*1000)/10):0;
+
+    let adBudgetTableHtml='';
+    if(repConfig.asesor==='todos'){
+      const adListUsers=[...USUARIOS];
+      const adPresRows=adListUsers.map(u=>{
+        const uBudgets=bList.filter(b=>{
+          const bAs=(nameOf(b.asesorId)||'').toLowerCase();
+          return bAs===u.nombre.toLowerCase()||(b.asesorId&&b.asesorId.toLowerCase()===u.id.toLowerCase());
+        });
+        let uPres=0, uPag=0, uSal=0;
+        uBudgets.forEach(b=>{
+          const t=computeBudgetTotals(b);
+          uPres+=(parseFloat(b.total)||0);
+          uPag+=t.totalPagado;
+          uSal+=t.saldo;
+        });
+        const uPct=uPres>0?Math.round((uPag/uPres)*100)+'%':'0%';
+        return `
+          <tr>
+            <td style="text-align:left;font-weight:600">${esc(u.nombre)}</td>
+            <td style="text-align:center"><b>${uBudgets.length}</b></td>
+            <td style="text-align:center;font-weight:600">${fmtMoney(uPres)}</td>
+            <td style="text-align:center;font-weight:600;color:#0097A7">${fmtMoney(uPag)}</td>
+            <td style="text-align:center;color:#E11D48">${fmtMoney(uSal)}</td>
+            <td style="text-align:center;font-weight:700;color:#0097A7">${uPct}</td>
+          </tr>
+        `;
+      }).join('');
+
+      adBudgetTableHtml=`
+        <div class="pdf-section-title">Resumen Financiero por Asesor</div>
+        <table class="pdf-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Asesor</th>
+              <th style="text-align:center">Presupuestos</th>
+              <th style="text-align:center">Total Presupuestado</th>
+              <th style="text-align:center">Total Cobrado</th>
+              <th style="text-align:center">Saldo Pendiente</th>
+              <th style="text-align:center">% Avance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${adPresRows}
+          </tbody>
+          <tfoot>
+            <tr style="background:#f8fafc;font-weight:700">
+              <td style="text-align:left;border-top:2px solid #0097a7">TOTAL</td>
+              <td style="text-align:center;border-top:2px solid #0097a7">${bList.length}</td>
+              <td style="text-align:center;border-top:2px solid #0097a7">${fmtMoney(sumPresupuestado)}</td>
+              <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7">${fmtMoney(sumPagado)}</td>
+              <td style="text-align:center;border-top:2px solid #0097a7;color:#E11D48">${fmtMoney(sumSaldo)}</td>
+              <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7">${pctGlobal}%</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+    }
+
+    let detailBudgetsHtml='';
+    if(!bList.length){
+      detailBudgetsHtml=`<tr><td colspan="7" style="text-align:center;padding:36px;color:#94a3b8;font-style:italic">No hay presupuestos con actividad registrados en este período.</td></tr>`;
+    } else {
+      detailBudgetsHtml=bList.map(b=>{
+        const t=computeBudgetTotals(b);
+        const sem=getBudgetSemáforo(b);
+        const fol=b.folio?`#${esc(b.folio)}`:'S/F';
+        const pFec=b.fechaEmision?fmtDateYY(b.fechaEmision):'—';
+        const aName=nameOf(b.asesorId)||'—';
+        return `
+          <tr>
+            <td class="col-paciente">
+              <div style="font-weight:700;color:#0f172a">${esc(b.paciente||'Paciente sin nombre')}</div>
+              <div style="font-size:11px;color:#64748b">${fol} · Tel: ${esc(b.telefono||'—')}</div>
+            </td>
+            <td style="text-align:center;white-space:nowrap">${pFec}</td>
+            <td style="text-align:center">${esc(aName)}</td>
+            <td style="text-align:left">
+              <div style="display:flex;align-items:center;gap:6px">
+                ${sem.icon}
+                <span style="font-size:11px;font-weight:600">${esc(sem.label)}</span>
+              </div>
+              <div style="background:#e2e8f0;height:4px;border-radius:2px;overflow:hidden;margin-top:4px;width:100%">
+                <div style="background:#0097a7;height:100%;width:${t.progreso}%"></div>
+              </div>
+            </td>
+            <td style="text-align:right;font-weight:600">${fmtMoney(b.total)}</td>
+            <td style="text-align:right;font-weight:600;color:#0097A7">${fmtMoney(t.totalPagado)}</td>
+            <td style="text-align:right;font-weight:600;color:${t.saldo>0?'#e11d48':'#10b981'}">${fmtMoney(t.saldo)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    box.innerHTML=`
+      <div class="dmf-pdf-document">
+        <div class="pdf-header">
+          ${logoSrc?`<img src="${logoSrc}" class="pdf-logo" alt="Dental Fácil">`:''}
+          <div class="pdf-title">REPORTE DE PRESUPUESTOS Y PROGRESO FINANCIERO</div>
+          <div class="pdf-divider"></div>
+          <div class="pdf-meta-date">${esc(periodTitle)}</div>
+          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Generado el ${esc(generatedStr)}</div>
+        </div>
+
+        <div class="pdf-kpi-grid">
+          <div class="pdf-kpi"><div class="pdf-kpi-label">Presupuestos</div><div class="pdf-kpi-val">${bList.length}</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-label">Presupuestado</div><div class="pdf-kpi-val" style="font-size:16px">${fmtMoney(sumPresupuestado)}</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-label">Total Cobrado</div><div class="pdf-kpi-val text-ok" style="font-size:16px">${fmtMoney(sumPagado)}</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-label">Saldo Pendiente</div><div class="pdf-kpi-val text-bad" style="font-size:16px">${fmtMoney(sumSaldo)}</div></div>
+          <div class="pdf-kpi"><div class="pdf-kpi-label">% Avance Global</div><div class="pdf-kpi-val text-ok">${pctGlobal}%</div></div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin:-10px 0 20px;font-size:11.5px;color:#64748b">
+          <span><b style="color:#059669">●</b> En Tratamiento: <b>${countTratamiento}</b></span>
+          <span><b style="color:#2563eb">●</b> Completados: <b>${countCompletados}</b></span>
+          <span><b style="color:#d97706">●</b> Pendientes: <b>${countPendientes}</b></span>
+        </div>
+
+        ${adBudgetTableHtml}
+
+        <div class="pdf-section-title">Detalle de Presupuestos y Avance de Pacientes (${bList.length})</div>
+        <table class="pdf-table">
+          <thead>
+            <tr>
+              <th style="width:28%;text-align:left">Paciente / Folio</th>
+              <th style="width:12%;text-align:center">Emisión</th>
+              <th style="width:12%;text-align:center">Asesor</th>
+              <th style="width:20%;text-align:left">Estado / Progreso</th>
+              <th style="width:10%;text-align:right">Total</th>
+              <th style="width:9%;text-align:right">Cobrado</th>
+              <th style="width:9%;text-align:right">Saldo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${detailBudgetsHtml}
+          </tbody>
+          <tfoot>
+            <tr style="background:#f8fafc;font-weight:700">
+              <td colspan="4" style="text-align:left;border-top:2px solid #0097a7">TOTAL GENERAL (${bList.length} PRESUPUESTOS)</td>
+              <td style="text-align:right;border-top:2px solid #0097a7">${fmtMoney(sumPresupuestado)}</td>
+              <td style="text-align:right;border-top:2px solid #0097a7;color:#0097A7">${fmtMoney(sumPagado)}</td>
+              <td style="text-align:right;border-top:2px solid #0097a7;color:#E11D48">${fmtMoney(sumSaldo)}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="pdf-footer-total">
+          TOTAL PRESUPUESTADO: <span class="pdf-total-number">${fmtMoney(sumPresupuestado)}</span> · COBRADO: <span class="pdf-total-number" style="color:#0097A7">${fmtMoney(sumPagado)} (${pctGlobal}%)</span>
+        </div>
+      </div>
+    `;
+    return;
   }
 
   if(repConfig.type==='atendidos'){
