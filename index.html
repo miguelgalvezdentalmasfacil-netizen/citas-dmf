@@ -154,23 +154,32 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .btn-filter-toggle.active{background:rgba(0,151,167,.1);border-color:#0097a7;color:#0097a7;font-weight:600}
 .btn-filter-toggle.has-filters{border-color:#0097a7;color:#0097a7}
 .filter-badge-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;font-size:11px;font-weight:700;background:#0097a7;color:#fff;line-height:1}
-.filters-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.search-wrap{flex:1 1 280px;min-width:220px;position:relative;display:flex;align-items:center}
+.filters-top{display:flex;align-items:center;gap:10px;width:100%}
+.search-wrap{flex:1 1 240px;min-width:180px;position:relative;display:flex;align-items:center}
 .f-icon{position:absolute;left:11px;color:var(--text-muted);pointer-events:none}
-.f-inp{width:100%;height:38px;background:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:0 30px 0 34px;font-size:13px;color:var(--text-main);outline:none;transition:all .15s ease}
+.f-inp{width:100%;height:38px;background:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:0 30px 0 34px;font-size:13px;color:var(--text-main);outline:none;transition:all .15s ease;box-sizing:border-box}
 .f-inp:focus{border-color:var(--text-main);box-shadow:0 0 0 2px rgba(0,151,167,.12)}
 .f-inp::placeholder{color:var(--text-light)}
 .f-clear-btn{position:absolute;right:8px;background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;padding:4px 6px;border-radius:50%;transition:all .15s ease}
 .f-clear-btn:hover{color:var(--text-main);background:var(--hover)}
-.date-filter-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.date-wrap{position:relative;display:flex;align-items:center}
-.f-date-inp{height:38px;padding:0 10px 0 32px;min-width:150px;cursor:pointer}
-.f-sel{height:38px;width:100%;background-color:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:0 28px 0 11px;font-size:13px;color:var(--text-main);outline:none;transition:all .15s ease;cursor:pointer}
-.f-sel-criteria{height:38px;min-width:165px}
-.f-reset-btn{height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;font-size:12.5px;font-weight:500;color:#0097a7;border:1px solid rgba(0,151,167,.3);background:rgba(0,151,167,.06);cursor:pointer;border-radius:var(--radius-md);transition:all .15s ease}
+.filters-top-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.date-filter-group{display:inline-flex;align-items:center;flex-wrap:nowrap!important;flex-shrink:0;border:1px solid var(--border-dark);border-radius:var(--radius-md);background:var(--bg-color);height:38px;box-sizing:border-box;transition:all .15s ease}
+.date-filter-group:focus-within{border-color:#0097a7;box-shadow:0 0 0 2px rgba(0,151,167,.12)}
+.date-filter-group.has-val{border-color:#0097a7;background:rgba(0,151,167,.04)}
+.date-filter-group .date-wrap{position:relative;display:flex;align-items:center;flex:0 0 auto}
+.date-filter-group .date-wrap .cdp-wrap{width:auto}
+.date-filter-group .cdp-trigger{border:none!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;height:36px;min-width:160px;padding:0 10px 0 12px;font-size:12.5px;box-sizing:border-box}
+.date-filter-group .c-select-wrap{flex:0 0 auto;width:auto!important;min-width:145px;border-left:1px solid var(--border-dark)}
+.date-filter-group .c-select-trigger{border:none!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;height:36px;font-size:12px;font-weight:500;color:var(--text-muted);padding:0 10px;box-sizing:border-box}
+.date-filter-group .c-select-trigger:hover,.date-filter-group .cdp-trigger:hover{color:var(--text-main);background:var(--hover)!important}
+.filters-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.f-reset-btn{height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;font-size:12.5px;font-weight:500;color:#0097a7;border:1px solid rgba(0,151,167,.3);background:rgba(0,151,167,.06);cursor:pointer;border-radius:var(--radius-md);transition:all .15s ease;white-space:nowrap}
 .f-reset-btn:hover{background:rgba(0,151,167,.14);border-color:#0097a7;color:#00838f}
-.f-close-btn{height:38px;display:inline-flex;align-items:center;gap:5px;padding:0 12px;font-size:12px;font-weight:500;color:var(--text-muted);background:transparent;border:1px solid var(--border-dark);border-radius:var(--radius-md);cursor:pointer;transition:all .15s ease;white-space:nowrap;margin-left:auto}
+.f-close-btn{height:38px;display:inline-flex;align-items:center;gap:5px;padding:0 12px;font-size:12px;font-weight:500;color:var(--text-muted);background:transparent;border:1px solid var(--border-dark);border-radius:var(--radius-md);cursor:pointer;transition:all .15s ease;white-space:nowrap}
 .f-close-btn:hover{background:var(--hover);color:var(--text-main);border-color:var(--text-main)}
+.f-sel{height:38px;width:100%;background-color:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:0 28px 0 11px;font-size:13px;color:var(--text-main);outline:none;transition:all .15s ease;cursor:pointer}
+.f-sel-criteria{height:38px;min-width:145px}
+.f-date-inp{height:38px;padding:0 10px 0 32px;min-width:150px;cursor:pointer}
 .f-sel.has-val,.f-date-inp.has-val,.f-inp.has-val{border-color:#0097a7;background-color:rgba(0,151,167,.04)}
 .filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;align-items:flex-end;padding-top:12px;border-top:1px solid var(--border)}
 .f-item{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -388,13 +397,14 @@ textarea.inp{resize:vertical;min-height:80px}
   .period-bar-right .c-select-wrap,.period-bar-right .cmp-wrap{flex:1;max-width:none}
   .period-bar-right .c-select-trigger,.period-bar-right .cmp-trigger{width:100%;justify-content:space-between}
   .period-bar-right .c-select-menu,.period-bar-right .cmp-popover{right:0;left:0;max-width:100%;width:auto}
-  .filters-top{flex-direction:column;align-items:stretch}
-  .search-wrap{width:100%}
-  .date-filter-group{width:100%;flex-direction:column;align-items:stretch}
-  .date-wrap{width:100%}
-  .f-date-inp{width:100%}
-  .f-sel-criteria{width:100%}
-  .f-reset-btn{width:100%;justify-content:center}
+  .filters-top{flex-direction:column;align-items:stretch;gap:10px}
+  .search-wrap{width:100%;flex:1 1 auto}
+  .filters-top-right{display:flex;align-items:center;justify-content:space-between;width:100%;gap:10px}
+  .date-filter-group{flex:1 1 auto;max-width:none}
+  .date-filter-group .date-wrap,.date-filter-group .date-wrap .cdp-wrap{flex:1 1 auto}
+  .date-filter-group .cdp-trigger{width:100%;min-width:0}
+  .date-filter-group .c-select-wrap{flex:0 0 150px}
+  .filters-actions{flex-shrink:0}
   .filters-grid{grid-template-columns:1fr 1fr}
   .bp-pill-group{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
 }
@@ -683,26 +693,30 @@ textarea.inp{resize:vertical;min-height:80px}
           <input class="f-inp" id="f-q" placeholder="Buscar por paciente o teléfono...">
           <button class="f-clear-btn hidden" id="b-clear-q" title="Borrar búsqueda">✕</button>
         </div>
-        <div class="date-filter-group">
-          <div class="date-wrap">
-            <svg class="f-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/>
-            </svg>
-            <input class="f-inp f-date-inp" id="f-date" type="date" title="Filtrar por fecha específica">
+        <div class="filters-top-right">
+          <div class="date-filter-group" title="Filtrar por fecha y criterio">
+            <div class="date-wrap">
+              <svg class="f-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="18" y2="10"/>
+              </svg>
+              <input class="f-inp f-date-inp" id="f-date" type="date" title="Filtrar por fecha específica">
+            </div>
+            <select class="f-sel f-sel-criteria" id="f-date-type" title="Criterio de fecha para el filtro">
+              <option value="cita">Por Fecha de Cita</option>
+              <option value="registro">Por Fecha de Registro</option>
+            </select>
           </div>
-          <select class="f-sel f-sel-criteria" id="f-date-type" title="Criterio de fecha para el filtro">
-            <option value="cita">Por Fecha de Cita</option>
-            <option value="registro">Por Fecha de Registro</option>
-          </select>
+          <div class="filters-actions">
+            <button class="f-reset-btn hidden" id="b-reset-filters" title="Restablecer todos los filtros">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              <span>Limpiar</span>
+            </button>
+            <button class="f-close-btn" id="b-close-filters" title="Ocultar barra de búsqueda y filtros">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span>Ocultar</span>
+            </button>
+          </div>
         </div>
-        <button class="f-reset-btn hidden" id="b-reset-filters" title="Restablecer todos los filtros">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          <span>Limpiar filtros</span>
-        </button>
-        <button class="f-close-btn" id="b-close-filters" title="Ocultar barra de búsqueda y filtros">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          <span>Ocultar</span>
-        </button>
       </div>
       <div class="filters-grid">
         <div class="f-item">
@@ -4554,6 +4568,7 @@ function checkFiltersActive(){
 
   $('#f-q')?.classList.toggle('has-val', !!q);
   $('#f-date')?.classList.toggle('has-val', !!d);
+  document.querySelector('.date-filter-group')?.classList.toggle('has-val', !!d);
   $('#f-st')?.classList.toggle('has-val', !!st);
   $('#f-suc')?.classList.toggle('has-val', !!su);
   $('#f-tip')?.classList.toggle('has-val', !!tip);
