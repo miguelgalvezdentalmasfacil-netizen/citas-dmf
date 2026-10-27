@@ -612,7 +612,7 @@ textarea.inp{resize:vertical;min-height:80px}
     <h1 style="margin-bottom:6px">Control de citas</h1>
     <p class="sub nocap" style="margin-bottom:28px">Ingresa con tu usuario de asesor.</p>
     <div class="field"><label class="l">Usuario</label><select id="lg-user" class="inp"></select></div>
-    <div class="field"><label class="l">PIN</label><input id="lg-pin" class="inp" type="password" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••"></div>
+    <div class="field"><label class="l">PIN</label><div style="position:relative;display:flex;align-items:center;"><input id="lg-pin" class="inp" type="password" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="PIN de 4 dígitos" style="padding-right:44px;"><button type="button" id="lg-pin-toggle" title="Mostrar u ocultar PIN" style="position:absolute;right:10px;background:none;border:none;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;padding:4px;border-radius:4px;" aria-label="Mostrar u ocultar PIN"><svg id="lg-pin-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div></div>
     <div class="err" id="lg-err"></div>
     <button class="btn block" id="lg-btn">Entrar</button>
   </div>
@@ -2079,16 +2079,45 @@ function showLogin(){
   $('#lg-user').innerHTML=USUARIOS.map(u=>`<option value="${u.id}" ${u.id===last?'selected':''}>${esc(u.nombre)}</option>`).join('');
   $('#lg-pin').value='';$('#lg-err').textContent='';
   enhanceAllSelects($('#login'));
+  $('#lg-user')._syncCustomSelect?.();
   const sm=$('#settings-menu');
   if(sm) sm.classList.add('hidden');
   const bs=$('#b-settings');
   if(bs) bs.setAttribute('aria-expanded','false');
 }
 function doLogin(){
-  const u=USUARIOS.find(x=>x.id===$('#lg-user').value);
-  if(u&&u.pin===$('#lg-pin').value.trim()){
+  const pin=($('#lg-pin').value||'').trim();
+  const selEl=$('#lg-user');
+  let selId=selEl?selEl.value:'';
+  let u=USUARIOS.find(x=>x.id===selId);
+
+  // ValidaciÃ³n de PIN para cada asesor
+  // Edgar: PIN oficial 4321 (con tolerancia de transiciÃ³n a 1234 si el navegador tiene versiÃ³n previa en cachÃ©)
+  // Miguel: PIN 1234
+  const checkPin=(usr,p)=>{
+    if(!usr||!p) return false;
+    if(usr.id==='u2') return p==='4321'||p==='1234';
+    return usr.pin===p;
+  };
+
+  // Si el usuario seleccionado en el dropdown no coincide con el PIN ingresado:
+  // Auto-detectar si el PIN corresponde a otro usuario (ej: dejaron seleccionado Miguel pero teclearon el 4321 de Edgar)
+  if(!checkPin(u,pin)){
+    const autoUser=USUARIOS.find(x=>checkPin(x,pin));
+    if(autoUser){
+      u=autoUser;
+      if(selEl){
+        selEl.value=u.id;
+        selEl._syncCustomSelect?.();
+      }
+    }
+  }
+
+  if(checkPin(u,pin)){
     user=u;sessionStorage.setItem('dmf_user',u.id);localStorage.setItem('dmf_last_user',u.id);startApp();
-  }else $('#lg-err').textContent='PIN incorrecto';
+  }else{
+    $('#lg-err').textContent='PIN incorrecto';
+  }
 }
 function updateSettingsUserInfo(){
   if(!user) return;
@@ -4650,6 +4679,20 @@ if($('#f-date')){
   });
 }
 $('#lg-btn').onclick=doLogin;
+const pinInp=$('#lg-pin');
+if(pinInp){
+  pinInp.addEventListener('input',()=>{ if($('#lg-err')) $('#lg-err').textContent=''; });
+}
+const pinTgl=$('#lg-pin-toggle');
+if(pinTgl&&pinInp){
+  pinTgl.onclick=()=>{
+    const isPw=pinInp.type==='password';
+    pinInp.type=isPw?'text':'password';
+    pinTgl.innerHTML=isPw
+      ?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>'
+      :'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+  };
+}
 if($('#b-out')) $('#b-out').onclick=()=>{sessionStorage.removeItem('dmf_user');user=null;showLogin()};
 $('#b-theme').onclick=()=>{const d=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=d;try{localStorage.setItem('dmf_theme',d)}catch(e){}};
 
