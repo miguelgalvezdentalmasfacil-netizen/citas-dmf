@@ -847,6 +847,26 @@ function savePresupuestosLocal(){
   }catch(e){}
 }
 
+function sanitizeAllExistingPresupuestos(){
+  if(!presupuestos) return;
+  let modified = false;
+  Object.keys(presupuestos).forEach(k => {
+    const b = presupuestos[k];
+    if(b && Array.isArray(b.pasos) && b.pasos.some(p => p.descripcion && (p.descripcion.includes('Subtotal Dcto') || p.descripcion.includes('Estado paso') || p.descripcion.includes('Pieza(s)')))){
+      const rawJoined = b.pasos.map(p => (p.estado || 'Pendiente') + ' ' + p.descripcion + ' ' + fmtMoney(p.monto)).join(' ');
+      const fixed = extractDentalinkData(rawJoined);
+      if(fixed && fixed.pasos && fixed.pasos.length > b.pasos.length){
+        b.pasos = fixed.pasos;
+        modified = true;
+      }
+    }
+  });
+  if(modified){
+    savePresupuestosLocal();
+  }
+}
+
+
 function syncPresupuestosFromCitas(loadedCitas){
   if(!Array.isArray(loadedCitas))return;
   loadedCitas.forEach(c=>{
@@ -870,6 +890,7 @@ function syncPresupuestosFromCitas(loadedCitas){
       });
     }
   });
+  sanitizeAllExistingPresupuestos();
   savePresupuestosLocal();
 }
 
@@ -2471,6 +2492,7 @@ function render(){
 }
 
 function renderPresupuestosView(){
+  sanitizeAllExistingPresupuestos();
   const myPres = getMyBudgets();
   let list = myPres;
 
