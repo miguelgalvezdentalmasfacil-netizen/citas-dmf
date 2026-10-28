@@ -5064,7 +5064,6 @@ function leadCardHTML(l){
           ` : `<span>Sin teléfono registrado</span>`}
         </div>
         <div><b>Interés:</b> ${esc(l.tratamiento || 'Valoración General')}</div>
-        <div><b>Sucursal:</b> ${esc(l.sucursal || 'Por definir')}</div>
         <div><b>Capturado:</b> ${esc(fechaReg)}</div>
       </div>
 
@@ -5143,21 +5142,12 @@ function openLeadModal(id){
       </div>
     </div>
 
-    <div class="grid2">
-      <div class="field">
-        <label class="l">Sucursal</label>
-        <select class="inp" id="l-suc">
-          ${opts(SUCURSALES, l.sucursal, 'Seleccionar')}
-        </select>
-      </div>
-      <div class="field">
-        <label class="l">Tratamiento de Interés</label>
-        <select class="inp" id="l-tra">
-          ${opts(TRATAMIENTOS, l.tratamiento, 'Seleccionar')}
-        </select>
-      </div>
+    <div class="field">
+      <label class="l">Tratamiento de Inter&eacute;s</label>
+      <select class="inp" id="l-tra">
+        ${opts(TRATAMIENTOS, l.tratamiento, 'Seleccionar')}
+      </select>
     </div>
-
     <div class="field">
       <label class="l">Mensaje del Anuncio / Notas</label>
       <textarea class="inp" id="l-not" placeholder="Detalles de la consulta o mensaje inicial del anuncio">${esc(l.notas)}</textarea>
@@ -5178,7 +5168,7 @@ async function saveManualLead(id){
   const telefono = v('l-tel');
   const origen = v('l-ori');
   const asesor = v('l-as') || (user ? user.nombre : 'Miguel');
-  const sucursal = v('l-suc');
+  const sucursal = '';
   const tratamiento = v('l-tra');
   const notas = v('l-not');
 

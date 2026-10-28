@@ -3,7 +3,6 @@ const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const advisorSelect = document.getElementById('advisorSelect');
-  const branchSelect = document.getElementById('branchSelect');
   const todayLeadsCount = document.getElementById('todayLeadsCount');
   const totalCapturedCount = document.getElementById('totalCapturedCount');
   const syncStatus = document.getElementById('syncStatus');
@@ -11,9 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnOpenDMF = document.getElementById('btnOpenDMF');
 
   // Load saved preferences
-  chrome.storage.local.get(['dmf_advisor', 'dmf_branch', 'dmf_leads_today', 'dmf_leads_total', 'dmf_leads_date'], (res) => {
+  chrome.storage.local.get(['dmf_advisor', 'dmf_leads_today', 'dmf_leads_total', 'dmf_leads_date'], (res) => {
     if (res.dmf_advisor) advisorSelect.value = res.dmf_advisor;
-    if (res.dmf_branch) branchSelect.value = res.dmf_branch;
 
     const todayIso = new Date().toISOString().slice(0, 10);
     const todayCount = (res.dmf_leads_date === todayIso) ? (res.dmf_leads_today || 0) : 0;
@@ -24,10 +22,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Save changes
   advisorSelect.addEventListener('change', () => {
     chrome.storage.local.set({ dmf_advisor: advisorSelect.value });
-  });
-
-  branchSelect.addEventListener('change', () => {
-    chrome.storage.local.set({ dmf_branch: branchSelect.value });
   });
 
   // Test Supabase connection
@@ -54,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Open DMF
   btnOpenDMF.addEventListener('click', () => {
-    // Open the local or web version of DMF
     chrome.tabs.create({ url: 'https://hzdootsarxbawbwtsfyp.supabase.co' });
   });
 });
