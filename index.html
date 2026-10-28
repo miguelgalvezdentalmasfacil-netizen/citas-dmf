@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -601,6 +601,83 @@ textarea.inp{resize:vertical;min-height:80px}
 .bp-wa-txt b{color:#15803d}
 .btn-text-sm{background:transparent;border:none;color:#0097a7;font-size:11.5px;font-weight:600;cursor:pointer;padding:2px 6px;border-radius:4px}
 .btn-text-sm:hover{background:rgba(0,151,167,.08)}
+
+
+/* ============ CAMPAÑAS & LEADS STYLES ============ */
+.seg button.tab-leads{font-weight:500}
+.seg button.tab-leads.on{background:#0097A7!important;color:#fff!important}
+
+/* Leads Funnel KPI Grid */
+.lead-funnel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media (max-width:900px){.lead-funnel-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.lead-funnel-grid{grid-template-columns:1fr}}
+
+.funnel-card{padding:20px 22px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--border-dark);display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow)}
+.funnel-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.funnel-card-label{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)}
+.funnel-card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--hover)}
+.funnel-card-val{font-size:28px;font-weight:300;letter-spacing:-1px;margin-top:2px;color:var(--text-main)}
+.funnel-sub-badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:6px;width:fit-content}
+.funnel-sub-badge.ok{background:rgba(16,185,129,.12);color:#10b981}
+.funnel-sub-badge.info{background:rgba(0,151,167,.12);color:#0097a7}
+.funnel-sub-badge.money{background:rgba(16,185,129,.15);color:#059669;font-weight:700}
+
+/* Advisor Comparison Section */
+.advisor-comp-section{background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:18px 22px;margin-bottom:24px;box-shadow:var(--shadow)}
+.advisor-comp-title{font-size:14.5px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--text-main)}
+.advisor-comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:768px){.advisor-comp-grid{grid-template-columns:1fr}}
+
+.advisor-box{background:var(--bg-color);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:14px 16px}
+.advisor-box-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-dark)}
+.advisor-box-name{font-size:15px;font-weight:700;color:var(--text-main);display:flex;align-items:center;gap:8px}
+.advisor-badge-pill{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(0,151,167,.12);color:#0097a7}
+.advisor-box-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.adv-kpi-item label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:3px}
+.adv-kpi-item b{font-size:15px;font-weight:600;color:var(--text-main)}
+.adv-kpi-item b.rate{color:#0097a7}
+.adv-kpi-item b.cash{color:#10b981}
+
+/* Channel Pills */
+.channel-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+.channel-badge.fb{background:rgba(24,119,242,.12);color:#1877F2;border:1px solid rgba(24,119,242,.3)}
+.channel-badge.ig{background:linear-gradient(45deg,rgba(253,29,29,.1),rgba(131,58,180,.1));color:#c13584;border:1px solid rgba(193,53,132,.3)}
+.channel-badge.tt{background:rgba(0,0,0,.08);color:var(--text-main);border:1px solid var(--border-dark)}
+:root[data-theme="dark"] .channel-badge.tt{background:rgba(255,255,255,.1);color:#00f2fe}
+.channel-badge.wa{background:rgba(37,211,102,.12);color:#16a34a;border:1px solid rgba(37,211,102,.3)}
+
+/* Leads Toolbar */
+.leads-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.leads-filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.lead-pill-btn{border:1px solid var(--border-dark);background:var(--surface);color:var(--text-muted);padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.lead-pill-btn:hover{background:var(--hover);color:var(--text-main)}
+.lead-pill-btn.active{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg)}
+.lead-pill-btn .lp-count{font-size:11px;padding:1px 6px;border-radius:10px;background:rgba(0,0,0,.08);font-weight:600}
+:root[data-theme="dark"] .lead-pill-btn .lp-count{background:rgba(255,255,255,.15)}
+.lead-pill-btn.active .lp-count{background:rgba(255,255,255,.25);color:#fff}
+
+/* Leads Cards Grid */
+.leads-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.lead-card{background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:18px;display:flex;flex-direction:column;gap:12px;transition:all .15s ease;box-shadow:var(--shadow)}
+.lead-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.06);border-color:var(--text-muted)}
+.lead-card.st-nuevo{border-left:4px solid #0097a7}
+.lead-card.st-en-conversacion{border-left:4px solid #d97706}
+.lead-card.st-agendado{border-left:4px solid #6366f1}
+.lead-card.st-asistio{border-left:4px solid #10b981}
+.lead-card.st-descartado{border-left:4px solid #94a3b8}
+
+.lead-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.lead-name{font-size:16px;font-weight:700;color:var(--text-main);line-height:1.25}
+.lead-badges-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.lead-msg-quote{background:var(--bg-color);border-left:3px solid #0097a7;padding:8px 12px;border-radius:4px;font-size:12.5px;color:var(--text-muted);font-style:italic;line-height:1.4;word-break:break-word}
+.lead-info-meta{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--text-muted)}
+.lead-tel-link{color:#10b981;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.lead-tel-link:hover{text-decoration:underline}
+.lead-actions-row{display:flex;gap:8px;align-items:center;margin-top:4px;padding-top:10px;border-top:1px solid var(--border-dark);flex-wrap:wrap}
+.btn-lead-agendar{background:#0097A7!important;color:#fff!important;border:none!important;font-weight:600!important}
+.btn-lead-agendar:hover{background:#00838F!important}
+.lead-status-sel{font-size:12px!important;padding:4px 8px!important;height:30px!important;border-radius:6px!important;background:var(--bg-color)!important}
+
 </style>
 </head>
 <body>
@@ -674,6 +751,7 @@ textarea.inp{resize:vertical;min-height:80px}
         <button data-view="mes">Mes <span class="badge" id="b-badge-mes"></span></button>
         <button data-view="todas">Todas</button>
         <button data-view="presupuestos" class="tab-presupuestos">Presupuestos <span class="badge" id="b-badge-presupuestos"></span></button>
+        <button data-view="leads" class="tab-leads" id="tab-btn-leads">CampaÃ±as & Leads <span class="badge" id="b-badge-leads"></span></button>
       </div>
       <div>
         <button class="btn out sm btn-filter-toggle" id="b-toggle-filters" title="Buscar por paciente, teléfono o aplicar filtros">
@@ -762,7 +840,7 @@ textarea.inp{resize:vertical;min-height:80px}
 const SUCURSALES=['Tijuana','Mexicali Obregón','Mexicali Villa Verde','Ensenada'];
 const TRATAMIENTOS=['Valoración','Limpieza dental','Ortodoncia (brackets)','Alineadores','Endodoncia','Extracción','Resina','Corona','Implante','Blanqueamiento','Prótesis','Otro'];
 const TIPOS=['Nueva','Reagenda'];
-const ORIGENES=['Publicidad Externa','Publicidad Interna','Convenio'];
+const ORIGENES=['Facebook Ads','Instagram Ads','TikTok Ads','WhatsApp Directo','Publicidad Externa','Publicidad Interna','Convenio','RecomendaciÃ³n'];
 const PAQUETES=['Individual','Dual','Familiar'];
 const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
@@ -2219,6 +2297,15 @@ function updateBadges(){
   setB('b-badge-semana',cSem,false);
   setB('b-badge-mes',cMes,false);
 
+  const elLeads = #b-badge-leads;
+  if(elLeads){
+    const lList = typeof getLeadsList === 'function' ? getLeadsList() : [];
+    const pCnt = lList.filter(l => ['Lead','Lead WhatsApp','En conversaciÃ³n'].includes(l.estatus)).length;
+    elLeads.textContent = pCnt || (lList.length ? lList.length : '0');
+    if(pCnt > 0) elLeads.classList.add('badge-alert');
+    else elLeads.classList.remove('badge-alert');
+  }
+
   const myPres = getMyBudgets();
   const elPres = $('#b-badge-presupuestos');
   if(elPres){
@@ -2258,6 +2345,7 @@ function mine(){return user.rol==='admin'?citas:citas.filter(c=>nameOf(c.asesorI
 function currentList(){
   const t=iso(new Date());let l=mine();
   const [wStart,wEnd]=getWeekRange(selectedWeekRef), [mStart,mEnd]=getMonthRange(selectedMonthRef);
+  if(view!=='todas'&&view!=='leads'){ l=l.filter(c=>c.estatus!=='Lead'&&c.estatus!=='Lead WhatsApp'&&c.estatus!=='Descartado'); }
   if(view==='hoy')l=l.filter(c=>c.fecha===t);
   else if(view==='manana')l=l.filter(c=>c.fecha===addDays(t,1));
   else if(view==='semana')l=l.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
@@ -2444,10 +2532,13 @@ function render(){
     semana:[weekTitle,weekLabel],
     mes:[isCurrMonth?'Citas de este mes':'Citas del mes',mName],
     todas:['Todas las citas','Historial completo'],
+    leads:['CampaÃ±as & Leads Publicitarios','Embudo de conversiÃ³n de anuncios Meta & TikTok en tiempo real'],
     presupuestos:['Planes de Tratamiento y Presupuestos','Seguimiento clínico y financiero por Asesor Dental']
   };
   $('#h-title').textContent=titles[view][0];
   $('#h-sub').textContent=titles[view][1];
+
+  if(view === 'leads'){ renderLeadsView(); return; }
 
   if(view === 'presupuestos'){
     const kpis = computeAllBudgetsKpis();
@@ -2493,6 +2584,15 @@ function render(){
 
 function renderPresupuestosView(){
   sanitizeAllExistingPresupuestos();
+  const elLeads = #b-badge-leads;
+  if(elLeads){
+    const lList = typeof getLeadsList === 'function' ? getLeadsList() : [];
+    const pCnt = lList.filter(l => ['Lead','Lead WhatsApp','En conversaciÃ³n'].includes(l.estatus)).length;
+    elLeads.textContent = pCnt || (lList.length ? lList.length : '0');
+    if(pCnt > 0) elLeads.classList.add('badge-alert');
+    else elLeads.classList.remove('badge-alert');
+  }
+
   const myPres = getMyBudgets();
   let list = myPres;
 
@@ -2721,7 +2821,14 @@ function openModal(h, cls){const m=$('#modal');m.innerHTML=`<div class="modal ${
 function closeModal(){$('#modal').classList.add('hidden');$('#modal').innerHTML='';closeAllCustomDropdowns();}
 
 function citaForm(id){
-  const c=citas.find(x=>x.id===id)||{fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',paquete:'Individual',tipo:'Nueva',origen:'',notas:'',asesorId:user?user.nombre:'Miguel'};
+  let foundC = citas.find(x=>x.id===id);
+  if(foundC && (foundC.tipo === 'Lead WhatsApp' || foundC.estatus === 'Lead')){
+    foundC.tipo = 'Nueva';
+    foundC.fecha = foundC.fecha || iso(new Date());
+    foundC.hora = foundC.hora || '11:00';
+    foundC.estatus = 'Pendiente';
+  }
+  const c = foundC || {fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',paquete:'Individual',tipo:'Nueva',origen:'',notas:'',asesorId:user?user.nombre:'Miguel'};
   const selAsesor=c.asesorId?nameOf(c.asesorId):(user?user.nombre:'Miguel');
   openModal(`
     <h2>${id?'Editar cita':'Nueva cita'}</h2><div class="sub nocap">Captura la información del paciente.</div>
@@ -4580,6 +4687,585 @@ function printReport(){
   printWindow.document.close();
 }
 
+/* ============ CAMPAÑAS & LEADS MODULE ============ */
+let leadFilter = 'todos';
+let leadSearchQuery = '';
+let leadChannelFilter = '';
+let leadAdvisorFilter = '';
+
+function getLeadsList(){
+  const all = (user.rol === 'admin')
+    ? citas
+    : citas.filter(c => nameOf(c.asesorId) === user.nombre || c.asesorId === user.id || nameOf(c.creadoPor) === user.nombre);
+
+  return all.filter(c => {
+    if (c.tipo === 'Lead WhatsApp') return true;
+    if (['Lead', 'Lead WhatsApp', 'En conversación', 'Descartado'].includes(c.estatus)) return true;
+    if (c.historial && Array.isArray(c.historial) && c.historial.some(h => h && (h.tipo === 'lead_whatsapp_capture' || h.tipo === 'lead_meta'))) return true;
+    if (c.origen && (
+      c.origen.toLowerCase().includes('ads') ||
+      c.origen.toLowerCase().includes('facebook') ||
+      c.origen.toLowerCase().includes('instagram') ||
+      c.origen.toLowerCase().includes('tiktok') ||
+      c.origen === 'WhatsApp Directo'
+    )) return true;
+    return false;
+  });
+}
+
+function computeLeadsFunnel(leads){
+  const total = leads.length;
+  const agendadasList = leads.filter(l => {
+    if (['Pendiente', 'Confirmada', 'Asistió', 'No asistió', 'Reagendó', 'Cita Agendada'].includes(l.estatus)) return true;
+    if (l.telefono && citas.some(c => c.id !== l.id && c.telefono === l.telefono && ['Pendiente', 'Confirmada', 'Asistió', 'No asistió'].includes(c.estatus))) return true;
+    return false;
+  });
+  const agendadas = agendadasList.length;
+  const convRate = total > 0 ? Math.round((agendadas / total) * 100) : 0;
+
+  const asistieronList = leads.filter(l => {
+    if (l.estatus === 'Asistió') return true;
+    if (l.telefono && citas.some(c => c.id !== l.id && c.telefono === l.telefono && c.estatus === 'Asistió')) return true;
+    return false;
+  });
+  const asistieron = asistieronList.length;
+  const asistRate = agendadas > 0 ? Math.round((asistieron / agendadas) * 100) : 0;
+
+  const ingresosConsultas = asistieron * 350;
+  let ingresosPresupuestos = 0;
+  asistieronList.forEach(l => {
+    const cleanTel = (l.telefono || '').replace(/\D/g, '');
+    Object.values(presupuestos || {}).forEach(b => {
+      const bTel = (b.telefono || '').replace(/\D/g, '');
+      if ((cleanTel && bTel && cleanTel === bTel) || (l.paciente && b.paciente && l.paciente.toLowerCase() === b.paciente.toLowerCase())) {
+        const abonosTot = (b.abonos || []).reduce((sum, a) => sum + (Number(a.monto) || 0), 0);
+        ingresosPresupuestos += abonosTot;
+      }
+    });
+  });
+  const totalIngresos = ingresosConsultas + ingresosPresupuestos;
+
+  return {
+    total,
+    agendadas,
+    convRate,
+    asistieron,
+    asistRate,
+    ingresosConsultas,
+    ingresosPresupuestos,
+    totalIngresos
+  };
+}
+
+function renderLeadsView(){
+  const allLeads = getLeadsList();
+  const funnel = computeLeadsFunnel(allLeads);
+
+  // Advisor metrics
+  const advMiguel = computeLeadsFunnel(allLeads.filter(l => nameOf(l.asesorId) === 'Miguel' || nameOf(l.creadoPor) === 'Miguel'));
+  const advEdgar = computeLeadsFunnel(allLeads.filter(l => nameOf(l.asesorId) === 'Edgar' || nameOf(l.creadoPor) === 'Edgar'));
+
+  // Channel metrics
+  const chFB = allLeads.filter(l => (l.origen || '').toLowerCase().includes('facebook')).length;
+  const chIG = allLeads.filter(l => (l.origen || '').toLowerCase().includes('instagram')).length;
+  const chTT = allLeads.filter(l => (l.origen || '').toLowerCase().includes('tiktok')).length;
+  const chWA = allLeads.filter(l => (l.origen || '').toLowerCase().includes('whatsapp')).length;
+
+  // Filter list
+  let filtered = allLeads;
+
+  // Status Filter
+  if (leadFilter === 'nuevos') {
+    filtered = filtered.filter(l => ['Lead', 'Lead WhatsApp', 'En conversación'].includes(l.estatus));
+  } else if (leadFilter === 'agendados') {
+    filtered = filtered.filter(l => ['Cita Agendada', 'Pendiente', 'Confirmada', 'Reagendó'].includes(l.estatus));
+  } else if (leadFilter === 'asistieron') {
+    filtered = filtered.filter(l => l.estatus === 'Asistió');
+  } else if (leadFilter === 'descartados') {
+    filtered = filtered.filter(l => ['Descartado', 'No asistió', 'Canceló'].includes(l.estatus));
+  }
+
+  // Advisor filter
+  if (leadAdvisorFilter) {
+    filtered = filtered.filter(l => nameOf(l.asesorId) === leadAdvisorFilter || nameOf(l.creadoPor) === leadAdvisorFilter);
+  }
+
+  // Channel filter
+  if (leadChannelFilter) {
+    filtered = filtered.filter(l => (l.origen || '').toLowerCase().includes(leadChannelFilter.toLowerCase()));
+  }
+
+  // Search filter
+  if (leadSearchQuery) {
+    const q = leadSearchQuery.toLowerCase();
+    filtered = filtered.filter(l =>
+      (l.paciente || '').toLowerCase().includes(q) ||
+      (l.telefono || '').includes(q) ||
+      (l.notas || '').toLowerCase().includes(q) ||
+      (l.tratamiento || '').toLowerCase().includes(q)
+    );
+  }
+
+  // Counts for pills
+  const cAll = allLeads.length;
+  const cNuevos = allLeads.filter(l => ['Lead', 'Lead WhatsApp', 'En conversación'].includes(l.estatus)).length;
+  const cAgendados = allLeads.filter(l => ['Cita Agendada', 'Pendiente', 'Confirmada', 'Reagendó'].includes(l.estatus)).length;
+  const cAsistieron = allLeads.filter(l => l.estatus === 'Asistió').length;
+  const cDescartados = allLeads.filter(l => ['Descartado', 'No asistió', 'Canceló'].includes(l.estatus)).length;
+
+  // Render HTML
+  let html = `
+    <!-- Funnel KPIs -->
+    <div class="lead-funnel-grid">
+      <div class="funnel-card">
+        <div class="funnel-card-header">
+          <span class="funnel-card-label">1. Leads Recibidos</span>
+          <div class="funnel-card-icon">💬</div>
+        </div>
+        <div class="funnel-card-val">${funnel.total}</div>
+        <div class="funnel-sub-badge info">Meta & TikTok Ads</div>
+      </div>
+
+      <div class="funnel-card">
+        <div class="funnel-card-header">
+          <span class="funnel-card-label">2. Citas Agendadas</span>
+          <div class="funnel-card-icon">📅</div>
+        </div>
+        <div class="funnel-card-val">${funnel.agendadas}</div>
+        <div class="funnel-sub-badge ${funnel.convRate >= 30 ? 'ok' : 'info'}">
+          ${funnel.convRate}% Tasa Conversión
+        </div>
+      </div>
+
+      <div class="funnel-card">
+        <div class="funnel-card-header">
+          <span class="funnel-card-label">3. Asistencias</span>
+          <div class="funnel-card-icon">🏥</div>
+        </div>
+        <div class="funnel-card-val">${funnel.asistieron}</div>
+        <div class="funnel-sub-badge ${funnel.asistRate >= 60 ? 'ok' : 'info'}">
+          ${funnel.asistRate}% Asistencia Cita
+        </div>
+      </div>
+
+      <div class="funnel-card">
+        <div class="funnel-card-header">
+          <span class="funnel-card-label">4. Facturación Anuncios</span>
+          <div class="funnel-card-icon">💰</div>
+        </div>
+        <div class="funnel-card-val">${fmtMoney(funnel.totalIngresos)}</div>
+        <div class="funnel-sub-badge money">
+          Consultas + Planes
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparativa de Asesores -->
+    <div class="advisor-comp-section">
+      <div class="advisor-comp-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Rendimiento de Conversión por Asesor Dental
+      </div>
+      <div class="advisor-comp-grid">
+        <!-- Edgar -->
+        <div class="advisor-box">
+          <div class="advisor-box-head">
+            <div class="advisor-box-name">
+              <span>Edgar</span>
+              <span class="advisor-badge-pill">Asesor</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted)">${advEdgar.total} leads asignados</div>
+          </div>
+          <div class="advisor-box-kpis">
+            <div class="adv-kpi-item">
+              <label>Leads</label>
+              <b>${advEdgar.total}</b>
+            </div>
+            <div class="adv-kpi-item">
+              <label>Citas</label>
+              <b>${advEdgar.agendadas}</b>
+            </div>
+            <div class="adv-kpi-item">
+              <label>Conversión</label>
+              <b class="rate">${advEdgar.convRate}%</b>
+            </div>
+            <div class="adv-kpi-item">
+              <label>Facturación</label>
+              <b class="cash">${fmtMoney(advEdgar.totalIngresos)}</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Miguel -->
+        <div class="advisor-box">
+          <div class="advisor-box-head">
+            <div class="advisor-box-name">
+              <span>Miguel</span>
+              <span class="advisor-badge-pill">Admin / Asesor</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted)">${advMiguel.total} leads asignados</div>
+          </div>
+          <div class="advisor-box-kpis">
+            <div class="adv-kpi-item">
+              <label>Leads</label>
+              <b>${advMiguel.total}</b>
+            </div>
+            <div class="adv-kpi-item">
+              <label>Citas</label>
+              <b>${advMiguel.agendadas}</b>
+            </div>
+            <div class="adv-kpi-item">
+              <label>Conversión</label>
+              <b class="rate">${advMiguel.convRate}%</b>
+            </div>
+            <div class="adv-kpi-item">
+              <label>Facturación</label>
+              <b class="cash">${fmtMoney(advMiguel.totalIngresos)}</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar & Filters -->
+    <div class="leads-toolbar">
+      <div class="leads-filter-pills">
+        <button class="lead-pill-btn ${leadFilter === 'todos' ? 'active' : ''}" data-act="filter-lead" data-filter="todos">
+          Todos <span class="lp-count">${cAll}</span>
+        </button>
+        <button class="lead-pill-btn ${leadFilter === 'nuevos' ? 'active' : ''}" data-act="filter-lead" data-filter="nuevos">
+          💬 Nuevos / Seguimiento <span class="lp-count">${cNuevos}</span>
+        </button>
+        <button class="lead-pill-btn ${leadFilter === 'agendados' ? 'active' : ''}" data-act="filter-lead" data-filter="agendados">
+          📅 Cita Agendada <span class="lp-count">${cAgendados}</span>
+        </button>
+        <button class="lead-pill-btn ${leadFilter === 'asistieron' ? 'active' : ''}" data-act="filter-lead" data-filter="asistieron">
+          🏥 Asistieron <span class="lp-count">${cAsistieron}</span>
+        </button>
+        <button class="lead-pill-btn ${leadFilter === 'descartados' ? 'active' : ''}" data-act="filter-lead" data-filter="descartados">
+          Descartados <span class="lp-count">${cDescartados}</span>
+        </button>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="leads-advisor-select" class="inp sm" style="width:auto;height:34px">
+          <option value="">Todos los Asesores</option>
+          <option value="Edgar" ${leadAdvisorFilter === 'Edgar' ? 'selected' : ''}>Edgar</option>
+          <option value="Miguel" ${leadAdvisorFilter === 'Miguel' ? 'selected' : ''}>Miguel</option>
+        </select>
+
+        <select id="leads-channel-select" class="inp sm" style="width:auto;height:34px">
+          <option value="">Todos los Canales</option>
+          <option value="Facebook" ${leadChannelFilter === 'Facebook' ? 'selected' : ''}>Facebook Ads</option>
+          <option value="Instagram" ${leadChannelFilter === 'Instagram' ? 'selected' : ''}>Instagram Ads</option>
+          <option value="TikTok" ${leadChannelFilter === 'TikTok' ? 'selected' : ''}>TikTok Ads</option>
+          <option value="WhatsApp" ${leadChannelFilter === 'WhatsApp' ? 'selected' : ''}>WhatsApp Directo</option>
+        </select>
+
+        <input type="text" id="leads-search-input" class="inp sm" placeholder="Buscar por paciente o teléfono..." value="${esc(leadSearchQuery)}" style="width:200px;height:34px">
+
+        <button class="btn sm" data-act="new-lead" style="white-space:nowrap">
+          + Registrar Lead Manual
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Cards List
+  if (!filtered.length) {
+    html += `
+      <div class="card empty" style="padding:48px 24px;text-align:center">
+        <div style="margin-bottom:12px;color:var(--text-light);display:flex;justify-content:center">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <div style="font-weight:600;font-size:16px;margin-bottom:6px">No hay leads en esta selección</div>
+        <div class="sub nocap" style="margin-bottom:12px">Los leads de WhatsApp Web capturados con la extensión aparecerán aquí automáticamente en tiempo real.</div>
+        <button class="btn sm out" data-act="new-lead">+ Registrar Lead Manual</button>
+      </div>
+    `;
+  } else {
+    html += `<div class="leads-cards-grid">`;
+    filtered.forEach(l => {
+      html += leadCardHTML(l);
+    });
+    html += `</div>`;
+  }
+
+  $('#content').innerHTML = html;
+
+  // Wire search and select inputs
+  const inSearch = $('#leads-search-input');
+  if (inSearch) {
+    inSearch.addEventListener('input', e => {
+      leadSearchQuery = e.target.value.trim();
+      renderLeadsView();
+      // restore focus
+      const cur = $('#leads-search-input');
+      if (cur) {
+        cur.focus();
+        cur.selectionStart = cur.selectionEnd = cur.value.length;
+      }
+    });
+  }
+
+  const selAdv = $('#leads-advisor-select');
+  if (selAdv) {
+    selAdv.addEventListener('change', e => {
+      leadAdvisorFilter = e.target.value;
+      renderLeadsView();
+    });
+  }
+
+  const selChan = $('#leads-channel-select');
+  if (selChan) {
+    selChan.addEventListener('change', e => {
+      leadChannelFilter = e.target.value;
+      renderLeadsView();
+    });
+  }
+}
+
+function leadCardHTML(l){
+  const cleanTel = (l.telefono || '').replace(/\D/g, '');
+  const origen = (l.origen || 'Facebook Ads').toLowerCase();
+
+  let chBadge = '<span class="channel-badge fb">Facebook Ads</span>';
+  if (origen.includes('instagram')) chBadge = '<span class="channel-badge ig">Instagram Ads</span>';
+  else if (origen.includes('tiktok')) chBadge = '<span class="channel-badge tt">TikTok Ads</span>';
+  else if (origen.includes('whatsapp')) chBadge = '<span class="channel-badge wa">WhatsApp Directo</span>';
+
+  let stClass = 'st-nuevo';
+  if (l.estatus === 'En conversación') stClass = 'st-en-conversacion';
+  else if (['Cita Agendada', 'Pendiente', 'Confirmada'].includes(l.estatus)) stClass = 'st-agendado';
+  else if (l.estatus === 'Asistió') stClass = 'st-asistio';
+  else if (['Descartado', 'No asistió', 'Canceló'].includes(l.estatus)) stClass = 'st-descartado';
+
+  const fechaReg = l.creadoEl ? new Date(l.creadoEl).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : (fmtShort(l.fecha) + ' ' + (l.hora || ''));
+
+  return `
+    <div class="lead-card ${stClass}">
+      <div class="lead-card-head">
+        <div>
+          <div class="lead-name">${esc(l.paciente)}</div>
+          <div class="lead-badges-row">
+            ${chBadge}
+            <span class="advisor-badge-pill">👤 ${esc(nameOf(l.asesorId || l.creadoPor))}</span>
+          </div>
+        </div>
+        <div>
+          <select class="lead-status-sel" data-lead-id="${esc(l.id)}">
+            <option value="Lead" ${l.estatus === 'Lead' ? 'selected' : ''}>💬 Lead Nuevo</option>
+            <option value="En conversación" ${l.estatus === 'En conversación' ? 'selected' : ''}>⏳ En conversación</option>
+            <option value="Cita Agendada" ${['Cita Agendada', 'Pendiente', 'Confirmada'].includes(l.estatus) ? 'selected' : ''}>📅 Cita Agendada</option>
+            <option value="Asistió" ${l.estatus === 'Asistió' ? 'selected' : ''}>✅ Asistió a Consulta</option>
+            <option value="Descartado" ${['Descartado', 'No asistió', 'Canceló'].includes(l.estatus) ? 'selected' : ''}>❌ Descartado</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="lead-info-meta">
+        <div>
+          ${cleanTel ? `
+            <a href="https://web.whatsapp.com/send?phone=${cleanTel}" target="_blank" class="lead-tel-link" title="Abrir chat en WhatsApp">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              ${esc(l.telefono)}
+            </a>
+          ` : `<span>Sin teléfono registrado</span>`}
+        </div>
+        <div><b>Interés:</b> ${esc(l.tratamiento || 'Valoración General')}</div>
+        <div><b>Sucursal:</b> ${esc(l.sucursal || 'Por definir')}</div>
+        <div><b>Capturado:</b> ${esc(fechaReg)}</div>
+      </div>
+
+      ${l.notas ? `
+        <div class="lead-msg-quote">
+          "${esc(l.notas)}"
+        </div>
+      ` : ''}
+
+      <div class="lead-actions-row">
+        <button class="btn sm btn-lead-agendar" data-act="convert-lead" data-id="${esc(l.id)}" title="Agendar cita formal en el calendario para este lead">
+          📅 Agendar Cita
+        </button>
+
+        ${cleanTel ? `
+          <a class="btn out sm" href="https://web.whatsapp.com/send?phone=${cleanTel}" target="_blank" style="color:#10b981;border-color:rgba(16,185,129,.4)">
+            💬 WhatsApp
+          </a>
+        ` : ''}
+
+        <button class="btn out sm" data-act="edit-lead" data-id="${esc(l.id)}">
+          Editar
+        </button>
+
+        <button class="btn out sm" data-act="del-lead" data-id="${esc(l.id)}" style="color:var(--bad);border-color:var(--bad)" title="Eliminar lead">
+          🗑️
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function openLeadModal(id){
+  const l = (id && citas.find(c => c.id === id)) || {
+    id: '',
+    paciente: '',
+    telefono: '',
+    origen: 'Facebook Ads',
+    asesorId: user ? user.nombre : 'Miguel',
+    sucursal: 'Plaza San Pedro',
+    tratamiento: 'Valoración Dental ($350)',
+    notas: ''
+  };
+
+  openModal(`
+    <h2>${id ? 'Editar Lead Publicitario' : 'Nuevo Lead Publicitario'}</h2>
+    <div class="sub nocap">Registro manual de prospectos de publicidad para seguimiento y embudo.</div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="l">Nombre del Paciente / Lead *</label>
+        <input class="inp" id="l-pac" value="${esc(l.paciente)}" placeholder="Nombre completo">
+      </div>
+      <div class="field">
+        <label class="l">Teléfono WhatsApp *</label>
+        <input class="inp" id="l-tel" inputmode="tel" value="${esc(l.telefono)}" placeholder="656 000 0000">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="l">Canal Publicitario (Origen)</label>
+        <select class="inp" id="l-ori">
+          <option value="Facebook Ads" ${l.origen === 'Facebook Ads' ? 'selected' : ''}>Facebook Ads</option>
+          <option value="Instagram Ads" ${l.origen === 'Instagram Ads' ? 'selected' : ''}>Instagram Ads</option>
+          <option value="TikTok Ads" ${l.origen === 'TikTok Ads' ? 'selected' : ''}>TikTok Ads</option>
+          <option value="WhatsApp Directo" ${l.origen === 'WhatsApp Directo' ? 'selected' : ''}>WhatsApp Directo</option>
+          <option value="Recomendación" ${l.origen === 'Recomendación' ? 'selected' : ''}>Recomendación</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="l">Asesor Asignado</label>
+        <select class="inp" id="l-as">
+          ${USUARIOS.map(u => `<option value="${esc(u.nombre)}" ${(nameOf(l.asesorId) === u.nombre || l.asesorId === u.id) ? 'selected' : ''}>${esc(u.nombre)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label class="l">Sucursal</label>
+        <select class="inp" id="l-suc">
+          ${opts(SUCURSALES, l.sucursal, 'Seleccionar')}
+        </select>
+      </div>
+      <div class="field">
+        <label class="l">Tratamiento de Interés</label>
+        <select class="inp" id="l-tra">
+          ${opts(TRATAMIENTOS, l.tratamiento, 'Seleccionar')}
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="l">Mensaje del Anuncio / Notas</label>
+      <textarea class="inp" id="l-not" placeholder="Detalles de la consulta o mensaje inicial del anuncio">${esc(l.notas)}</textarea>
+    </div>
+
+    <div class="err" id="l-err"></div>
+
+    <div class="m-actions">
+      <button class="btn out" data-act="close">Cancelar</button>
+      <button class="btn" data-act="savelead" data-id="${id || ''}">Guardar Lead</button>
+    </div>
+  `);
+}
+
+async function saveManualLead(id){
+  const v = k => $('#' + k).value.trim();
+  const paciente = v('l-pac');
+  const telefono = v('l-tel');
+  const origen = v('l-ori');
+  const asesor = v('l-as') || (user ? user.nombre : 'Miguel');
+  const sucursal = v('l-suc');
+  const tratamiento = v('l-tra');
+  const notas = v('l-not');
+
+  if (!paciente || !telefono) {
+    $('#l-err').textContent = 'Por favor completa el nombre y teléfono del paciente.';
+    return;
+  }
+
+  const now = new Date().toISOString();
+  let target = null;
+
+  if (id) {
+    target = citas.find(c => c.id === id);
+    if (target) {
+      target.paciente = paciente;
+      target.telefono = telefono;
+      target.origen = origen;
+      target.asesorId = asesor;
+      target.sucursal = sucursal;
+      target.tratamiento = tratamiento;
+      target.notas = notas;
+    }
+  } else {
+    const leadId = 'c_lead_' + Date.now() + '_' + telefono.replace(/\D/g, '');
+    target = {
+      id: leadId,
+      paciente: paciente,
+      telefono: telefono,
+      origen: origen,
+      asesorId: asesor,
+      sucursal: sucursal,
+      tratamiento: tratamiento,
+      tipo: 'Lead WhatsApp',
+      notas: notas,
+      fecha: now.slice(0, 10),
+      hora: '10:00',
+      estatus: 'Lead',
+      creadoEl: now,
+      creadoPor: user ? user.nombre : asesor,
+      historial: [{
+        tipo: 'lead_whatsapp_capture',
+        origen: origen,
+        capturadoPor: user ? user.nombre : asesor,
+        fecha: now,
+        primerMensaje: notas
+      }]
+    };
+    citas.push(target);
+  }
+
+  persist();
+  closeModal();
+  render();
+  if (target) await DB.upsert(target);
+}
+
+// Quick status change for leads
+document.addEventListener('change', async (e) => {
+  if (e.target && e.target.classList.contains('lead-status-sel')) {
+    const leadId = e.target.dataset.leadId;
+    const newStatus = e.target.value;
+    const target = citas.find(c => c.id === leadId);
+    if (target) {
+      target.estatus = newStatus;
+      if (!target.historial) target.historial = [];
+      target.historial.push({
+        f: new Date().toISOString(),
+        e: 'Cambio de estatus: ' + newStatus,
+        por: user ? user.nombre : 'Sistema'
+      });
+      persist();
+      render();
+      await DB.upsert(target);
+    }
+  }
+});
+
+
 /* ============ EVENTS ============ */
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-act],[data-view]');
@@ -4593,6 +5279,12 @@ document.addEventListener('click',e=>{
   }
   const id=t.dataset.id;
   switch(t.dataset.act){
+    case'filter-lead':leadFilter=t.dataset.filter||'todos';renderLeadsView();break;
+    case'new-lead':openLeadModal();break;
+    case'convert-lead':citaForm(id);break;
+    case'edit-lead':openLeadModal(id);break;
+    case'savelead':saveManualLead(id);break;
+    case'del-lead':if(confirm('Â¿Deseas eliminar este lead publicitario?')){DB.delete(id);closeModal();render();}break;
     case'new':citaForm();break;
     case'edit':citaForm(id);break;
     case'status':statusForm(id);break;

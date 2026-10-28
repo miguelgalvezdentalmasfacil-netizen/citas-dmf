@@ -1,0 +1,304 @@
+/* Dental Más Fácil WhatsApp Web Extension Styles */
+
+/* Header Button inside WhatsApp chat header */
+.dmf-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0097A7 0%, #00838F 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 8px rgba(0, 151, 167, 0.35) !important;
+  transition: all 0.2s ease !important;
+  margin-left: 10px !important;
+  margin-right: 6px !important;
+  z-index: 99 !important;
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.dmf-header-btn:hover {
+  background: linear-gradient(135deg, #00ACC1 0%, #0097A7 100%) !important;
+  box-shadow: 0 4px 12px rgba(0, 151, 167, 0.5) !important;
+  transform: translateY(-1px) !important;
+}
+
+.dmf-header-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* Floating Action Pill */
+.dmf-floating-btn {
+  position: fixed;
+  bottom: 84px;
+  right: 28px;
+  background: #0F172A;
+  color: #FFFFFF;
+  border: 2px solid #0097A7;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 14px rgba(0, 151, 167, 0.4);
+  z-index: 999999;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.dmf-floating-btn:hover {
+  background: #0097A7;
+  color: #FFFFFF;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 151, 167, 0.5);
+}
+
+.dmf-floating-btn .dmf-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 6px #10B981;
+}
+
+/* Modal Backdrop & Container */
+.dmf-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: dmfFadeIn 0.2s ease-out;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+@keyframes dmfFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dmf-modal-box {
+  width: 520px;
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #0F172A;
+  color: #F8FAFC;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 1px 1px rgba(0, 151, 167, 0.3);
+  padding: 24px;
+  animation: dmfSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+@keyframes dmfSlideUp {
+  from { transform: translateY(20px) scale(0.97); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.dmf-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dmf-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.dmf-modal-title-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #0097A7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.dmf-modal-close {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.dmf-modal-close:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dmf-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.dmf-form-group {
+  margin-bottom: 14px;
+}
+
+.dmf-form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94A3B8;
+  margin-bottom: 6px;
+}
+
+.dmf-form-group input,
+.dmf-form-group select,
+.dmf-form-group textarea {
+  width: 100%;
+  background: #1E293B;
+  border: 1px solid #334155;
+  color: #FFFFFF;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.dmf-form-group input:focus,
+.dmf-form-group select:focus,
+.dmf-form-group textarea:focus {
+  border-color: #0097A7;
+  box-shadow: 0 0 0 2px rgba(0, 151, 167, 0.25);
+}
+
+.dmf-toggle-box {
+  background: #1E293B;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.dmf-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #F8FAFC;
+}
+
+.dmf-toggle-label input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  accent-color: #0097A7;
+}
+
+.dmf-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.dmf-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.dmf-btn-secondary {
+  background: #334155;
+  color: #F8FAFC;
+}
+
+.dmf-btn-secondary:hover {
+  background: #475569;
+}
+
+.dmf-btn-primary {
+  background: #0097A7;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 151, 167, 0.4);
+}
+
+.dmf-btn-primary:hover {
+  background: #00838F;
+}
+
+.dmf-btn-green {
+  background: #10B981;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.dmf-btn-green:hover {
+  background: #059669;
+}
+
+/* Toast Notifications */
+.dmf-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: #0F172A;
+  color: #FFFFFF;
+  border-left: 4px solid #10B981;
+  border-radius: 10px;
+  padding: 14px 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  z-index: 10000001;
+  font-size: 13.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: dmfToastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+@keyframes dmfToastIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.dmf-toast-error {
+  border-left-color: #EF4444;
+}
