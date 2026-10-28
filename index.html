@@ -2297,7 +2297,7 @@ function updateBadges(){
   setB('b-badge-semana',cSem,false);
   setB('b-badge-mes',cMes,false);
 
-  const elLeads = #b-badge-leads;
+  const elLeads = document.getElementById('b-badge-leads');
   if(elLeads){
     const lList = typeof getLeadsList === 'function' ? getLeadsList() : [];
     const pCnt = lList.filter(l => ['Lead','Lead WhatsApp','En conversaciÃ³n'].includes(l.estatus)).length;
@@ -2584,15 +2584,6 @@ function render(){
 
 function renderPresupuestosView(){
   sanitizeAllExistingPresupuestos();
-  const elLeads = #b-badge-leads;
-  if(elLeads){
-    const lList = typeof getLeadsList === 'function' ? getLeadsList() : [];
-    const pCnt = lList.filter(l => ['Lead','Lead WhatsApp','En conversaciÃ³n'].includes(l.estatus)).length;
-    elLeads.textContent = pCnt || (lList.length ? lList.length : '0');
-    if(pCnt > 0) elLeads.classList.add('badge-alert');
-    else elLeads.classList.remove('badge-alert');
-  }
-
   const myPres = getMyBudgets();
   let list = myPres;
 
