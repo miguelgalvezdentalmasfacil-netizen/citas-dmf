@@ -4684,32 +4684,14 @@ function printReport(){
 /* ============ LEADS MODULE ============ */
 let leadFilter = 'todos';
 let leadSearchQuery = '';
-let leadChannelFilter = '';
 
 function isAsistio(st){ return !!st && (st === 'Asisti' + '\u00f3' || st.startsWith('Asisti')); }
 function isNoAsistio(st){ return !!st && (st === 'No asisti' + '\u00f3' || st.startsWith('No asisti')); }
 
 function getLeadsList(){
-  const all = (user && user.rol === 'admin')
+  return (user && user.rol === 'admin')
     ? citas
     : citas.filter(c => nameOf(c.asesorId) === user.nombre || c.asesorId === user.id || nameOf(c.creadoPor) === user.nombre);
-
-  return all.filter(c => {
-    if (c.tipo === 'Lead WhatsApp') return true;
-    if (['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(c.estatus)) return true;
-    if (c.historial && Array.isArray(c.historial) && c.historial.some(h => h && (h.tipo === 'lead_whatsapp_capture' || h.tipo === 'lead_meta'))) return true;
-    const ori = (c.origen || '').toLowerCase();
-    if (
-      ori.includes('publicidad') ||
-      ori.includes('ads') ||
-      ori.includes('meta') ||
-      ori.includes('facebook') ||
-      ori.includes('instagram') ||
-      ori.includes('whatsapp') ||
-      ori.includes('lead')
-    ) return true;
-    return false;
-  });
 }
 
 const CAMPAIGN_OCTUBRE_LEADS = 289;
@@ -4774,12 +4756,6 @@ function renderLeadsView(){
     filtered = filtered.filter(l => isNoAsistio(l.estatus));
   } else if (leadFilter === 'descartados') {
     filtered = filtered.filter(l => ['Descartado', 'Cancel' + '\u00f3'].includes(l.estatus));
-  }
-
-  // Channel filter
-  if (leadChannelFilter) {
-    const cf = leadChannelFilter.toLowerCase();
-    filtered = filtered.filter(l => (l.origen || '').toLowerCase().includes(cf));
   }
 
   // Search filter
@@ -4858,14 +4834,6 @@ function renderLeadsView(){
       </div>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <select id="leads-channel-select" class="inp sm" style="width:auto;height:34px">
-          <option value="">Todos los Canales</option>
-          <option value="Publicidad" ${leadChannelFilter === 'Publicidad' ? 'selected' : ''}>Publicidad Meta</option>
-          <option value="Facebook" ${leadChannelFilter === 'Facebook' ? 'selected' : ''}>Facebook Ads</option>
-          <option value="Instagram" ${leadChannelFilter === 'Instagram' ? 'selected' : ''}>Instagram Ads</option>
-          <option value="WhatsApp" ${leadChannelFilter === 'WhatsApp' ? 'selected' : ''}>WhatsApp Directo</option>
-        </select>
-
         <input type="text" id="leads-search-input" class="inp sm" placeholder="Buscar por paciente o tel\u00e9fono..." value="${esc(leadSearchQuery)}" style="width:220px;height:34px">
 
         <button class="btn sm" data-act="new-lead" style="white-space:nowrap">
@@ -4908,14 +4876,6 @@ function renderLeadsView(){
         cur.focus();
         cur.selectionStart = cur.selectionEnd = cur.value.length;
       }
-    });
-  }
-
-  const selChan = $('#leads-channel-select');
-  if (selChan) {
-    selChan.addEventListener('change', e => {
-      leadChannelFilter = e.target.value;
-      renderLeadsView();
     });
   }
 }
