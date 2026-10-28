@@ -2818,6 +2818,9 @@ function citaForm(id){
     foundC.fecha = foundC.fecha || iso(new Date());
     foundC.hora = foundC.hora || '11:00';
     foundC.estatus = 'Pendiente';
+    if(foundC.paciente && (/^\+?\d[\d\s\-]+$/.test(foundC.paciente) || foundC.paciente.includes('Prospecto'))){
+      foundC.paciente = '';
+    }
   }
   const c = foundC || {fecha:view==='manana'?addDays(iso(new Date()),1):iso(new Date()),hora:'',paciente:'',telefono:'',sucursal:'',tratamiento:'',paquete:'Individual',tipo:'Nueva',origen:'',notas:'',asesorId:user?user.nombre:'Miguel'};
   const selAsesor=c.asesorId?nameOf(c.asesorId):(user?user.nombre:'Miguel');
@@ -4977,8 +4980,8 @@ function leadCardHTML(l){
             </a>
           ` : `<span>Sin tel\u00e9fono registrado</span>`}
         </div>
-        <div><b>Tratamiento:</b> ${esc(l.tratamiento || 'Valoraci\u00f3n')}</div>
-        <div><b>Fecha Cita:</b> ${esc(fmtShort(l.fecha))} ${esc(l.hora || '')}</div>
+        ${l.tratamiento ? `<div><b>Tratamiento:</b> ${esc(l.tratamiento)}</div>` : ''}
+        <div><b>Fecha:</b> ${esc(fmtShort(l.fecha))} ${esc(l.hora || '')}</div>
       </div>
 
       ${l.notas ? `
