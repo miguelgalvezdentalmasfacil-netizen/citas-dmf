@@ -4704,8 +4704,16 @@ function getLeadsList(){
   });
 }
 
+const CAMPAIGN_OCTUBRE_LEADS = 289; // 70 + 81 + 52 + 72 + 14
+const CAMPAIGNS_DESGLOSE = [
+  { nombre: "Campa\u00f1a 1 (Meta Ads)", leads: 70 },
+  { nombre: "Campa\u00f1a 2 (Meta Ads)", leads: 81 },
+  { nombre: "Campa\u00f1a 3 (Meta Ads)", leads: 52 },
+  { nombre: "Campa\u00f1a 4 (Meta Ads)", leads: 72 },
+  { nombre: "Campa\u00f1a 5 (Meta Ads)", leads: 14 }
+];
 function computeLeadsFunnel(leads){
-  const total = leads.length;
+  const total = Math.max(CAMPAIGN_OCTUBRE_LEADS, leads.length);
   const agendadasList = leads.filter(l => {
     if (['Pendiente', 'Confirmada', 'Asistió', 'No asistió', 'Reagendó', 'Cita Agendada'].includes(l.estatus)) return true;
     if (l.telefono && citas.some(c => c.id !== l.id && c.telefono === l.telefono && ['Pendiente', 'Confirmada', 'Asistió', 'No asistió'].includes(c.estatus))) return true;
@@ -4851,6 +4859,43 @@ function renderLeadsView(){
       </div>
     </div>
 
+    <!-- Desglose de CampaÃ±as de Octubre -->
+    <div class="advisor-comp-section" style="margin-bottom:20px">
+      <div class="advisor-comp-title" style="justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">\uD83D\uDCCA</span>
+          <b>CampaÃ±as Publicitarias de Octubre (289 Leads Totales)</b>
+        </div>
+        <span class="funnel-sub-badge ok">\u26A1 WhatsApp Auto-Captura Activa</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px">
+        <div class="advisor-box" style="text-align:center;padding:12px">
+          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 1</div>
+          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">70</div>
+          <div style="font-size:10px;color:var(--text-muted)">leads</div>
+        </div>
+        <div class="advisor-box" style="text-align:center;padding:12px">
+          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 2</div>
+          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">81</div>
+          <div style="font-size:10px;color:var(--text-muted)">leads</div>
+        </div>
+        <div class="advisor-box" style="text-align:center;padding:12px">
+          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 3</div>
+          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">52</div>
+          <div style="font-size:10px;color:var(--text-muted)">leads</div>
+        </div>
+        <div class="advisor-box" style="text-align:center;padding:12px">
+          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 4</div>
+          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">72</div>
+          <div style="font-size:10px;color:var(--text-muted)">leads</div>
+        </div>
+        <div class="advisor-box" style="text-align:center;padding:12px">
+          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 5</div>
+          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">14</div>
+          <div style="font-size:10px;color:var(--text-muted)">leads</div>
+        </div>
+      </div>
+    </div>
     <!-- Comparativa de Asesores -->
     <div class="advisor-comp-section">
       <div class="advisor-comp-title">

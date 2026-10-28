@@ -2,7 +2,7 @@ const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const advisorSelect = document.getElementById('advisorSelect');
+  const assignMode = document.getElementById('assignMode');
   const todayLeadsCount = document.getElementById('todayLeadsCount');
   const totalCapturedCount = document.getElementById('totalCapturedCount');
   const syncStatus = document.getElementById('syncStatus');
@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnOpenDMF = document.getElementById('btnOpenDMF');
 
   // Load saved preferences
-  chrome.storage.local.get(['dmf_advisor', 'dmf_leads_today', 'dmf_leads_total', 'dmf_leads_date'], (res) => {
-    if (res.dmf_advisor) advisorSelect.value = res.dmf_advisor;
+  chrome.storage.local.get(['dmf_assign_mode', 'dmf_leads_today', 'dmf_leads_total', 'dmf_leads_date'], (res) => {
+    if (res.dmf_assign_mode) assignMode.value = res.dmf_assign_mode;
 
     const todayIso = new Date().toISOString().slice(0, 10);
     const todayCount = (res.dmf_leads_date === todayIso) ? (res.dmf_leads_today || 0) : 0;
@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Save changes
-  advisorSelect.addEventListener('change', () => {
-    chrome.storage.local.set({ dmf_advisor: advisorSelect.value });
+  assignMode.addEventListener('change', () => {
+    chrome.storage.local.set({ dmf_assign_mode: assignMode.value });
   });
 
   // Test Supabase connection
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
     if (res.ok) {
-      syncText.textContent = 'En la nube (Conectado)';
+      syncText.textContent = 'Automático Activo (En la nube)';
       syncStatus.style.background = 'rgba(16, 185, 129, 0.15)';
       syncStatus.style.borderColor = 'rgba(16, 185, 129, 0.4)';
     } else {
