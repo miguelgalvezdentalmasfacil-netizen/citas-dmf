@@ -117,7 +117,7 @@
     // Inspect incoming messages
     const msgContainers = document.querySelectorAll('#main div[data-testid="msg-container"], #main .message-in');
     const adKeywords = [
-      'anuncio', 'publicidad', 'facebook', 'fb.me', 'instagram', 'tiktok',
+      'anuncio', 'publicidad', 'facebook', 'fb.me', 'instagram', 'meta',
       'información', 'informes', 'promoción', 'promo', 'valoración',
       'precio', 'costo', 'cita', 'brackets', 'ortodoncia', 'limpieza',
       'implante', 'muela', 'dientes', 'soluciones dentales', 'recupera tus piezas',
@@ -131,9 +131,7 @@
           if (!latestMessage) latestMessage = txt.trim().slice(0, 300);
           const lower = txt.toLowerCase();
 
-          if (lower.includes('tiktok')) origin = 'TikTok Ads';
-          else if (lower.includes('instagram') || lower.includes('ig')) origin = 'Instagram Ads';
-          else if (lower.includes('facebook') || lower.includes('fb')) origin = 'Facebook Ads';
+          origin = 'Meta Ads';
 
           if (adKeywords.some(kw => lower.includes(kw))) {
             isAdLead = true;
@@ -176,7 +174,7 @@
 
     // Auto-capture this lead!
     isCapturing = true;
-    updateAutoStatusBadge(false, '⚡ Registrando lead en DMF...');
+    updateAutoStatusBadge(false, 'Registrando lead en DMF...');
 
     // Determine advisor (turnos 50/50 or specific)
     let assignedAdvisor = 'Miguel';
@@ -260,7 +258,7 @@
           });
         }
 
-        showToast(`⚡ Lead de publicidad registrado automáticamente: ${data.name} (${data.phone}) → Asignado a ${assignedAdvisor}`);
+        showToast(`Lead publicitario registrado en DMF: ${data.name} (${data.phone}) → Asignado a ${assignedAdvisor}`);
         updateAutoStatusBadge(true, `Auto-registrado (${assignedAdvisor})`);
       }
     } catch (err) {

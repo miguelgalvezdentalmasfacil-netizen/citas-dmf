@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -751,7 +751,7 @@ textarea.inp{resize:vertical;min-height:80px}
         <button data-view="mes">Mes <span class="badge" id="b-badge-mes"></span></button>
         <button data-view="todas">Todas</button>
         <button data-view="presupuestos" class="tab-presupuestos">Presupuestos <span class="badge" id="b-badge-presupuestos"></span></button>
-        <button data-view="leads" class="tab-leads" id="tab-btn-leads">Campa&ntilde;as &amp; Leads <span class="badge" id="b-badge-leads"></span></button>
+        <button data-view="leads" class="tab-leads" id="tab-btn-leads">Leads <span class="badge" id="b-badge-leads"></span></button>
       </div>
       <div>
         <button class="btn out sm btn-filter-toggle" id="b-toggle-filters" title="Buscar por paciente, teléfono o aplicar filtros">
@@ -2532,13 +2532,13 @@ function render(){
     semana:[weekTitle,weekLabel],
     mes:[isCurrMonth?'Citas de este mes':'Citas del mes',mName],
     todas:['Todas las citas','Historial completo'],
-    leads:['Campa\u00f1as & Leads Publicitarios','Embudo de conversi\u00f3n de anuncios Meta & TikTok en tiempo real'],
+    leads:['Leads','Embudo de conversi\u00f3n de Meta Ads a citas y asistencias'],
     presupuestos:['Planes de Tratamiento y Presupuestos','Seguimiento cl\u00ednico y financiero por Asesor Dental']
   };
   $('#h-title').textContent=titles[view][0];
   $('#h-sub').textContent=titles[view][1];
 
-  if(view === 'leads'){ renderLeadsView(); return; }
+  if(view === 'leads'){ document.getElementById('stats').innerHTML = ''; renderLeadsView(); return; }
 
   if(view === 'presupuestos'){
     const kpis = computeAllBudgetsKpis();
@@ -4678,57 +4678,53 @@ function printReport(){
   printWindow.document.close();
 }
 
-/* ============ CAMPAÑAS & LEADS MODULE ============ */
+/* ============ LEADS MODULE ============ */
 let leadFilter = 'todos';
 let leadSearchQuery = '';
 let leadChannelFilter = '';
-let leadAdvisorFilter = '';
+
+function isAsistio(st){ return !!st && (st === 'Asisti' + '\u00f3' || st.startsWith('Asisti')); }
+function isNoAsistio(st){ return !!st && (st === 'No asisti' + '\u00f3' || st.startsWith('No asisti')); }
 
 function getLeadsList(){
-  const all = (user.rol === 'admin')
+  const all = (user && user.rol === 'admin')
     ? citas
     : citas.filter(c => nameOf(c.asesorId) === user.nombre || c.asesorId === user.id || nameOf(c.creadoPor) === user.nombre);
 
   return all.filter(c => {
     if (c.tipo === 'Lead WhatsApp') return true;
-    if (['Lead', 'Lead WhatsApp', 'En conversación', 'Descartado'].includes(c.estatus)) return true;
+    if (['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(c.estatus)) return true;
     if (c.historial && Array.isArray(c.historial) && c.historial.some(h => h && (h.tipo === 'lead_whatsapp_capture' || h.tipo === 'lead_meta'))) return true;
-    if (c.origen && (
-      c.origen.toLowerCase().includes('ads') ||
-      c.origen.toLowerCase().includes('facebook') ||
-      c.origen.toLowerCase().includes('instagram') ||
-      c.origen.toLowerCase().includes('tiktok') ||
-      c.origen === 'WhatsApp Directo'
-    )) return true;
+    const ori = (c.origen || '').toLowerCase();
+    if (
+      ori.includes('publicidad') ||
+      ori.includes('ads') ||
+      ori.includes('meta') ||
+      ori.includes('facebook') ||
+      ori.includes('instagram') ||
+      ori.includes('whatsapp') ||
+      ori.includes('lead')
+    ) return true;
     return false;
   });
 }
 
-const CAMPAIGN_OCTUBRE_LEADS = 289; // 70 + 81 + 52 + 72 + 14
-const CAMPAIGNS_DESGLOSE = [
-  { nombre: "Campa\u00f1a 1 (Meta Ads)", leads: 70 },
-  { nombre: "Campa\u00f1a 2 (Meta Ads)", leads: 81 },
-  { nombre: "Campa\u00f1a 3 (Meta Ads)", leads: 52 },
-  { nombre: "Campa\u00f1a 4 (Meta Ads)", leads: 72 },
-  { nombre: "Campa\u00f1a 5 (Meta Ads)", leads: 14 }
-];
+const CAMPAIGN_OCTUBRE_LEADS = 289;
+
 function computeLeadsFunnel(leads){
-  const total = Math.max(CAMPAIGN_OCTUBRE_LEADS, leads.length);
-  const agendadasList = leads.filter(l => {
-    if (['Pendiente', 'Confirmada', 'Asistió', 'No asistió', 'Reagendó', 'Cita Agendada'].includes(l.estatus)) return true;
-    if (l.telefono && citas.some(c => c.id !== l.id && c.telefono === l.telefono && ['Pendiente', 'Confirmada', 'Asistió', 'No asistió'].includes(c.estatus))) return true;
-    return false;
-  });
+  const newLeads = leads.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus));
+  const total = Math.max(CAMPAIGN_OCTUBRE_LEADS, CAMPAIGN_OCTUBRE_LEADS + newLeads.length);
+
+  const agendadasList = leads.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus));
   const agendadas = agendadasList.length;
   const convRate = total > 0 ? Math.round((agendadas / total) * 100) : 0;
 
-  const asistieronList = leads.filter(l => {
-    if (l.estatus === 'Asistió') return true;
-    if (l.telefono && citas.some(c => c.id !== l.id && c.telefono === l.telefono && c.estatus === 'Asistió')) return true;
-    return false;
-  });
+  const asistieronList = leads.filter(l => isAsistio(l.estatus));
   const asistieron = asistieronList.length;
   const asistRate = agendadas > 0 ? Math.round((asistieron / agendadas) * 100) : 0;
+
+  const noAsistieronList = leads.filter(l => isNoAsistio(l.estatus));
+  const noAsistieron = noAsistieronList.length;
 
   const ingresosConsultas = asistieron * 350;
   let ingresosPresupuestos = 0;
@@ -4750,6 +4746,7 @@ function computeLeadsFunnel(leads){
     convRate,
     asistieron,
     asistRate,
+    noAsistieron,
     ingresosConsultas,
     ingresosPresupuestos,
     totalIngresos
@@ -4760,38 +4757,26 @@ function renderLeadsView(){
   const allLeads = getLeadsList();
   const funnel = computeLeadsFunnel(allLeads);
 
-  // Advisor metrics
-  const advMiguel = computeLeadsFunnel(allLeads.filter(l => nameOf(l.asesorId) === 'Miguel' || nameOf(l.creadoPor) === 'Miguel'));
-  const advEdgar = computeLeadsFunnel(allLeads.filter(l => nameOf(l.asesorId) === 'Edgar' || nameOf(l.creadoPor) === 'Edgar'));
-
-  // Channel metrics
-  const chFB = allLeads.filter(l => (l.origen || '').toLowerCase().includes('facebook')).length;
-  const chIG = allLeads.filter(l => (l.origen || '').toLowerCase().includes('instagram')).length;
-  const chTT = allLeads.filter(l => (l.origen || '').toLowerCase().includes('tiktok')).length;
-  const chWA = allLeads.filter(l => (l.origen || '').toLowerCase().includes('whatsapp')).length;
-
   // Filter list
   let filtered = allLeads;
 
   // Status Filter
   if (leadFilter === 'nuevos') {
-    filtered = filtered.filter(l => ['Lead', 'Lead WhatsApp', 'En conversación'].includes(l.estatus));
+    filtered = filtered.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus));
   } else if (leadFilter === 'agendados') {
-    filtered = filtered.filter(l => ['Cita Agendada', 'Pendiente', 'Confirmada', 'Reagendó'].includes(l.estatus));
+    filtered = filtered.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus));
   } else if (leadFilter === 'asistieron') {
-    filtered = filtered.filter(l => l.estatus === 'Asistió');
+    filtered = filtered.filter(l => isAsistio(l.estatus));
+  } else if (leadFilter === 'no_asistieron') {
+    filtered = filtered.filter(l => isNoAsistio(l.estatus));
   } else if (leadFilter === 'descartados') {
-    filtered = filtered.filter(l => ['Descartado', 'No asistió', 'Canceló'].includes(l.estatus));
-  }
-
-  // Advisor filter
-  if (leadAdvisorFilter) {
-    filtered = filtered.filter(l => nameOf(l.asesorId) === leadAdvisorFilter || nameOf(l.creadoPor) === leadAdvisorFilter);
+    filtered = filtered.filter(l => ['Descartado', 'Cancel' + '\u00f3'].includes(l.estatus));
   }
 
   // Channel filter
   if (leadChannelFilter) {
-    filtered = filtered.filter(l => (l.origen || '').toLowerCase().includes(leadChannelFilter.toLowerCase()));
+    const cf = leadChannelFilter.toLowerCase();
+    filtered = filtered.filter(l => (l.origen || '').toLowerCase().includes(cf));
   }
 
   // Search filter
@@ -4807,10 +4792,11 @@ function renderLeadsView(){
 
   // Counts for pills
   const cAll = allLeads.length;
-  const cNuevos = allLeads.filter(l => ['Lead', 'Lead WhatsApp', 'En conversación'].includes(l.estatus)).length;
-  const cAgendados = allLeads.filter(l => ['Cita Agendada', 'Pendiente', 'Confirmada', 'Reagendó'].includes(l.estatus)).length;
-  const cAsistieron = allLeads.filter(l => l.estatus === 'Asistió').length;
-  const cDescartados = allLeads.filter(l => ['Descartado', 'No asistió', 'Canceló'].includes(l.estatus)).length;
+  const cNuevos = allLeads.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus)).length;
+  const cAgendados = allLeads.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus)).length;
+  const cAsistieron = allLeads.filter(l => isAsistio(l.estatus)).length;
+  const cNoAsistieron = allLeads.filter(l => isNoAsistio(l.estatus)).length;
+  const cDescartados = allLeads.filter(l => ['Descartado', 'Cancel' + '\u00f3'].includes(l.estatus)).length;
 
   // Render HTML
   let html = `
@@ -4819,19 +4805,17 @@ function renderLeadsView(){
       <div class="funnel-card">
         <div class="funnel-card-header">
           <span class="funnel-card-label">1. Leads Recibidos</span>
-          <div class="funnel-card-icon">💬</div>
         </div>
         <div class="funnel-card-val">${funnel.total}</div>
-        <div class="funnel-sub-badge info">Meta & TikTok Ads</div>
+        <div class="funnel-sub-badge info">Meta Ads</div>
       </div>
 
       <div class="funnel-card">
         <div class="funnel-card-header">
           <span class="funnel-card-label">2. Citas Agendadas</span>
-          <div class="funnel-card-icon">📅</div>
         </div>
         <div class="funnel-card-val">${funnel.agendadas}</div>
-        <div class="funnel-sub-badge ${funnel.convRate >= 30 ? 'ok' : 'info'}">
+        <div class="funnel-sub-badge ${funnel.convRate >= 15 ? 'ok' : 'info'}">
           ${funnel.convRate}% Tasa Conversi\u00f3n
         </div>
       </div>
@@ -4839,10 +4823,9 @@ function renderLeadsView(){
       <div class="funnel-card">
         <div class="funnel-card-header">
           <span class="funnel-card-label">3. Asistencias</span>
-          <div class="funnel-card-icon">🏥</div>
         </div>
         <div class="funnel-card-val">${funnel.asistieron}</div>
-        <div class="funnel-sub-badge ${funnel.asistRate >= 60 ? 'ok' : 'info'}">
+        <div class="funnel-sub-badge ${funnel.asistRate >= 30 ? 'ok' : 'info'}">
           ${funnel.asistRate}% Asistencia Cita
         </div>
       </div>
@@ -4850,115 +4833,10 @@ function renderLeadsView(){
       <div class="funnel-card">
         <div class="funnel-card-header">
           <span class="funnel-card-label">4. Facturaci\u00f3n Anuncios</span>
-          <div class="funnel-card-icon">💰</div>
         </div>
         <div class="funnel-card-val">${fmtMoney(funnel.totalIngresos)}</div>
         <div class="funnel-sub-badge money">
           Consultas + Planes
-        </div>
-      </div>
-    </div>
-
-    <!-- Desglose de CampaÃ±as de Octubre -->
-    <div class="advisor-comp-section" style="margin-bottom:20px">
-      <div class="advisor-comp-title" style="justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">\uD83D\uDCCA</span>
-          <b>CampaÃ±as Publicitarias de Octubre (289 Leads Totales)</b>
-        </div>
-        <span class="funnel-sub-badge ok">\u26A1 WhatsApp Auto-Captura Activa</span>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:12px">
-        <div class="advisor-box" style="text-align:center;padding:12px">
-          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 1</div>
-          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">70</div>
-          <div style="font-size:10px;color:var(--text-muted)">leads</div>
-        </div>
-        <div class="advisor-box" style="text-align:center;padding:12px">
-          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 2</div>
-          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">81</div>
-          <div style="font-size:10px;color:var(--text-muted)">leads</div>
-        </div>
-        <div class="advisor-box" style="text-align:center;padding:12px">
-          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 3</div>
-          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">52</div>
-          <div style="font-size:10px;color:var(--text-muted)">leads</div>
-        </div>
-        <div class="advisor-box" style="text-align:center;padding:12px">
-          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 4</div>
-          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">72</div>
-          <div style="font-size:10px;color:var(--text-muted)">leads</div>
-        </div>
-        <div class="advisor-box" style="text-align:center;padding:12px">
-          <div style="font-size:11.5px;color:var(--text-muted)">Campa\u00f1a 5</div>
-          <div style="font-size:20px;font-weight:700;color:#0097a7;margin-top:2px">14</div>
-          <div style="font-size:10px;color:var(--text-muted)">leads</div>
-        </div>
-      </div>
-    </div>
-    <!-- Comparativa de Asesores -->
-    <div class="advisor-comp-section">
-      <div class="advisor-comp-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Rendimiento de Conversi\u00f3n por Asesor Dental
-      </div>
-      <div class="advisor-comp-grid">
-        <!-- Edgar -->
-        <div class="advisor-box">
-          <div class="advisor-box-head">
-            <div class="advisor-box-name">
-              <span>Edgar</span>
-              <span class="advisor-badge-pill">Asesor</span>
-            </div>
-            <div style="font-size:12px;color:var(--text-muted)">${advEdgar.total} leads asignados</div>
-          </div>
-          <div class="advisor-box-kpis">
-            <div class="adv-kpi-item">
-              <label>Leads</label>
-              <b>${advEdgar.total}</b>
-            </div>
-            <div class="adv-kpi-item">
-              <label>Citas</label>
-              <b>${advEdgar.agendadas}</b>
-            </div>
-            <div class="adv-kpi-item">
-              <label>Conversión</label>
-              <b class="rate">${advEdgar.convRate}%</b>
-            </div>
-            <div class="adv-kpi-item">
-              <label>Facturación</label>
-              <b class="cash">${fmtMoney(advEdgar.totalIngresos)}</b>
-            </div>
-          </div>
-        </div>
-
-        <!-- Miguel -->
-        <div class="advisor-box">
-          <div class="advisor-box-head">
-            <div class="advisor-box-name">
-              <span>Miguel</span>
-              <span class="advisor-badge-pill">Admin / Asesor</span>
-            </div>
-            <div style="font-size:12px;color:var(--text-muted)">${advMiguel.total} leads asignados</div>
-          </div>
-          <div class="advisor-box-kpis">
-            <div class="adv-kpi-item">
-              <label>Leads</label>
-              <b>${advMiguel.total}</b>
-            </div>
-            <div class="adv-kpi-item">
-              <label>Citas</label>
-              <b>${advMiguel.agendadas}</b>
-            </div>
-            <div class="adv-kpi-item">
-              <label>Conversión</label>
-              <b class="rate">${advMiguel.convRate}%</b>
-            </div>
-            <div class="adv-kpi-item">
-              <label>Facturación</label>
-              <b class="cash">${fmtMoney(advMiguel.totalIngresos)}</b>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -4970,13 +4848,16 @@ function renderLeadsView(){
           Todos <span class="lp-count">${cAll}</span>
         </button>
         <button class="lead-pill-btn ${leadFilter === 'nuevos' ? 'active' : ''}" data-act="filter-lead" data-filter="nuevos">
-          💬 Nuevos / Seguimiento <span class="lp-count">${cNuevos}</span>
+          Nuevos Leads <span class="lp-count">${cNuevos}</span>
         </button>
         <button class="lead-pill-btn ${leadFilter === 'agendados' ? 'active' : ''}" data-act="filter-lead" data-filter="agendados">
-          📅 Cita Agendada <span class="lp-count">${cAgendados}</span>
+          Citas Agendadas <span class="lp-count">${cAgendados}</span>
         </button>
         <button class="lead-pill-btn ${leadFilter === 'asistieron' ? 'active' : ''}" data-act="filter-lead" data-filter="asistieron">
-          🏥 Asistieron <span class="lp-count">${cAsistieron}</span>
+          Asistieron <span class="lp-count">${cAsistieron}</span>
+        </button>
+        <button class="lead-pill-btn ${leadFilter === 'no_asistieron' ? 'active' : ''}" data-act="filter-lead" data-filter="no_asistieron">
+          No Asistieron <span class="lp-count">${cNoAsistieron}</span>
         </button>
         <button class="lead-pill-btn ${leadFilter === 'descartados' ? 'active' : ''}" data-act="filter-lead" data-filter="descartados">
           Descartados <span class="lp-count">${cDescartados}</span>
@@ -4984,21 +4865,15 @@ function renderLeadsView(){
       </div>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <select id="leads-advisor-select" class="inp sm" style="width:auto;height:34px">
-          <option value="">Todos los Asesores</option>
-          <option value="Edgar" ${leadAdvisorFilter === 'Edgar' ? 'selected' : ''}>Edgar</option>
-          <option value="Miguel" ${leadAdvisorFilter === 'Miguel' ? 'selected' : ''}>Miguel</option>
-        </select>
-
         <select id="leads-channel-select" class="inp sm" style="width:auto;height:34px">
           <option value="">Todos los Canales</option>
+          <option value="Publicidad" ${leadChannelFilter === 'Publicidad' ? 'selected' : ''}>Publicidad Meta</option>
           <option value="Facebook" ${leadChannelFilter === 'Facebook' ? 'selected' : ''}>Facebook Ads</option>
           <option value="Instagram" ${leadChannelFilter === 'Instagram' ? 'selected' : ''}>Instagram Ads</option>
-          <option value="TikTok" ${leadChannelFilter === 'TikTok' ? 'selected' : ''}>TikTok Ads</option>
           <option value="WhatsApp" ${leadChannelFilter === 'WhatsApp' ? 'selected' : ''}>WhatsApp Directo</option>
         </select>
 
-        <input type="text" id="leads-search-input" class="inp sm" placeholder="Buscar por paciente o teléfono..." value="${esc(leadSearchQuery)}" style="width:200px;height:34px">
+        <input type="text" id="leads-search-input" class="inp sm" placeholder="Buscar por paciente o tel\u00e9fono..." value="${esc(leadSearchQuery)}" style="width:220px;height:34px">
 
         <button class="btn sm" data-act="new-lead" style="white-space:nowrap">
           + Registrar Lead Manual
@@ -5014,8 +4889,8 @@ function renderLeadsView(){
         <div style="margin-bottom:12px;color:var(--text-light);display:flex;justify-content:center">
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </div>
-        <div style="font-weight:600;font-size:16px;margin-bottom:6px">No hay leads en esta selección</div>
-        <div class="sub nocap" style="margin-bottom:12px">Los leads de WhatsApp Web capturados con la extensión aparecerán aquí automáticamente en tiempo real.</div>
+        <div style="font-weight:600;font-size:16px;margin-bottom:6px">No hay registros en esta selecci\u00f3n</div>
+        <div class="sub nocap" style="margin-bottom:12px">Los leads de WhatsApp Web capturados con la extensi\u00f3n aparecer\u00e1n aqu\u00ed autom\u00e1ticamente en tiempo real.</div>
         <button class="btn sm out" data-act="new-lead">+ Registrar Lead Manual</button>
       </div>
     `;
@@ -5035,20 +4910,11 @@ function renderLeadsView(){
     inSearch.addEventListener('input', e => {
       leadSearchQuery = e.target.value.trim();
       renderLeadsView();
-      // restore focus
       const cur = $('#leads-search-input');
       if (cur) {
         cur.focus();
         cur.selectionStart = cur.selectionEnd = cur.value.length;
       }
-    });
-  }
-
-  const selAdv = $('#leads-advisor-select');
-  if (selAdv) {
-    selAdv.addEventListener('change', e => {
-      leadAdvisorFilter = e.target.value;
-      renderLeadsView();
     });
   }
 
@@ -5063,18 +4929,20 @@ function renderLeadsView(){
 
 function leadCardHTML(l){
   const cleanTel = (l.telefono || '').replace(/\D/g, '');
-  const origen = (l.origen || 'Facebook Ads').toLowerCase();
+  const origen = (l.origen || 'Meta Ads').toLowerCase();
 
-  let chBadge = '<span class="channel-badge fb">Facebook Ads</span>';
+  let chBadge = '<span class="channel-badge fb">Meta Ads</span>';
   if (origen.includes('instagram')) chBadge = '<span class="channel-badge ig">Instagram Ads</span>';
-  else if (origen.includes('tiktok')) chBadge = '<span class="channel-badge tt">TikTok Ads</span>';
+  else if (origen.includes('facebook')) chBadge = '<span class="channel-badge fb">Facebook Ads</span>';
   else if (origen.includes('whatsapp')) chBadge = '<span class="channel-badge wa">WhatsApp Directo</span>';
+  else if (origen.includes('publicidad')) chBadge = '<span class="channel-badge fb">Meta Ads</span>';
 
   let stClass = 'st-nuevo';
-  if (l.estatus === 'En conversación') stClass = 'st-en-conversacion';
-  else if (['Cita Agendada', 'Pendiente', 'Confirmada'].includes(l.estatus)) stClass = 'st-agendado';
-  else if (l.estatus === 'Asistió') stClass = 'st-asistio';
-  else if (['Descartado', 'No asistió', 'Canceló'].includes(l.estatus)) stClass = 'st-descartado';
+  if (l.estatus === 'En conversaci' + '\u00f3' + 'n') stClass = 'st-en-conversacion';
+  else if (isAsistio(l.estatus)) stClass = 'st-asistio';
+  else if (isNoAsistio(l.estatus)) stClass = 'st-descartado';
+  else if (['Cita Agendada', 'Pendiente', 'Confirmada', 'Reagend' + '\u00f3'].includes(l.estatus)) stClass = 'st-agendado';
+  else if (['Descartado', 'Cancel' + '\u00f3'].includes(l.estatus)) stClass = 'st-descartado';
 
   const fechaReg = l.creadoEl ? new Date(l.creadoEl).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : (fmtShort(l.fecha) + ' ' + (l.hora || ''));
 
@@ -5085,16 +4953,17 @@ function leadCardHTML(l){
           <div class="lead-name">${esc(l.paciente)}</div>
           <div class="lead-badges-row">
             ${chBadge}
-            <span class="advisor-badge-pill">👤 ${esc(nameOf(l.asesorId || l.creadoPor))}</span>
+            <span class="advisor-badge-pill">Asesor: ${esc(nameOf(l.asesorId || l.creadoPor))}</span>
           </div>
         </div>
         <div>
           <select class="lead-status-sel" data-lead-id="${esc(l.id)}">
-            <option value="Lead" ${l.estatus === 'Lead' ? 'selected' : ''}>💬 Lead Nuevo</option>
-            <option value="En conversación" ${l.estatus === 'En conversación' ? 'selected' : ''}>⏳ En conversación</option>
-            <option value="Cita Agendada" ${['Cita Agendada', 'Pendiente', 'Confirmada'].includes(l.estatus) ? 'selected' : ''}>📅 Cita Agendada</option>
-            <option value="Asistió" ${l.estatus === 'Asistió' ? 'selected' : ''}>✅ Asistió a Consulta</option>
-            <option value="Descartado" ${['Descartado', 'No asistió', 'Canceló'].includes(l.estatus) ? 'selected' : ''}>❌ Descartado</option>
+            <option value="Lead" ${l.estatus === 'Lead' ? 'selected' : ''}>Lead Nuevo</option>
+            <option value="En conversaci\u00f3n" ${l.estatus === 'En conversaci\u00f3n' ? 'selected' : ''}>En conversaci\u00f3n</option>
+            <option value="Cita Agendada" ${['Cita Agendada', 'Pendiente', 'Confirmada'].includes(l.estatus) ? 'selected' : ''}>Cita Agendada</option>
+            <option value="Asisti\u00f3" ${isAsistio(l.estatus) ? 'selected' : ''}>Asisti\u00f3</option>
+            <option value="No asisti\u00f3" ${isNoAsistio(l.estatus) ? 'selected' : ''}>No asisti\u00f3</option>
+            <option value="Descartado" ${['Descartado', 'Cancel\u00f3'].includes(l.estatus) ? 'selected' : ''}>Descartado</option>
           </select>
         </div>
       </div>
@@ -5106,10 +4975,10 @@ function leadCardHTML(l){
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
               ${esc(l.telefono)}
             </a>
-          ` : `<span>Sin teléfono registrado</span>`}
+          ` : `<span>Sin tel\u00e9fono registrado</span>`}
         </div>
-        <div><b>Interés:</b> ${esc(l.tratamiento || 'Valoración General')}</div>
-        <div><b>Capturado:</b> ${esc(fechaReg)}</div>
+        <div><b>Tratamiento:</b> ${esc(l.tratamiento || 'Valoraci\u00f3n')}</div>
+        <div><b>Fecha Cita:</b> ${esc(fmtShort(l.fecha))} ${esc(l.hora || '')}</div>
       </div>
 
       ${l.notas ? `
@@ -5119,13 +4988,19 @@ function leadCardHTML(l){
       ` : ''}
 
       <div class="lead-actions-row">
-        <button class="btn sm btn-lead-agendar" data-act="convert-lead" data-id="${esc(l.id)}" title="Agendar cita formal en el calendario para este lead">
-          📅 Agendar Cita
-        </button>
+        ${(['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus)) ? `
+          <button class="btn sm btn-lead-agendar" data-act="convert-lead" data-id="${esc(l.id)}" title="Agendar cita formal en el calendario para este lead">
+            Agendar Cita
+          </button>
+        ` : `
+          <button class="btn sm out" data-act="edit" data-id="${esc(l.id)}" title="Ver o editar cita en agenda">
+            Ver Cita
+          </button>
+        `}
 
         ${cleanTel ? `
           <a class="btn out sm" href="https://web.whatsapp.com/send?phone=${cleanTel}" target="_blank" style="color:#10b981;border-color:rgba(16,185,129,.4)">
-            💬 WhatsApp
+            WhatsApp
           </a>
         ` : ''}
 
@@ -5134,7 +5009,7 @@ function leadCardHTML(l){
         </button>
 
         <button class="btn out sm" data-act="del-lead" data-id="${esc(l.id)}" style="color:var(--bad);border-color:var(--bad)" title="Eliminar lead">
-          🗑️
+          Eliminar
         </button>
       </div>
     </div>
@@ -5146,7 +5021,7 @@ function openLeadModal(id){
     id: '',
     paciente: '',
     telefono: '',
-    origen: 'Facebook Ads',
+    origen: 'Meta Ads',
     asesorId: user ? user.nombre : 'Miguel',
     sucursal: 'Plaza San Pedro',
     tratamiento: 'Valoración Dental ($350)',
@@ -5174,7 +5049,7 @@ function openLeadModal(id){
         <select class="inp" id="l-ori">
           <option value="Facebook Ads" ${l.origen === 'Facebook Ads' ? 'selected' : ''}>Facebook Ads</option>
           <option value="Instagram Ads" ${l.origen === 'Instagram Ads' ? 'selected' : ''}>Instagram Ads</option>
-          <option value="TikTok Ads" ${l.origen === 'TikTok Ads' ? 'selected' : ''}>TikTok Ads</option>
+          
           <option value="WhatsApp Directo" ${l.origen === 'WhatsApp Directo' ? 'selected' : ''}>WhatsApp Directo</option>
           <option value="Recomendación" ${l.origen === 'Recomendación' ? 'selected' : ''}>Recomendación</option>
         </select>
