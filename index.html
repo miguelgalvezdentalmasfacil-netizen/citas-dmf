@@ -608,7 +608,7 @@ textarea.inp{resize:vertical;min-height:80px}
 .seg button.tab-leads.on{background:#0097A7!important;color:#fff!important}
 
 /* Leads Funnel KPI Grid */
-.lead-funnel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.lead-funnel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
 @media (max-width:900px){.lead-funnel-grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:480px){.lead-funnel-grid{grid-template-columns:1fr}}
 
@@ -4832,16 +4832,6 @@ function renderLeadsView(){
           ${funnel.asistRate}% Asistencia Cita
         </div>
       </div>
-
-      <div class="funnel-card">
-        <div class="funnel-card-header">
-          <span class="funnel-card-label">4. Facturaci\u00f3n Anuncios</span>
-        </div>
-        <div class="funnel-card-val">${fmtMoney(funnel.totalIngresos)}</div>
-        <div class="funnel-sub-badge money">
-          Consultas + Planes
-        </div>
-      </div>
     </div>
 
     <!-- Toolbar & Filters -->
@@ -4958,16 +4948,6 @@ function leadCardHTML(l){
             ${chBadge}
             <span class="advisor-badge-pill">Asesor: ${esc(nameOf(l.asesorId || l.creadoPor))}</span>
           </div>
-        </div>
-        <div>
-          <select class="lead-status-sel" data-lead-id="${esc(l.id)}">
-            <option value="Lead" ${l.estatus === 'Lead' ? 'selected' : ''}>Lead Nuevo</option>
-            <option value="En conversaci\u00f3n" ${l.estatus === 'En conversaci\u00f3n' ? 'selected' : ''}>En conversaci\u00f3n</option>
-            <option value="Cita Agendada" ${['Cita Agendada', 'Pendiente', 'Confirmada'].includes(l.estatus) ? 'selected' : ''}>Cita Agendada</option>
-            <option value="Asisti\u00f3" ${isAsistio(l.estatus) ? 'selected' : ''}>Asisti\u00f3</option>
-            <option value="No asisti\u00f3" ${isNoAsistio(l.estatus) ? 'selected' : ''}>No asisti\u00f3</option>
-            <option value="Descartado" ${['Descartado', 'Cancel\u00f3'].includes(l.estatus) ? 'selected' : ''}>Descartado</option>
-          </select>
         </div>
       </div>
 
