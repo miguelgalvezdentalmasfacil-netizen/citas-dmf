@@ -746,12 +746,12 @@ textarea.inp{resize:vertical;min-height:80px}
     <div class="toolbar">
       <div class="seg" id="tabs">
         <button data-view="hoy">Hoy <span class="badge" id="b-badge-hoy"></span></button>
-        <button data-view="manana">Mañana <span class="badge" id="b-badge-manana"></span></button>
+        <button data-view="manana">Ma&ntilde;ana <span class="badge" id="b-badge-manana"></span></button>
         <button data-view="semana">Semana <span class="badge" id="b-badge-semana"></span></button>
         <button data-view="mes">Mes <span class="badge" id="b-badge-mes"></span></button>
         <button data-view="todas">Todas</button>
         <button data-view="presupuestos" class="tab-presupuestos">Presupuestos <span class="badge" id="b-badge-presupuestos"></span></button>
-        <button data-view="leads" class="tab-leads" id="tab-btn-leads">CampaÃ±as & Leads <span class="badge" id="b-badge-leads"></span></button>
+        <button data-view="leads" class="tab-leads" id="tab-btn-leads">Campa&ntilde;as &amp; Leads <span class="badge" id="b-badge-leads"></span></button>
       </div>
       <div>
         <button class="btn out sm btn-filter-toggle" id="b-toggle-filters" title="Buscar por paciente, teléfono o aplicar filtros">
@@ -840,7 +840,7 @@ textarea.inp{resize:vertical;min-height:80px}
 const SUCURSALES=['Tijuana','Mexicali Obregón','Mexicali Villa Verde','Ensenada'];
 const TRATAMIENTOS=['Valoración','Limpieza dental','Ortodoncia (brackets)','Alineadores','Endodoncia','Extracción','Resina','Corona','Implante','Blanqueamiento','Prótesis','Otro'];
 const TIPOS=['Nueva','Reagenda'];
-const ORIGENES=['Facebook Ads','Instagram Ads','TikTok Ads','WhatsApp Directo','Publicidad Externa','Publicidad Interna','Convenio','RecomendaciÃ³n'];
+const ORIGENES=['Facebook Ads','Instagram Ads','TikTok Ads','WhatsApp Directo','Publicidad Externa','Publicidad Interna','Convenio','Recomendaci\u00f3n'];
 const PAQUETES=['Individual','Dual','Familiar'];
 const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
@@ -2300,7 +2300,7 @@ function updateBadges(){
   const elLeads = document.getElementById('b-badge-leads');
   if(elLeads){
     const lList = typeof getLeadsList === 'function' ? getLeadsList() : [];
-    const pCnt = lList.filter(l => ['Lead','Lead WhatsApp','En conversaciÃ³n'].includes(l.estatus)).length;
+    const pCnt = lList.filter(l => ['Lead','Lead WhatsApp','En conversaci\u00f3n','En conversaciÃ³n'].includes(l.estatus)).length;
     elLeads.textContent = pCnt || (lList.length ? lList.length : '0');
     if(pCnt > 0) elLeads.classList.add('badge-alert');
     else elLeads.classList.remove('badge-alert');
@@ -2335,7 +2335,7 @@ function renderAviso(){
         </div>
       </div>
       <div class="alert-actions">
-        <button class="btn sm" data-view="manana">Ver citas de mañana</button>
+        <button class="btn sm" data-view="manana">Ver citas de ma&ntilde;ana</button>
       </div>
     </div>`;
 }
@@ -2528,12 +2528,12 @@ function render(){
 
   const titles={
     hoy:['Citas de hoy',fmtLong(t)],
-    manana:['Citas de mañana',fmtLong(addDays(t,1))],
+    manana:['Citas de ma\u00f1ana',fmtLong(addDays(t,1))],
     semana:[weekTitle,weekLabel],
     mes:[isCurrMonth?'Citas de este mes':'Citas del mes',mName],
     todas:['Todas las citas','Historial completo'],
-    leads:['CampaÃ±as & Leads Publicitarios','Embudo de conversiÃ³n de anuncios Meta & TikTok en tiempo real'],
-    presupuestos:['Planes de Tratamiento y Presupuestos','Seguimiento clínico y financiero por Asesor Dental']
+    leads:['Campa\u00f1as & Leads Publicitarios','Embudo de conversi\u00f3n de anuncios Meta & TikTok en tiempo real'],
+    presupuestos:['Planes de Tratamiento y Presupuestos','Seguimiento cl\u00ednico y financiero por Asesor Dental']
   };
   $('#h-title').textContent=titles[view][0];
   $('#h-sub').textContent=titles[view][1];
@@ -4824,7 +4824,7 @@ function renderLeadsView(){
         </div>
         <div class="funnel-card-val">${funnel.agendadas}</div>
         <div class="funnel-sub-badge ${funnel.convRate >= 30 ? 'ok' : 'info'}">
-          ${funnel.convRate}% Tasa Conversión
+          ${funnel.convRate}% Tasa Conversi\u00f3n
         </div>
       </div>
 
@@ -4841,7 +4841,7 @@ function renderLeadsView(){
 
       <div class="funnel-card">
         <div class="funnel-card-header">
-          <span class="funnel-card-label">4. Facturación Anuncios</span>
+          <span class="funnel-card-label">4. Facturaci\u00f3n Anuncios</span>
           <div class="funnel-card-icon">💰</div>
         </div>
         <div class="funnel-card-val">${fmtMoney(funnel.totalIngresos)}</div>
@@ -4855,7 +4855,7 @@ function renderLeadsView(){
     <div class="advisor-comp-section">
       <div class="advisor-comp-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Rendimiento de Conversión por Asesor Dental
+        Rendimiento de Conversi\u00f3n por Asesor Dental
       </div>
       <div class="advisor-comp-grid">
         <!-- Edgar -->
