@@ -11,7 +11,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load saved preferences
   chrome.storage.local.get(['dmf_assign_mode', 'dmf_leads_today', 'dmf_leads_total', 'dmf_leads_date'], (res) => {
-    if (res.dmf_assign_mode) assignMode.value = res.dmf_assign_mode;
+    const savedMode = (res.dmf_assign_mode && res.dmf_assign_mode !== 'turnos') ? res.dmf_assign_mode : 'Miguel';
+    assignMode.value = savedMode;
+    chrome.storage.local.set({ dmf_assign_mode: savedMode });
 
     const todayIso = new Date().toISOString().slice(0, 10);
     const todayCount = (res.dmf_leads_date === todayIso) ? (res.dmf_leads_today || 0) : 0;

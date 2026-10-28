@@ -4,15 +4,20 @@
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
   let autoCaptureEnabled = true;
-  let assignmentMode = 'turnos'; // 'turnos' (50/50), 'Miguel', 'Edgar'
-  let lastAssignedAdvisor = 'Edgar';
+  let assignmentMode = 'Miguel'; // Asignar 100% a Miguel
+  let lastAssignedAdvisor = 'Miguel';
   let capturedPhonesCache = new Set();
 
   // Load preferences and sync cache from storage
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
     chrome.storage.local.get(['dmf_auto_capture', 'dmf_assign_mode', 'dmf_last_advisor', 'dmf_captured_cache'], (res) => {
       if (res.dmf_auto_capture !== undefined) autoCaptureEnabled = res.dmf_auto_capture;
-      if (res.dmf_assign_mode) assignmentMode = res.dmf_assign_mode;
+      if (res.dmf_assign_mode && res.dmf_assign_mode !== 'turnos') {
+        assignmentMode = res.dmf_assign_mode;
+      } else {
+        assignmentMode = 'Miguel';
+        chrome.storage.local.set({ dmf_assign_mode: 'Miguel' });
+      }
       if (res.dmf_last_advisor) lastAssignedAdvisor = res.dmf_last_advisor;
       if (Array.isArray(res.dmf_captured_cache)) {
         capturedPhonesCache = new Set(res.dmf_captured_cache);
