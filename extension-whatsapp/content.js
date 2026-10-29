@@ -1,6 +1,6 @@
 // Dental Más Fácil - WhatsApp Web Extension v3.2 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
 (() => {
-  const VERSION = '3.2.0';
+  const VERSION = '3.2.1';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
   const APP_URL = 'https://miguelgalvezdentalmasfacil-netizen.github.io/citas-dmf/';
@@ -57,46 +57,6 @@
     }
   }
   syncExistingPhonesFromDB();
-
-  // Notificación flotante (Toast)
-  function showToast(message, color = '#0097a7') {
-    const existing = document.querySelector('.dmf-toast');
-    if (existing) existing.remove();
-
-    const toast = document.createElement('div');
-    toast.className = 'dmf-toast';
-    toast.style.cssText = `
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #0f172a;
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 500;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
-      z-index: 999999;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid ${color};
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    `;
-    toast.innerHTML = `<span style="color:${color};font-weight:700">DMF v${VERSION}</span> <span>${message}</span>`;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, 4500);
-  }
-
-  // Notificación visible al iniciar
-  setTimeout(() => {
-    showToast('Auto-captura activa. Mensajes de anuncios se registran solos.', '#10b981');
-  }, 2000);
 
   // Palabras y frases clave exactas de Meta Ads (Facebook e Instagram)
   const META_AD_KEYWORDS = [
@@ -319,7 +279,7 @@
       });
 
       if (res.ok) {
-        showToast(`🔥 Lead de anuncio auto-registrado: ${cleanPhone}`, '#10b981');
+        console.log(`[DMF v${VERSION}] Lead de anuncio auto-registrado en Supabase: ${cleanPhone}`);
         const active = extractActiveChat();
         if (active && active.phone === cleanPhone) {
           updateHeaderUI(cleanPhone, true);
