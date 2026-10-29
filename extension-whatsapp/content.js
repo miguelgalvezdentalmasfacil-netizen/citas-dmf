@@ -1,17 +1,18 @@
-// Dental Más Fácil - WhatsApp Web Extension v2.0 (MODO SEGURO - SIN AUTO-REGISTRO AL DAR CLIC)
+// Dental Más Fácil - WhatsApp Web Extension v2.1 (AUTO-CAPTURA INTELIGENTE DE NUEVOS LEADS DE META ADS)
 (() => {
-  const VERSION = '2.0.0';
+  const VERSION = '2.1.0';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
   const APP_URL = 'https://miguelgalvezdentalmasfacil-netizen.github.io/citas-dmf/';
 
   const ASSIGNED_ADVISOR = 'Miguel';
   const capturedPhonesCache = new Set();
+  const knownInitialPhones = new Set();
   let isSaving = false;
 
-  console.log(`[DMF v${VERSION}] Inicializando extensión en WhatsApp Web...`);
+  console.log(`[DMF v${VERSION}] Extensión conectada. Auto-captura de Meta Ads activa.`);
 
-  // 1. Sincronizar teléfonos existentes de Supabase para saber quién ya está registrado
+  // 1. Sincronizar teléfonos existentes de Supabase para no duplicar jamás
   async function syncExistingPhonesFromDB() {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/citas?select=telefono`, {
@@ -24,8 +25,13 @@
         const rows = await res.json();
         rows.forEach(r => {
           if (r.telefono) {
-            const clean = String(r.telefono).replace(/\D/g, '');
-            if (clean) capturedPhonesCache.add(clean);
+            let clean = String(r.telefono).replace(/\D/g, '');
+            if (clean.startsWith('521') && clean.length === 13) clean = clean.slice(3);
+            else if (clean.startsWith('52') && clean.length === 12) clean = clean.slice(2);
+            if (clean) {
+              capturedPhonesCache.add(clean);
+              knownInitialPhones.add(clean);
+            }
           }
         });
       }
@@ -35,7 +41,28 @@
   }
   syncExistingPhonesFromDB();
 
-  // 2. Notificación flotante (Toast)
+  // 2. Tomar foto de todos los chats que YA están en la bandeja al cargar la página
+  // para NUNCA registrarlos como "nuevos"
+  function snapshotInitialChats() {
+    const chatRows = document.querySelectorAll('#pane-side [role="row"], #pane-side div[data-testid="cell-frame-container"]');
+    if (chatRows && chatRows.length > 0) {
+      chatRows.forEach(row => {
+        const text = row.textContent || '';
+        const match = text.match(/(\+?\d[\d\s\-\(\)]{8,}\d)/);
+        if (match) {
+          let clean = match[0].replace(/\D/g, '');
+          if (clean.startsWith('521') && clean.length === 13) clean = clean.slice(3);
+          else if (clean.startsWith('52') && clean.length === 12) clean = clean.slice(2);
+          if (clean.length >= 10) knownInitialPhones.add(clean);
+        }
+      });
+    }
+  }
+  setTimeout(snapshotInitialChats, 1200);
+  setTimeout(snapshotInitialChats, 3500);
+  setTimeout(snapshotInitialChats, 6500);
+
+  // Notificación flotante (Toast)
   function showToast(message, color = '#0097a7') {
     const existing = document.querySelector('.dmf-toast');
     if (existing) existing.remove();
@@ -70,12 +97,129 @@
     }, 4500);
   }
 
-  // Notificar al usuario visiblemente que la v2.0 segura está activa
+  // Notificación visible al iniciar
   setTimeout(() => {
-    showToast('Modo Seguro Activo: Ningún chat se registrará al dar clic.', '#10b981');
-  }, 2000);
+    showToast('Auto-captura activa: Los nuevos leads de publicidad se guardarán automáticamente.', '#10b981');
+  }, 2200);
 
-  // 3. Extraer información del chat activo en #main
+  // Palabras y frases clave exactas que vienen en los mensajes de Meta Ads
+  const META_AD_KEYWORDS = [
+    'quiero más información',
+    'quiero mas informacion',
+    'me gustaría conseguir más información',
+    'me gustaria conseguir mas informacion',
+    'soluciones dentales',
+    'recupera tus piezas',
+    'facilidades de pago',
+    'logo-facebook',
+    'fb.me',
+    'vi su anuncio',
+    'vi este anuncio',
+    'vi en facebook',
+    'vi esto en facebook',
+    'vi en instagram',
+    'anuncio de facebook',
+    'anuncio de instagram'
+  ];
+
+  // 3. AUTO-CAPTURA EN TIEMPO REAL: Se ejecuta en segundo plano
+  // Revisa los mensajes NO LEÍDOS que llegan de anuncios nuevos
+  async function detectNewIncomingAdLeads() {
+    const chatRows = document.querySelectorAll('#pane-side [role="row"], #pane-side div[data-testid="cell-frame-container"]');
+    if (!chatRows || chatRows.length === 0) return;
+
+    // Solo revisar los primeros 4 chats en la cima de la bandeja (los que acaban de llegar)
+    const topChats = Array.from(chatRows).slice(0, 4);
+    for (const row of topChats) {
+      // Regla 1: Debe tener distintivo de mensaje NO LEÍDO (bolita verde / número de mensajes)
+      const hasUnread = row.querySelector('[data-testid="icon-unread-count"], span[aria-label*="no leído"], span[aria-label*="no leídos"], span[aria-label*="unread"]') ||
+                        row.querySelector('span[class*="unread"]');
+      if (!hasUnread) continue;
+
+      // Regla 2: Debe ser un número de teléfono (no un contacto personal guardado con nombre de persona)
+      const rowText = row.textContent || '';
+      const phoneMatch = rowText.match(/(\+?\d[\d\s\-\(\)]{8,}\d)/);
+      if (!phoneMatch) continue;
+
+      let clean = phoneMatch[0].replace(/\D/g, '');
+      if (clean.startsWith('521') && clean.length === 13) clean = clean.slice(3);
+      else if (clean.startsWith('52') && clean.length === 12) clean = clean.slice(2);
+      if (clean.length < 10) continue;
+
+      // Regla 3: Si ya estaba en la bandeja al iniciar WhatsApp, IGNORAR (es un chat viejo)
+      if (knownInitialPhones.has(clean)) continue;
+
+      // Regla 4: Si ya está en la base de datos o en memoria, IGNORAR (ya fue guardado)
+      if (capturedPhonesCache.has(clean)) continue;
+
+      // Regla 5: Debe coincidir con el texto prellenado de anuncio de Meta Ads
+      const lower = rowText.toLowerCase();
+      const isMetaAd = META_AD_KEYWORDS.some(kw => lower.includes(kw));
+      if (!isMetaAd) continue;
+
+      // ¡ES UN LEAD NUEVO DE PUBLICIDAD QUE ACABA DE ENTRAR EN VIVO!
+      console.log(`[DMF v${VERSION}] ¡Nuevo lead de Meta Ads detectado automáticamente!:`, clean);
+
+      // Bloquear inmediatamente en memoria para evitar llamadas dobles
+      capturedPhonesCache.add(clean);
+      knownInitialPhones.add(clean);
+
+      // Guardar en Supabase automáticamente con puro número y fecha
+      await saveLeadDirectly(clean, rowText.slice(0, 250));
+    }
+  }
+
+  // Guardado directo en Supabase para leads capturados en automático
+  async function saveLeadDirectly(cleanPhone, snippet) {
+    const now = new Date();
+    const fecha = now.toISOString().slice(0, 10);
+    const hora = now.toTimeString().slice(0, 5);
+    const leadId = 'c_' + cleanPhone + '_' + fecha + '_' + hora.replace(':', '');
+
+    const record = {
+      id: leadId,
+      asesor_id: ASSIGNED_ADVISOR,
+      fecha: fecha,
+      hora: hora,
+      paciente: cleanPhone, // Puro número como pidió Miguel
+      telefono: cleanPhone,
+      sucursal: '',
+      tratamiento: '',
+      tipo: 'Lead WhatsApp',
+      origen: 'Meta Ads',
+      notas: snippet || '',
+      estatus: 'Lead',
+      creado_el: now.toISOString(),
+      creado_por: ASSIGNED_ADVISOR
+    };
+
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/citas`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(record)
+      });
+
+      if (res.ok) {
+        showToast(`🔥 Nuevo lead de Meta Ads recibido: ${cleanPhone}`, '#10b981');
+        const active = extractActiveChat();
+        if (active && active.phone === cleanPhone) {
+          updateHeaderUI(cleanPhone, true);
+        }
+      } else {
+        console.warn('[DMF] Supabase res not ok:', res.status);
+      }
+    } catch (e) {
+      console.error('[DMF] Error auto-guardando lead:', e);
+    }
+  }
+
+  // 4. Extraer información del chat activo en #main
   function extractActiveChat() {
     const mainHeader = document.querySelector('#main header');
     if (!mainHeader) return null;
@@ -112,8 +256,8 @@
     };
   }
 
-  // 4. Guardar Lead en Supabase - ÚNICA Y EXCLUSIVAMENTE cuando el usuario pulsa "+ Registrar Lead"
-  async function saveLeadToDMF(chat) {
+  // 5. Guardado manual: Solo si el usuario pulsa el botón "+ Registrar Lead en DMF"
+  async function saveLeadManual(chat) {
     if (isSaving || !chat || !chat.phone) return;
     isSaving = true;
 
@@ -133,7 +277,7 @@
       asesor_id: ASSIGNED_ADVISOR,
       fecha: fecha,
       hora: hora,
-      paciente: chat.phone, // Puro número
+      paciente: chat.phone,
       telefono: chat.phone,
       sucursal: '',
       tratamiento: '',
@@ -159,14 +303,12 @@
 
       if (res.ok) {
         capturedPhonesCache.add(chat.phone);
+        knownInitialPhones.add(chat.phone);
         updateHeaderUI(chat.phone, true);
-        showToast(`Lead ${chat.phone} registrado con éxito en DMF`, '#10b981');
-      } else {
-        throw new Error('Supabase error: ' + res.status);
+        showToast(`Lead ${chat.phone} registrado con éxito`, '#10b981');
       }
     } catch (e) {
-      console.error('[DMF] Error guardando lead:', e);
-      showToast('Error al guardar lead. Intenta de nuevo.', '#ef4444');
+      console.error('[DMF] Error guardando lead manual:', e);
       if (btn) {
         btn.textContent = '+ Registrar Lead en DMF';
         btn.style.opacity = '1';
@@ -176,7 +318,7 @@
     }
   }
 
-  // 5. Renderizar interfaz en la cabecera
+  // 6. Interfaz en la cabecera
   function updateHeaderUI(phone, isRegistered) {
     const mainHeader = document.querySelector('#main header');
     if (!mainHeader) return;
@@ -210,13 +352,13 @@
           e.stopPropagation();
           e.preventDefault();
           const chat = extractActiveChat();
-          if (chat) saveLeadToDMF(chat);
+          if (chat) saveLeadManual(chat);
         };
       }
     }
   }
 
-  // 6. Verificar conversación abierta (SOLO ACTUALIZA LA CABECERA - NUNCA GUARDA NADA)
+  // 7. Verificación de conversación: NUNCA GUARDA NADA, SOLO ACTUALIZA LA CABECERA
   function checkConversation() {
     const chat = extractActiveChat();
     if (!chat) {
@@ -229,7 +371,8 @@
     updateHeaderUI(chat.phone, isRegistered);
   }
 
-  // 7. Evento clic en chats: SOLO refresca la cabecera, NUNCA registra
+  // 8. Evento clic en chats:
+  // IMPORTANTE: DAR CLIC ES 100% DE LECTURA. NUNCA REGISTRA NADA POR DAR CLIC.
   let clickTimeout = null;
   document.addEventListener('click', (e) => {
     if (e.target && e.target.closest && e.target.closest('#pane-side, [role="row"], [data-testid="cell-frame-container"]')) {
@@ -238,8 +381,13 @@
     }
   }, { passive: true });
 
-  // 8. Intervalo pasivo: SOLO para mantener la cabecera sincronizada
-  setInterval(checkConversation, 3000);
+  // 9. Intervalo periódico en segundo plano:
+  // - Detecta leads de Meta Ads que entren no leídos en vivo
+  // - Mantiene la cabecera sincronizada
+  setInterval(() => {
+    checkConversation();
+    detectNewIncomingAdLeads();
+  }, 3500);
 
-  console.log(`[DMF v${VERSION}] Modo seguro listo. Auto-registro al dar clic: DESACTIVADO.`);
+  console.log(`[DMF v${VERSION}] Modo seguro + Auto-captura de anuncios listo.`);
 })();

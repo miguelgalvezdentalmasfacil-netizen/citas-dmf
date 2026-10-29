@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Dental Más Fácil - WhatsApp Leads & Citas",
-  "version": "2.0.0",
-  "description": "Control de leads de Meta Ads en WhatsApp Web para Dental Más Fácil. Clics seguros sin auto-registro accidental.",
+  "version": "2.1.0",
+  "description": "Auto-captura inteligente de nuevos leads de Meta Ads en WhatsApp Web para Dental Más Fácil. Clics seguros sin auto-registro accidental.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
