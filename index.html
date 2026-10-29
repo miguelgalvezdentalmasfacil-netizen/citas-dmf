@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -2301,7 +2301,8 @@ function updateBadges(){
   if(elLeads){
     const lList = typeof getLeadsList === 'function' ? getLeadsList() : [];
     const pCnt = lList.filter(l => ['Lead','Lead WhatsApp','En conversaci\u00f3n','En conversaciÃ³n'].includes(l.estatus)).length;
-    elLeads.textContent = pCnt || (lList.length ? lList.length : '0');
+    const funnel = typeof computeLeadsFunnel === 'function' ? computeLeadsFunnel(lList) : { total: CAMPAIGN_OCTUBRE_LEADS };
+    elLeads.textContent = funnel.total;
     if(pCnt > 0) elLeads.classList.add('badge-alert');
     else elLeads.classList.remove('badge-alert');
   }
@@ -4814,7 +4815,7 @@ function renderLeadsView(){
     <div class="leads-toolbar">
       <div class="leads-filter-pills">
         <button class="lead-pill-btn ${leadFilter === 'todos' ? 'active' : ''}" data-act="filter-lead" data-filter="todos">
-          Todos <span class="lp-count">${cAll}</span>
+          Todos <span class="lp-count">${funnel.total}</span>
         </button>
         <button class="lead-pill-btn ${leadFilter === 'nuevos' ? 'active' : ''}" data-act="filter-lead" data-filter="nuevos">
           Nuevos Leads <span class="lp-count">${cNuevos}</span>
