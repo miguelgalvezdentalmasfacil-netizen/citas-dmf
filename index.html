@@ -4784,7 +4784,7 @@ function renderLeadsView(){
     <div class="lead-funnel-grid">
       <div class="funnel-card">
         <div class="funnel-card-header">
-          <span class="funnel-card-label">1. Leads Recibidos</span>
+          <span class="funnel-card-label">Leads Recibidos</span>
         </div>
         <div class="funnel-card-val">${funnel.total}</div>
         <div class="funnel-sub-badge info">Meta Ads</div>
@@ -4792,7 +4792,7 @@ function renderLeadsView(){
 
       <div class="funnel-card">
         <div class="funnel-card-header">
-          <span class="funnel-card-label">2. Citas Agendadas</span>
+          <span class="funnel-card-label">Citas Agendadas</span>
         </div>
         <div class="funnel-card-val">${funnel.agendadas}</div>
         <div class="funnel-sub-badge ${funnel.convRate >= 15 ? 'ok' : 'info'}">
@@ -4802,7 +4802,7 @@ function renderLeadsView(){
 
       <div class="funnel-card">
         <div class="funnel-card-header">
-          <span class="funnel-card-label">3. Asistencias</span>
+          <span class="funnel-card-label">Asistencias</span>
         </div>
         <div class="funnel-card-val">${funnel.asistieron}</div>
         <div class="funnel-sub-badge ${funnel.asistRate >= 30 ? 'ok' : 'info'}">
@@ -4812,8 +4812,8 @@ function renderLeadsView(){
     </div>
 
     <!-- Toolbar & Filters -->
-    <div class="leads-toolbar">
-      <div class="leads-filter-pills">
+    <div class="leads-toolbar" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;margin:22px auto 26px auto;text-align:center">
+      <div class="leads-filter-pills" style="justify-content:center;display:flex;gap:8px;flex-wrap:wrap">
         <button class="lead-pill-btn ${leadFilter === 'todos' ? 'active' : ''}" data-act="filter-lead" data-filter="todos">
           Todos <span class="lp-count">${funnel.total}</span>
         </button>
@@ -4829,12 +4829,9 @@ function renderLeadsView(){
         <button class="lead-pill-btn ${leadFilter === 'no_asistieron' ? 'active' : ''}" data-act="filter-lead" data-filter="no_asistieron">
           No Asistieron <span class="lp-count">${cNoAsistieron}</span>
         </button>
-        <button class="lead-pill-btn ${leadFilter === 'descartados' ? 'active' : ''}" data-act="filter-lead" data-filter="descartados">
-          Descartados <span class="lp-count">${cDescartados}</span>
-        </button>
       </div>
 
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap">
         <input type="text" id="leads-search-input" class="inp sm" placeholder="Buscar por paciente o tel\u00e9fono..." value="${esc(leadSearchQuery)}" style="width:220px;height:34px">
 
         <button class="btn sm" data-act="new-lead" style="white-space:nowrap">
@@ -4925,11 +4922,6 @@ function leadCardHTML(l){
         <div><b>Fecha:</b> ${esc(fmtShort(l.fecha))} ${esc(l.hora || '')}</div>
       </div>
 
-      ${l.notas ? `
-        <div class="lead-msg-quote">
-          "${esc(l.notas)}"
-        </div>
-      ` : ''}
 
       <div class="lead-actions-row">
         ${(['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus)) ? `
