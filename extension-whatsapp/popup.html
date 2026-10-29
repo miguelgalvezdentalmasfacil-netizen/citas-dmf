@@ -11,7 +11,7 @@
       <div class="logo-circle" style="font-weight:700;font-size:13px">DMF</div>
       <div>
         <div class="brand-title">Dental Más Fácil</div>
-        <div class="brand-sub">Control de Leads Meta Ads</div>
+        <div class="brand-sub">Auto-Captura v3.2.0</div>
       </div>
     </div>
     <div class="status-badge" id="syncStatus">
@@ -28,15 +28,26 @@
     </div>
   </div>
 
-  <div class="actions" style="margin-top:16px">
+  <div class="card" style="margin-top:10px">
+    <div class="card-title">Auto-Captura en Vivo</div>
+    <div style="font-size:12px;color:#64748b;line-height:1.4">
+      Detecta y registra los nuevos mensajes de Meta Ads automáticamente.
+    </div>
+    <button class="btn" id="btnScanNow" style="width:100%;margin-top:10px;padding:9px;font-size:12.5px;background:rgba(0,151,167,.12);border:1px solid rgba(0,151,167,.35);color:#0097a7;border-radius:8px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px">
+      ⚡ Escanear chats en WhatsApp ahora
+    </button>
+    <div id="scanFeedback" style="font-size:11.5px;margin-top:8px;text-align:center;font-weight:600;min-height:16px"></div>
+  </div>
+
+  <div class="actions" style="margin-top:12px">
     <button class="btn btn-primary" id="btnOpenDMF" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       Abrir Dental Más Fácil
     </button>
   </div>
 
-  <div class="footer-help" style="margin-top:14px;font-size:12px;line-height:1.4;color:#64748b">
-    🛡️ <b>Control seguro:</b> Dar clic a una conversación no registra nada. Usa el botón <b>+ Registrar Lead</b> en la cabecera del chat, o deja que los nuevos mensajes de Meta Ads se detecten en vivo.
+  <div class="footer-help" style="margin-top:12px;font-size:11.5px;line-height:1.4;color:#64748b">
+    🛡️ <b>Blindaje de seguridad:</b> Los chats viejos y contactos personales nunca se registran. Solo prospectos nuevos de anuncios de hoy.
   </div>
 
   <script src="popup.js"></script>
