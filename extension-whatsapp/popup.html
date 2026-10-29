@@ -11,47 +11,32 @@
       <div class="logo-circle" style="font-weight:700;font-size:13px">DMF</div>
       <div>
         <div class="brand-title">Dental Más Fácil</div>
-        <div class="brand-sub">Auto-Captura WhatsApp Leads</div>
+        <div class="brand-sub">Control de Leads Meta Ads</div>
       </div>
     </div>
     <div class="status-badge" id="syncStatus">
       <span class="status-dot online"></span>
-      <span id="syncText">Automático Activo</span>
+      <span id="syncText">Conectado</span>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">Configuración Automática</div>
-    <div class="form-group">
-      <label for="assignMode">Modo de Asignación de Leads</label>
-      <select id="assignMode">
-        <option value="Miguel" selected>Asignar todos a Miguel</option>
-        <option value="turnos">Turnos 50/50 (Alternar Miguel y Edgar)</option>
-        <option value="Edgar">Asignar todos a Edgar</option>
-      </select>
+    <div class="card-title">Asignación</div>
+    <div class="form-group" style="margin-bottom:0">
+      <label style="font-size:13px;color:var(--text,#1e293b);font-weight:600">Asesor Dental:</label>
+      <div style="font-size:14px;font-weight:700;color:#0097a7;margin-top:4px">Miguel (Todos los leads)</div>
     </div>
   </div>
 
-  <div class="card stats-card">
-    <div class="stat-item">
-      <div class="stat-num" id="todayLeadsCount">0</div>
-      <div class="stat-label">Leads Hoy</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num" id="totalCapturedCount">0</div>
-      <div class="stat-label">Total Capturados</div>
-    </div>
-  </div>
-
-  <div class="actions">
-    <button class="btn btn-primary" id="btnOpenDMF">
+  <div class="actions" style="margin-top:16px">
+    <button class="btn btn-primary" id="btnOpenDMF" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       Abrir Dental Más Fácil
     </button>
   </div>
 
-  <div class="footer-help">
-    ⚡ <b>Modo 100% Automático:</b> Ya no necesitas dar clics. Al recibir o abrir mensajes de anuncios de Meta y TikTok en WhatsApp Web, se registran automáticamente en tiempo real.
+  <div class="footer-help" style="margin-top:14px;font-size:12px;line-height:1.4;color:#64748b">
+    🛡️ <b>Control seguro:</b> Dar clic a una conversación no registra nada. Usa el botón <b>+ Registrar Lead</b> en la cabecera del chat, o deja que los nuevos mensajes de Meta Ads se detecten en vivo.
   </div>
 
   <script src="popup.js"></script>

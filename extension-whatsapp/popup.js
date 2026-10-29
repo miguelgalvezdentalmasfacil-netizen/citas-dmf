@@ -1,30 +1,11 @@
 const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
+const APP_URL = 'https://miguelgalvezdentalmasfacil-netizen.github.io/citas-dmf/';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const assignMode = document.getElementById('assignMode');
-  const todayLeadsCount = document.getElementById('todayLeadsCount');
-  const totalCapturedCount = document.getElementById('totalCapturedCount');
   const syncStatus = document.getElementById('syncStatus');
   const syncText = document.getElementById('syncText');
   const btnOpenDMF = document.getElementById('btnOpenDMF');
-
-  // Load saved preferences
-  chrome.storage.local.get(['dmf_assign_mode', 'dmf_leads_today', 'dmf_leads_total', 'dmf_leads_date'], (res) => {
-    const savedMode = (res.dmf_assign_mode && res.dmf_assign_mode !== 'turnos') ? res.dmf_assign_mode : 'Miguel';
-    assignMode.value = savedMode;
-    chrome.storage.local.set({ dmf_assign_mode: savedMode });
-
-    const todayIso = new Date().toISOString().slice(0, 10);
-    const todayCount = (res.dmf_leads_date === todayIso) ? (res.dmf_leads_today || 0) : 0;
-    todayLeadsCount.textContent = todayCount;
-    totalCapturedCount.textContent = res.dmf_leads_total || 0;
-  });
-
-  // Save changes
-  assignMode.addEventListener('change', () => {
-    chrome.storage.local.set({ dmf_assign_mode: assignMode.value });
-  });
 
   // Test Supabase connection
   try {
@@ -35,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
     if (res.ok) {
-      syncText.textContent = 'Automático Activo (En la nube)';
+      syncText.textContent = 'Conectado a la nube';
       syncStatus.style.background = 'rgba(16, 185, 129, 0.15)';
       syncStatus.style.borderColor = 'rgba(16, 185, 129, 0.4)';
     } else {
@@ -45,11 +26,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     syncText.textContent = 'Sin conexión';
     syncStatus.style.background = 'rgba(239, 68, 68, 0.15)';
     syncStatus.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-    syncStatus.querySelector('.status-dot').style.background = '#EF4444';
+    const dot = syncStatus.querySelector('.status-dot');
+    if (dot) dot.style.background = '#EF4444';
   }
 
   // Open DMF
-  btnOpenDMF.addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://hzdootsarxbawbwtsfyp.supabase.co' });
-  });
+  if (btnOpenDMF) {
+    btnOpenDMF.addEventListener('click', () => {
+      chrome.tabs.create({ url: APP_URL });
+    });
+  }
 });

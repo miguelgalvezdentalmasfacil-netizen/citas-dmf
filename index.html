@@ -5345,7 +5345,29 @@ document.addEventListener('click',e=>{
     // Sincronización en vivo con la base de datos Supabase
     try{
       citas = await DB.loadAll();
-      if(user) render();
+      if(user) {
+        render();
+        try {
+          const uP = new URLSearchParams(window.location.search);
+          const qTel = uP.get('tel');
+          if (qTel) {
+            const clTel = qTel.replace(/\D/g, '');
+            const foundC = citas.find(c => {
+              const ct = String(c.telefono || '').replace(/\D/g, '');
+              return ct && (ct.endsWith(clTel) || clTel.endsWith(ct));
+            });
+            if (foundC) {
+              setTimeout(() => citaForm(foundC.id), 250);
+            } else {
+              setTimeout(() => {
+                citaForm();
+                const telEl = $('#c-tel');
+                if (telEl) telEl.value = clTel;
+              }, 250);
+            }
+          }
+        } catch (eParam) {}
+      }
       initRealtime();
     }catch(err){
       console.warn('Error syncing cloud db:', err);
