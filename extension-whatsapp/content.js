@@ -1,6 +1,6 @@
-// Dental Más Fácil - WhatsApp Web Extension v2.1 (AUTO-CAPTURA INTELIGENTE DE NUEVOS LEADS DE META ADS)
+// Dental Más Fácil - WhatsApp Web Extension v3.0 (3 CANDADOS: AUTO-CAPTURA SOLO DE ANUNCIOS NUEVOS)
 (() => {
-  const VERSION = '2.1.0';
+  const VERSION = '3.0.0';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
   const APP_URL = 'https://miguelgalvezdentalmasfacil-netizen.github.io/citas-dmf/';
@@ -10,9 +10,9 @@
   const knownInitialPhones = new Set();
   let isSaving = false;
 
-  console.log(`[DMF v${VERSION}] Extensión conectada. Auto-captura de Meta Ads activa.`);
+  console.log(`[DMF v${VERSION}] Extensión conectada con 3 candados de seguridad.`);
 
-  // 1. Sincronizar teléfonos existentes de Supabase para no duplicar jamás
+  // 1. Sincronizar todos los teléfonos existentes en Supabase a memoria
   async function syncExistingPhonesFromDB() {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/citas?select=telefono`, {
@@ -36,13 +36,13 @@
         });
       }
     } catch (e) {
-      console.warn('[DMF] Error sincronizando teléfonos:', e);
+      console.warn('[DMF] Error sincronizando teléfonos existentes:', e);
     }
   }
   syncExistingPhonesFromDB();
 
-  // 2. Tomar foto de todos los chats que YA están en la bandeja al cargar la página
-  // para NUNCA registrarlos como "nuevos"
+  // 2. CANDADO 1: FOTO DE CHATS PREVIOS AL CARGAR LA PÁGINA
+  // Todo chat que ya esté en la bandeja y no sea un anuncio nuevo no leído de hoy queda bloqueado como chat viejo.
   function snapshotInitialChats() {
     const chatRows = document.querySelectorAll('#pane-side [role="row"], #pane-side div[data-testid="cell-frame-container"]');
     if (chatRows && chatRows.length > 0) {
@@ -53,14 +53,21 @@
           let clean = match[0].replace(/\D/g, '');
           if (clean.startsWith('521') && clean.length === 13) clean = clean.slice(3);
           else if (clean.startsWith('52') && clean.length === 12) clean = clean.slice(2);
-          if (clean.length >= 10) knownInitialPhones.add(clean);
+          if (clean.length >= 10) {
+            // Si NO tiene insignia de no leído, es definitivamente un chat previo
+            const hasUnread = row.querySelector('[data-testid="icon-unread-count"], span[aria-label*="no leído"], span[aria-label*="no leídos"], span[aria-label*="unread"]') ||
+                              row.querySelector('span[class*="unread"]');
+            if (!hasUnread) {
+              knownInitialPhones.add(clean);
+            }
+          }
         }
       });
     }
   }
   setTimeout(snapshotInitialChats, 1200);
-  setTimeout(snapshotInitialChats, 3500);
-  setTimeout(snapshotInitialChats, 6500);
+  setTimeout(snapshotInitialChats, 3000);
+  setTimeout(snapshotInitialChats, 6000);
 
   // Notificación flotante (Toast)
   function showToast(message, color = '#0097a7') {
@@ -99,10 +106,10 @@
 
   // Notificación visible al iniciar
   setTimeout(() => {
-    showToast('Auto-captura activa: Los nuevos leads de publicidad se guardarán automáticamente.', '#10b981');
+    showToast('Auto-captura activa con 3 candados de seguridad. Chats viejos blindados.', '#10b981');
   }, 2200);
 
-  // Palabras y frases clave exactas que vienen en los mensajes de Meta Ads
+  // Palabras y frases clave exactas de Meta Ads (Facebook e Instagram)
   const META_AD_KEYWORDS = [
     'quiero más información',
     'quiero mas informacion',
@@ -122,21 +129,32 @@
     'anuncio de instagram'
   ];
 
-  // 3. AUTO-CAPTURA EN TIEMPO REAL: Se ejecuta en segundo plano
-  // Revisa los mensajes NO LEÍDOS que llegan de anuncios nuevos
+  // CANDADO 2: VERIFICADOR DE FECHA DE HOY (Descartar días anteriores como "ayer" o fechas pasadas)
+  function isTimestampFromToday(text) {
+    if (!text) return false;
+    const lower = text.toLowerCase();
+    // Si contiene "ayer", "yesterday" o una fecha con barra (ej. 28/10/26), NO es de hoy
+    if (lower.includes('ayer') || lower.includes('yesterday') || /\d{1,2}\/\d{1,2}/.test(lower)) {
+      return false;
+    }
+    // Es de hoy si contiene hora con dos puntos (10:35), am/pm, o "ahora"
+    return lower.includes(':') || lower.includes('am') || lower.includes('pm') || lower.includes('a. m.') || lower.includes('p. m.') || lower.includes('ahora') || lower.includes('just now');
+  }
+
+  // 3. CANDADO 3: AUTO-CAPTURA EN VIVO DE ANUNCIOS QUE LLEGUEN EN SEGUNDO PLANO
   async function detectNewIncomingAdLeads() {
     const chatRows = document.querySelectorAll('#pane-side [role="row"], #pane-side div[data-testid="cell-frame-container"]');
     if (!chatRows || chatRows.length === 0) return;
 
-    // Solo revisar los primeros 4 chats en la cima de la bandeja (los que acaban de llegar)
+    // Solo revisar los 4 primeros chats de la lista (los más recientes)
     const topChats = Array.from(chatRows).slice(0, 4);
     for (const row of topChats) {
-      // Regla 1: Debe tener distintivo de mensaje NO LEÍDO (bolita verde / número de mensajes)
+      // Candado A: Debe tener distintivo de mensaje NO LEÍDO
       const hasUnread = row.querySelector('[data-testid="icon-unread-count"], span[aria-label*="no leído"], span[aria-label*="no leídos"], span[aria-label*="unread"]') ||
                         row.querySelector('span[class*="unread"]');
       if (!hasUnread) continue;
 
-      // Regla 2: Debe ser un número de teléfono (no un contacto personal guardado con nombre de persona)
+      // Candado B: Debe ser número de teléfono (no un contacto personal guardado con nombre)
       const rowText = row.textContent || '';
       const phoneMatch = rowText.match(/(\+?\d[\d\s\-\(\)]{8,}\d)/);
       if (!phoneMatch) continue;
@@ -146,30 +164,33 @@
       else if (clean.startsWith('52') && clean.length === 12) clean = clean.slice(2);
       if (clean.length < 10) continue;
 
-      // Regla 3: Si ya estaba en la bandeja al iniciar WhatsApp, IGNORAR (es un chat viejo)
+      // Candado C: NO debe ser un chat previo de la sesión
       if (knownInitialPhones.has(clean)) continue;
 
-      // Regla 4: Si ya está en la base de datos o en memoria, IGNORAR (ya fue guardado)
+      // Candado D: NO debe estar ya registrado en Supabase
       if (capturedPhonesCache.has(clean)) continue;
 
-      // Regla 5: Debe coincidir con el texto prellenado de anuncio de Meta Ads
+      // Candado E: La fecha debe ser de HOY (no de ayer ni semanas pasadas)
+      if (!isTimestampFromToday(rowText)) continue;
+
+      // Candado F: Debe contener texto de anuncio de Meta Ads
       const lower = rowText.toLowerCase();
       const isMetaAd = META_AD_KEYWORDS.some(kw => lower.includes(kw));
       if (!isMetaAd) continue;
 
-      // ¡ES UN LEAD NUEVO DE PUBLICIDAD QUE ACABA DE ENTRAR EN VIVO!
-      console.log(`[DMF v${VERSION}] ¡Nuevo lead de Meta Ads detectado automáticamente!:`, clean);
+      // ¡CUMPLE LOS 3 CANDADOS! Es un lead genuino que acaba de entrar por anuncio
+      console.log(`[DMF v${VERSION}] ¡Nuevo lead de Meta Ads recibido en vivo!:`, clean);
 
-      // Bloquear inmediatamente en memoria para evitar llamadas dobles
+      // Bloquear en memoria de inmediato para evitar duplicados
       capturedPhonesCache.add(clean);
       knownInitialPhones.add(clean);
 
-      // Guardar en Supabase automáticamente con puro número y fecha
+      // Guardar automáticamente en Supabase con puro número y fecha
       await saveLeadDirectly(clean, rowText.slice(0, 250));
     }
   }
 
-  // Guardado directo en Supabase para leads capturados en automático
+  // Guardado directo en Supabase (Puro número, fecha y hora)
   async function saveLeadDirectly(cleanPhone, snippet) {
     const now = new Date();
     const fecha = now.toISOString().slice(0, 10);
@@ -206,16 +227,16 @@
       });
 
       if (res.ok) {
-        showToast(`🔥 Nuevo lead de Meta Ads recibido: ${cleanPhone}`, '#10b981');
+        showToast(`🔥 Nuevo lead de anuncio registrado automáticamente: ${cleanPhone}`, '#10b981');
         const active = extractActiveChat();
         if (active && active.phone === cleanPhone) {
           updateHeaderUI(cleanPhone, true);
         }
       } else {
-        console.warn('[DMF] Supabase res not ok:', res.status);
+        console.warn('[DMF] Supabase respondió error:', res.status);
       }
     } catch (e) {
-      console.error('[DMF] Error auto-guardando lead:', e);
+      console.error('[DMF] Error guardando lead en Supabase:', e);
     }
   }
 
@@ -244,19 +265,29 @@
     if (!cleanDigits || cleanDigits.length < 10) return null;
 
     let latestMessage = '';
+    let isTodayInMain = true;
     const msgContainers = document.querySelectorAll('#main div[data-testid="msg-container"], #main .message-in');
     if (msgContainers && msgContainers.length > 0) {
-      latestMessage = (msgContainers[msgContainers.length - 1].textContent || '').trim().slice(0, 300);
+      const firstMsg = msgContainers[0];
+      const lastMsg = msgContainers[msgContainers.length - 1];
+      latestMessage = (firstMsg.textContent || lastMsg.textContent || '').trim().slice(0, 300);
+
+      // Revisar si los mensajes dentro del chat son de días viejos
+      const fullMainText = document.querySelector('#main')?.textContent?.toLowerCase() || '';
+      if (fullMainText.includes('ayer') || fullMainText.includes('yesterday')) {
+        isTodayInMain = false;
+      }
     }
 
     return {
       phone: cleanDigits,
       name: nameOrTitle || cleanDigits,
-      latestMessage: latestMessage
+      latestMessage: latestMessage,
+      isToday: isTodayInMain
     };
   }
 
-  // 5. Guardado manual: Solo si el usuario pulsa el botón "+ Registrar Lead en DMF"
+  // 5. Guardado manual con el botón "+ Registrar Lead en DMF"
   async function saveLeadManual(chat) {
     if (isSaving || !chat || !chat.phone) return;
     isSaving = true;
@@ -318,7 +349,7 @@
     }
   }
 
-  // 6. Interfaz en la cabecera
+  // 6. Cabecera del chat activo
   function updateHeaderUI(phone, isRegistered) {
     const mainHeader = document.querySelector('#main header');
     if (!mainHeader) return;
@@ -358,7 +389,9 @@
     }
   }
 
-  // 7. Verificación de conversación: NUNCA GUARDA NADA, SOLO ACTUALIZA LA CABECERA
+  // 7. Verificación del chat activo:
+  // Si Miguel abre un chat de anuncio que acaba de llegar HOY y no estaba en la sesión previa,
+  // se auto-registra al abrirlo. Pero si es un chat viejo o guardado, NUNCA se auto-registra.
   function checkConversation() {
     const chat = extractActiveChat();
     if (!chat) {
@@ -367,12 +400,41 @@
       return;
     }
 
-    const isRegistered = capturedPhonesCache.has(chat.phone);
-    updateHeaderUI(chat.phone, isRegistered);
+    // Si ya está registrado: solo actualizar cabecera
+    if (capturedPhonesCache.has(chat.phone)) {
+      updateHeaderUI(chat.phone, true);
+      return;
+    }
+
+    // CANDADO 1: Si es un chat previo de la bandeja, NUNCA auto-registrar
+    if (knownInitialPhones.has(chat.phone)) {
+      updateHeaderUI(chat.phone, false);
+      return;
+    }
+
+    // CANDADO 2: Si los mensajes dentro del chat son viejos (de ayer o antes), NUNCA auto-registrar
+    if (!chat.isToday) {
+      knownInitialPhones.add(chat.phone);
+      updateHeaderUI(chat.phone, false);
+      return;
+    }
+
+    // CANDADO 3: Si es un chat nuevo que trae el mensaje del anuncio de hoy, AUTO-REGISTRAR
+    const lower = (chat.latestMessage || '').toLowerCase();
+    const isMetaAd = META_AD_KEYWORDS.some(kw => lower.includes(kw));
+
+    if (isMetaAd) {
+      console.log(`[DMF v${VERSION}] Lead de anuncio nuevo abierto hoy. Auto-registrando:`, chat.phone);
+      capturedPhonesCache.add(chat.phone);
+      knownInitialPhones.add(chat.phone);
+      saveLeadDirectly(chat.phone, chat.latestMessage);
+      updateHeaderUI(chat.phone, true);
+    } else {
+      updateHeaderUI(chat.phone, false);
+    }
   }
 
-  // 8. Evento clic en chats:
-  // IMPORTANTE: DAR CLIC ES 100% DE LECTURA. NUNCA REGISTRA NADA POR DAR CLIC.
+  // 8. Evento clic en chats: Refresca la cabecera pasando por los 3 candados
   let clickTimeout = null;
   document.addEventListener('click', (e) => {
     if (e.target && e.target.closest && e.target.closest('#pane-side, [role="row"], [data-testid="cell-frame-container"]')) {
@@ -383,11 +445,11 @@
 
   // 9. Intervalo periódico en segundo plano:
   // - Detecta leads de Meta Ads que entren no leídos en vivo
-  // - Mantiene la cabecera sincronizada
+  // - Sincroniza la cabecera
   setInterval(() => {
-    checkConversation();
     detectNewIncomingAdLeads();
-  }, 3500);
+    checkConversation();
+  }, 3000);
 
-  console.log(`[DMF v${VERSION}] Modo seguro + Auto-captura de anuncios listo.`);
+  console.log(`[DMF v${VERSION}] 3 candados de seguridad listos. Chats viejos blindados.`);
 })();
