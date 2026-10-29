@@ -390,8 +390,8 @@
   }
 
   // 7. Verificación del chat activo:
-  // Si Miguel abre un chat de anuncio que acaba de llegar HOY y no estaba en la sesión previa,
-  // se auto-registra al abrirlo. Pero si es un chat viejo o guardado, NUNCA se auto-registra.
+  // IMPORTANTE: 100% DE LECTURA. NUNCA REGISTRA NADA AL ABRIR O DAR CLIC.
+  // Solo actualiza la etiqueta de la cabecera según si ya está en DMF o no.
   function checkConversation() {
     const chat = extractActiveChat();
     if (!chat) {
@@ -400,38 +400,8 @@
       return;
     }
 
-    // Si ya está registrado: solo actualizar cabecera
-    if (capturedPhonesCache.has(chat.phone)) {
-      updateHeaderUI(chat.phone, true);
-      return;
-    }
-
-    // CANDADO 1: Si es un chat previo de la bandeja, NUNCA auto-registrar
-    if (knownInitialPhones.has(chat.phone)) {
-      updateHeaderUI(chat.phone, false);
-      return;
-    }
-
-    // CANDADO 2: Si los mensajes dentro del chat son viejos (de ayer o antes), NUNCA auto-registrar
-    if (!chat.isToday) {
-      knownInitialPhones.add(chat.phone);
-      updateHeaderUI(chat.phone, false);
-      return;
-    }
-
-    // CANDADO 3: Si es un chat nuevo que trae el mensaje del anuncio de hoy, AUTO-REGISTRAR
-    const lower = (chat.latestMessage || '').toLowerCase();
-    const isMetaAd = META_AD_KEYWORDS.some(kw => lower.includes(kw));
-
-    if (isMetaAd) {
-      console.log(`[DMF v${VERSION}] Lead de anuncio nuevo abierto hoy. Auto-registrando:`, chat.phone);
-      capturedPhonesCache.add(chat.phone);
-      knownInitialPhones.add(chat.phone);
-      saveLeadDirectly(chat.phone, chat.latestMessage);
-      updateHeaderUI(chat.phone, true);
-    } else {
-      updateHeaderUI(chat.phone, false);
-    }
+    const isRegistered = capturedPhonesCache.has(chat.phone);
+    updateHeaderUI(chat.phone, isRegistered);
   }
 
   // 8. Evento clic en chats: Refresca la cabecera pasando por los 3 candados
