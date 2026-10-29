@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Dental Más Fácil - WhatsApp Leads & Citas",
   "version": "1.0.0",
-  "description": "Captura y registra leads de publicidad (Meta Ads, TikTok) desde WhatsApp Web directo a Dental Más Fácil y Supabase.",
+  "description": "Captura y control de leads de publicidad de Meta Ads desde WhatsApp Web a Dental Más Fácil.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
