@@ -4697,8 +4697,8 @@ function getLeadsList(){
 const CAMPAIGN_OCTUBRE_LEADS = 289;
 
 function computeLeadsFunnel(leads){
-  const newLeads = leads.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus));
-  const total = Math.max(CAMPAIGN_OCTUBRE_LEADS, CAMPAIGN_OCTUBRE_LEADS + newLeads.length);
+  const incomingLeads = leads.filter(l => l.origen === 'Meta Ads' || l.tipo === 'Lead WhatsApp' || ['Lead', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus));
+  const total = CAMPAIGN_OCTUBRE_LEADS + incomingLeads.length;
 
   const agendadasList = leads.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus));
   const agendadas = agendadasList.length;
