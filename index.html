@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -1185,6 +1185,19 @@ const fmtReg=s=>{
 };
 
 /* ============ BUDGET & TREATMENT PLAN HELPERS ============ */
+function isLeadRecord(c){
+  if(!c) return false;
+  const s = String(c.estatus || '').trim().toLowerCase();
+  const t = String(c.tipo || '').trim().toLowerCase();
+  if(s === 'lead' || s === 'lead whatsapp' || s === 'descartado') return true;
+  if(s.startsWith('en conversaci')) return true;
+  if(t === 'lead whatsapp' || t === 'lead') return true;
+  return false;
+}
+function isRealCita(c){
+  return !isLeadRecord(c);
+}
+
 const fmtMoney = n => '$' + (parseFloat(n)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
 
 function computeBudgetTotals(b){
@@ -1201,7 +1214,7 @@ function computeBudgetTotals(b){
 
 function getPatientCitas(tel, name){
   const key = patientKey(tel, name);
-  return citas.filter(c => patientKey(c.telefono, c.paciente) === key)
+  return citas.filter(c => isRealCita(c) && patientKey(c.telefono, c.paciente) === key)
               .sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
 }
 
@@ -2280,7 +2293,7 @@ function startApp(){
 }
 
 function updateBadges(){
-  const all=mine(), t=iso(new Date()), m=addDays(t,1);
+  const all=mine().filter(isRealCita), t=iso(new Date()), m=addDays(t,1);
   const [wStart,wEnd]=getWeekRange(t), [mStart,mEnd]=getMonthRange(t);
   const cHoy=all.filter(c=>c.fecha===t).length;
   const cMan=all.filter(c=>c.fecha===m);
@@ -2318,7 +2331,7 @@ function updateBadges(){
 function renderAviso(){
   const box=$('#banner-aviso');if(!box)return;
   const t=iso(new Date()), m=addDays(t,1);
-  const lMan=mine().filter(c=>c.fecha===m);
+  const lMan=mine().filter(c=>c.fecha===m && isRealCita(c));
   const pMan=lMan.filter(c=>c.estatus==='Pendiente');
   if(!lMan.length){box.innerHTML='';return}
   const pendTxt=pMan.length
@@ -2342,11 +2355,11 @@ function renderAviso(){
 }
 
 /* ============ RENDER ============ */
-function mine(){return user.rol==='admin'?citas:citas.filter(c=>nameOf(c.asesorId)===user.nombre||c.asesorId===user.id||nameOf(c.creadoPor)===user.nombre)}
+function mine(){const base=(user&&user.rol==='admin')?citas:citas.filter(c=>nameOf(c.asesorId)===user.nombre||c.asesorId===user.id||nameOf(c.creadoPor)===user.nombre);return base.filter(isRealCita);}
 function currentList(){
   const t=iso(new Date());let l=mine();
   const [wStart,wEnd]=getWeekRange(selectedWeekRef), [mStart,mEnd]=getMonthRange(selectedMonthRef);
-  if(view!=='todas'&&view!=='leads'){ l=l.filter(c=>c.estatus!=='Lead'&&c.estatus!=='Lead WhatsApp'&&c.estatus!=='Descartado'); }
+  l=l.filter(isRealCita);
   if(view==='hoy')l=l.filter(c=>c.fecha===t);
   else if(view==='manana')l=l.filter(c=>c.fecha===addDays(t,1));
   else if(view==='semana')l=l.filter(c=>c.fecha>=wStart&&c.fecha<=wEnd);
@@ -4139,7 +4152,7 @@ function renderPdfPreview(){
 
   let list=citas.filter(c=>{
     const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
-    return dVal>=startDate&&dVal<=endDate;
+    return dVal>=startDate&&dVal<=endDate&&isRealCita(c);
   });
   if(repConfig.asesor!=='todos'){
     list=list.filter(c=>citaMatchesAsesor(c, repConfig.asesor));
@@ -4484,7 +4497,7 @@ function renderPdfPreview(){
   const adRows=adList.map(u=>{
     const uCitas=citas.filter(c=>{
       const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
-      return dVal>=startDate && dVal<=endDate && citaMatchesAsesor(c, u.id);
+      return dVal>=startDate && dVal<=endDate && citaMatchesAsesor(c, u.id) && isRealCita(c);
     });
     const uT=uCitas.length;
     const uA=uCitas.filter(c=>c.estatus==='Asistió').length;
