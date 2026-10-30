@@ -1,6 +1,6 @@
-﻿// Dental Más Fácil - WhatsApp Web Extension v3.3.2 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
+﻿// Dental Más Fácil - WhatsApp Web Extension v3.4.0 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
 (() => {
-  const VERSION = '3.3.2';
+  const VERSION = '3.4.0';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
@@ -373,8 +373,9 @@
   }, { passive: true });
 
   // Monitoreo continuo cada 2.5 segundos
+  // NOTA: scanSidebarChats() SOLO se ejecuta con el botón manual del popup
+  // para evitar capturar chats viejos al hacer scroll
   setInterval(() => {
-    scanSidebarChats();
     checkOpenChat();
   }, 2500);
 
