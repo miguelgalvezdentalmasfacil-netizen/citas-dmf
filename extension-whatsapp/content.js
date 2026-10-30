@@ -1,6 +1,6 @@
-// Dental Más Fácil - WhatsApp Web Extension v3.3.1 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
+﻿// Dental Más Fácil - WhatsApp Web Extension v3.3.2 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
 (() => {
-  const VERSION = '3.3.1';
+  const VERSION = '3.3.2';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
@@ -164,7 +164,7 @@
   // Comprobar si una fila en la bandeja es de HOY
   function isRowFromToday(row) {
     const timeStr = getRowTimestampText(row);
-    if (!timeStr) return true; // Si no hay elemento de hora claro, no descartar por fecha
+    if (!timeStr) return false; // Sin timestamp claro, descartar por seguridad
     if (timeStr.includes('ayer') || timeStr.includes('yesterday') || /\d{1,2}\/\d{1,2}/.test(timeStr)) {
       return false; // Es de ayer o fecha anterior
     }
@@ -287,11 +287,39 @@
     const mainEl = document.querySelector('#main');
     if (!mainEl) return;
 
-    // Si es un chat largo con más de 12 mensajes, es una conversación vieja
-    const msgContainers = document.querySelectorAll('#main div[data-testid="msg-container"], #main .message-in, #main .message-out');
-    if (msgContainers.length > 12) {
+    // Verificar si el chat tiene mensajes de HOY
+    // 1. Buscar separadores de fecha de WhatsApp ("Hoy" / "Today")
+    const dateSeps = document.querySelectorAll('#main [data-testid="msg-dateseparator"]');
+    let hasToday = false;
+    let hasSeps = dateSeps.length > 0;
+    for (const sep of dateSeps) {
+      const t = (sep.textContent || '').toLowerCase().trim();
+      if (t === 'hoy' || t === 'today') { hasToday = true; break; }
+    }
+    // 2. Si hay separadores pero ninguno dice "Hoy", es chat de otro día → saltar
+    if (hasSeps && !hasToday) {
       updateHeaderBadge(phone, false);
       return;
+    }
+    // 3. Si no hay separadores, verificar data-pre-plain-text con fecha de hoy
+    if (!hasSeps) {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2,'0');
+      const mm = String(now.getMonth()+1).padStart(2,'0');
+      const yyyy = now.getFullYear();
+      const todayFmt = `${dd}/${mm}/${yyyy}`;
+      const msgs = document.querySelectorAll('#main .copyable-text[data-pre-plain-text]');
+      if (msgs.length > 0) {
+        const lastPre = msgs[msgs.length-1].getAttribute('data-pre-plain-text') || '';
+        if (!lastPre.includes(todayFmt)) {
+          updateHeaderBadge(phone, false);
+          return;
+        }
+      } else {
+        // Sin mensajes visibles, no registrar
+        updateHeaderBadge(phone, false);
+        return;
+      }
     }
 
     // Verificar si tiene mensajes de anuncio o respuesta del bot
