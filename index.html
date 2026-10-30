@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -4755,13 +4755,15 @@ function computeLeadsFunnel(leads){
 function renderLeadsView(){
   const allLeads = getLeadsList();
   const funnel = computeLeadsFunnel(allLeads);
+  const todayIso = iso(new Date());
+  const isLeadToday = l => { const f = (l.fecha || '').slice(0, 10); const cr = (l.creadoEl || '').slice(0, 10); return f === todayIso || cr === todayIso; };
 
   // Filter list
   let filtered = allLeads;
 
   // Status Filter
   if (leadFilter === 'nuevos') {
-    filtered = filtered.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus));
+    filtered = filtered.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus) && isLeadToday(l));
   } else if (leadFilter === 'agendados') {
     filtered = filtered.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus));
   } else if (leadFilter === 'asistieron') {
@@ -4783,9 +4785,11 @@ function renderLeadsView(){
     );
   }
 
+  filtered = filtered.slice().sort((a, b) => (b.creadoEl || b.fecha || '').localeCompare(a.creadoEl || a.fecha || ''));
+
   // Counts for pills
   const cAll = allLeads.length;
-  const cNuevos = allLeads.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus)).length;
+  const cNuevos = allLeads.filter(l => ['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus) && isLeadToday(l)).length;
   const cAgendados = allLeads.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus)).length;
   const cAsistieron = allLeads.filter(l => isAsistio(l.estatus)).length;
   const cNoAsistieron = allLeads.filter(l => isNoAsistio(l.estatus)).length;
