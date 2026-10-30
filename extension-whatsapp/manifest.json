@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Dental Más Fácil - WhatsApp Leads & Citas",
-  "version": "3.2.1",
+  "version": "3.3.0",
   "description": "Auto-captura inteligente de leads de Meta Ads en tiempo real con 3 candados de seguridad para Dental Más Fácil.",
   "icons": {
     "16": "icons/icon16.png",
