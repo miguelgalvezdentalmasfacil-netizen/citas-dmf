@@ -1,15 +1,14 @@
-// Dental Más Fácil - WhatsApp Web Extension v3.3.0 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
+// Dental Más Fácil - WhatsApp Web Extension v3.3.1 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
 (() => {
-  const VERSION = '3.3.0';
+  const VERSION = '3.3.1';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
   const ASSIGNED_ADVISOR = 'Miguel';
   const capturedPhonesCache = new Set();
-  const knownOldPhones = new Set();
-  let isSaving = false;
+  const savingInProgress = new Set();
 
-  console.log(`[DMF v${VERSION}] Extensión iniciada. Monitoreo en segundo plano activo.`);
+  console.log(`[DMF v${VERSION}] Extensión conectada. Auto-captura activa en segundo plano.`);
 
   // 1. Limpiador y normalizador de teléfonos (10 dígitos limpios)
   function cleanPhoneNumber(str) {
@@ -18,7 +17,7 @@
     const digits = s.replace(/\D/g, '');
     if (digits.length < 10) return null;
 
-    // Si tiene más de 3 letras, es un nombre guardado (ej. "Carlos Perez"), no un prospecto nuevo
+    // Si tiene más de 3 letras, es un nombre guardado de contacto (ej. "Carlos Perez"), no un prospecto nuevo
     const letters = s.replace(/[^a-zA-Z]/g, '');
     if (letters.length > 3) return null;
 
@@ -36,7 +35,6 @@
   // 2. Extraer teléfono de una fila de la bandeja (#pane-side)
   function extractPhoneFromRow(row) {
     if (!row) return null;
-    // Buscar específicamente en el elemento de título donde WhatsApp coloca el número
     const titleEl = row.querySelector('div[data-testid="cell-frame-title"] span, span[title], span[dir="auto"]');
     if (titleEl) {
       const rawTitle = titleEl.getAttribute('title') || titleEl.textContent || '';
@@ -46,7 +44,7 @@
     return null;
   }
 
-  // 3. Sincronizar todos los teléfonos existentes en Supabase
+  // 3. Sincronizar todos los teléfonos existentes en Supabase a memoria
   async function syncExistingPhonesFromDB() {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/citas?select=telefono`, {
@@ -62,7 +60,6 @@
             const clean = cleanPhoneNumber(String(r.telefono));
             if (clean) {
               capturedPhonesCache.add(clean);
-              knownOldPhones.add(clean);
             }
           }
         });
@@ -110,13 +107,15 @@
     'precios',
     'costo',
     'costos',
-    // Frases del bot de bienvenida automático de Dental Más Fácil
+    // Mensajes del bot automático de bienvenida de Dental Más Fácil
     'dental más fácil',
     'dental mas facil',
+    'dental + fácil',
     'saludamos de dental',
     'bienvenido a dental',
     'hola! le saludamos',
-    '¡hola! le saludamos'
+    '¡hola! le saludamos',
+    'asesor dental'
   ];
 
   // Comprobar si el contenido corresponde a un anuncio o lead publicitario
@@ -145,22 +144,41 @@
     return AD_AND_BOT_KEYWORDS.some(kw => t.includes(kw));
   }
 
+  // Extraer el texto exclusivo de la hora de la fila de WhatsApp Web
+  function getRowTimestampText(row) {
+    if (!row) return '';
+    const smallLeaves = Array.from(row.querySelectorAll('span, div')).filter(el => {
+      const t = (el.textContent || '').trim();
+      return t.length > 0 && t.length <= 15 && el.children.length === 0;
+    });
+
+    for (const el of smallLeaves) {
+      const t = el.textContent.trim().toLowerCase();
+      if (/:\d{2}/.test(t) || t === 'ayer' || t === 'yesterday' || /\d{1,2}\/\d{1,2}/.test(t) || t === 'ahora') {
+        return t;
+      }
+    }
+    return '';
+  }
+
   // Comprobar si una fila en la bandeja es de HOY
   function isRowFromToday(row) {
-    if (!row) return false;
-    const text = (row.textContent || '').toLowerCase().replace(/[\u200e\u200f\u202a-\u202e\u202f\u00a0]/g, ' ');
-
-    // Si dice explícitamente "ayer" o un día de la semana, NO es de hoy
-    if (text.includes('ayer') || text.includes('yesterday')) return false;
-    if (/\b(lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado|domingo)\b/i.test(text)) return false;
-
-    // Es de hoy si tiene formato de hora (ej: 10:35, 9:15, a. m., p. m., ahora)
-    return /:\d{2}/.test(text) || text.includes('ahora') || text.includes('just now');
+    const timeStr = getRowTimestampText(row);
+    if (!timeStr) return true; // Si no hay elemento de hora claro, no descartar por fecha
+    if (timeStr.includes('ayer') || timeStr.includes('yesterday') || /\d{1,2}\/\d{1,2}/.test(timeStr)) {
+      return false; // Es de ayer o fecha anterior
+    }
+    return /:\d{2}/.test(timeStr) || timeStr.includes('ahora') || timeStr.includes('just now');
   }
 
   // Guardar lead directamente en Supabase
   async function saveLeadDirectly(cleanPhone, snippet) {
-    if (!cleanPhone || cleanPhone.length < 10) return;
+    if (!cleanPhone || cleanPhone.length < 10) return false;
+    if (savingInProgress.has(cleanPhone)) return false;
+
+    savingInProgress.add(cleanPhone);
+    capturedPhonesCache.add(cleanPhone);
+
     const now = new Date();
     const fecha = now.toISOString().slice(0, 10);
     const hora = now.toTimeString().slice(0, 5);
@@ -197,9 +215,8 @@
 
       if (res.ok) {
         console.log(`[DMF v${VERSION}] 🔥 ¡LEAD REGISTRADO CON ÉXITO EN SUPABASE!: ${cleanPhone}`);
-        capturedPhonesCache.add(cleanPhone);
-        knownOldPhones.add(cleanPhone);
         updateHeaderBadge(cleanPhone, true);
+        savingInProgress.delete(cleanPhone);
         return true;
       } else {
         console.warn(`[DMF v${VERSION}] Supabase respondió status ${res.status}`);
@@ -207,11 +224,12 @@
     } catch (e) {
       console.error(`[DMF v${VERSION}] Error guardando lead en Supabase:`, e);
     }
+
+    savingInProgress.delete(cleanPhone);
     return false;
   }
 
   // MODO 1: Auto-captura en la bandeja lateral (#pane-side)
-  // Revisa los chats visibles sin necesidad de abrirlos
   async function scanSidebarChats() {
     const chatRows = document.querySelectorAll('#pane-side [role="row"], #pane-side div[data-testid="cell-frame-container"]');
     if (!chatRows || chatRows.length === 0) return 0;
@@ -226,14 +244,8 @@
       // Si ya está registrado en Supabase, omitir
       if (capturedPhonesCache.has(phone)) continue;
 
-      // Si es un chat viejo descartado, omitir
-      if (knownOldPhones.has(phone)) continue;
-
       // Verificar que sea de hoy
-      if (!isRowFromToday(row)) {
-        knownOldPhones.add(phone);
-        continue;
-      }
+      if (!isRowFromToday(row)) continue;
 
       // Verificar si es de anuncio o trae saludo del bot
       const rowText = row.textContent || '';
@@ -241,9 +253,6 @@
 
       // ¡CUMPLE TODO! Auto-registrar
       console.log(`[DMF v${VERSION}] Lead de anuncio detectado en bandeja:`, phone);
-      capturedPhonesCache.add(phone);
-      knownOldPhones.add(phone);
-
       const ok = await saveLeadDirectly(phone, rowText);
       if (ok) registeredCount++;
     }
@@ -278,18 +287,9 @@
     const mainEl = document.querySelector('#main');
     if (!mainEl) return;
 
-    // Verificar si es un chat viejo buscando fechas explícitas de días anteriores en los separadores de fecha
-    const dayHeaders = mainEl.querySelectorAll('div[data-testid="chat-day-header"], span[dir="auto"]');
-    let hasYesterdayOrOlder = false;
-    dayHeaders.forEach(dh => {
-      const txt = (dh.textContent || '').toLowerCase();
-      if (txt === 'ayer' || txt === 'yesterday' || /\b(lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado|domingo)\b/i.test(txt)) {
-        hasYesterdayOrOlder = true;
-      }
-    });
-
-    if (hasYesterdayOrOlder) {
-      knownOldPhones.add(phone);
+    // Si es un chat largo con más de 12 mensajes, es una conversación vieja
+    const msgContainers = document.querySelectorAll('#main div[data-testid="msg-container"], #main .message-in, #main .message-out');
+    if (msgContainers.length > 12) {
       updateHeaderBadge(phone, false);
       return;
     }
@@ -298,14 +298,10 @@
     const mainText = (mainEl.textContent || '').toLowerCase();
     if (isMetaAdOrLead(mainEl, mainText)) {
       console.log(`[DMF v${VERSION}] Lead nuevo de Meta Ads abierto hoy:`, phone);
-      capturedPhonesCache.add(phone);
-      knownOldPhones.add(phone);
-      updateHeaderBadge(phone, true);
-
-      // Obtener el primer mensaje del cliente
-      const msgContainers = document.querySelectorAll('#main div[data-testid="msg-container"], #main .message-in');
-      const snippet = msgContainers[0] ? (msgContainers[0].textContent || '').slice(0, 250) : 'Lead Meta Ads';
+      const firstIn = document.querySelector('#main .message-in, #main div[data-testid="msg-container"]');
+      const snippet = firstIn ? (firstIn.textContent || '').slice(0, 250) : 'Lead Meta Ads';
       await saveLeadDirectly(phone, snippet);
+      updateHeaderBadge(phone, true);
     } else {
       updateHeaderBadge(phone, false);
     }
@@ -344,15 +340,15 @@
   document.addEventListener('click', (e) => {
     if (e.target && e.target.closest && e.target.closest('#pane-side, [role="row"], [data-testid="cell-frame-container"]')) {
       if (clickTimeout) clearTimeout(clickTimeout);
-      clickTimeout = setTimeout(checkOpenChat, 350);
+      clickTimeout = setTimeout(checkOpenChat, 300);
     }
   }, { passive: true });
 
-  // Monitoreo continuo cada 3 segundos
+  // Monitoreo continuo cada 2.5 segundos
   setInterval(() => {
     scanSidebarChats();
     checkOpenChat();
-  }, 3000);
+  }, 2500);
 
   // Escuchar botón de escaneo forzado desde el Popup de la extensión
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
