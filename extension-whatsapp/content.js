@@ -1,6 +1,6 @@
-// Dental Más Fácil - WhatsApp Web Extension v3.5.0 (CAPTURA CONSERVADORA - SOLO LEADS REALES)
+﻿// Dental Más Fácil - WhatsApp Web Extension v3.5.1 (CAPTURA CONSERVADORA - SOLO LEADS REALES)
 (() => {
-  const VERSION = '3.5.0';
+  const VERSION = '3.5.1';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
@@ -151,7 +151,9 @@
     const now = new Date();
     const fecha = now.toISOString().slice(0, 10);
     const hora = now.toTimeString().slice(0, 5);
-    const leadId = 'c_' + cleanPhone + '_' + fecha + '_' + hora.replace(':', '');
+    // ID por telefono+fecha: mismo teléfono en el mismo día siempre genera el mismo ID
+    // Supabase ignorará el duplicado gracias a merge-duplicates (no crea registro extra)
+    const leadId = 'c_' + cleanPhone + '_' + fecha;
 
     const record = {
       id: leadId,
@@ -184,7 +186,7 @@
 
       if (res.ok) {
         console.log(`[DMF v${VERSION}] ✅ LEAD GUARDADO: ${cleanPhone}`);
-        updateHeaderBadge(phone, true);
+        updateHeaderBadge(cleanPhone, true);
         savingInProgress.delete(cleanPhone);
         return true;
       } else {
