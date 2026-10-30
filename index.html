@@ -1332,7 +1332,7 @@ function extractDentalinkData(text){
 
   // Fases o procedimientos clínicos del presupuesto de Dentalink
   const pasos = [];
-  const statusWords = 'Realizada|Realizado|Pendiente|Planificada|Planificado|Presupuestada|Presupuestado|En\\s+tratamiento|En\\s+proceso|En\\s+curso|Iniciada|Iniciado|Anulada|Anulado';
+  const statusWords = 'Realizada|Realizado|Pendiente|Planificada|Planificado|Presupuestada|Presupuestado|Iniciada|Iniciado|Anulada|Anulado';
 
   // Dividir el texto en bloques por cada palabra de estado en Dentalink
   const splitRegex = new RegExp(`(?<=\\s|^)(?=(?:${statusWords})\\b)`, 'i');
