@@ -1,91 +1,68 @@
-﻿// Dental Más Fácil - WhatsApp Web Extension v3.4.0 (AUTO-CAPTURA INTELIGENTE DE ANUNCIOS META ADS)
+// Dental Más Fácil - WhatsApp Web Extension v3.5.0 (CAPTURA CONSERVADORA - SOLO LEADS REALES)
 (() => {
-  const VERSION = '3.4.0';
+  const VERSION = '3.5.0';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
 
   const ASSIGNED_ADVISOR = 'Miguel';
   const capturedPhonesCache = new Set();
   const savingInProgress = new Set();
+  let lastCheckedPhone = null; // Para no re-verificar el mismo chat en cada tick
 
-  console.log(`[DMF v${VERSION}] Extensión conectada. Auto-captura activa en segundo plano.`);
+  console.log(`[DMF v${VERSION}] Extensión conectada. Modo conservador activo.`);
 
-  // 1. Limpiador y normalizador de teléfonos (10 dígitos limpios)
+  // ─── 1. Limpiador de teléfonos ────────────────────────────────────────────
   function cleanPhoneNumber(str) {
     if (!str) return null;
     const s = String(str).replace(/[\u200e\u200f\u202a-\u202e\u202f\u00a0]/g, ' ').trim();
     const digits = s.replace(/\D/g, '');
     if (digits.length < 10) return null;
-
-    // Si tiene más de 3 letras, es un nombre guardado de contacto (ej. "Carlos Perez"), no un prospecto nuevo
     const letters = s.replace(/[^a-zA-Z]/g, '');
-    if (letters.length > 3) return null;
+    if (letters.length > 3) return null; // Es un nombre guardado, no número
 
     let clean = digits;
     if (clean.startsWith('521') && clean.length === 13) clean = clean.slice(3);
     else if (clean.startsWith('52') && clean.length === 12) clean = clean.slice(2);
     else if (clean.startsWith('1') && clean.length === 11) clean = clean.slice(1);
 
-    if (clean.length === 10) {
-      return clean;
-    }
-    return null;
+    return clean.length === 10 ? clean : null;
   }
 
-  // 2. Extraer teléfono de una fila de la bandeja (#pane-side)
-  function extractPhoneFromRow(row) {
-    if (!row) return null;
-    const titleEl = row.querySelector('div[data-testid="cell-frame-title"] span, span[title], span[dir="auto"]');
-    if (titleEl) {
-      const rawTitle = titleEl.getAttribute('title') || titleEl.textContent || '';
-      const clean = cleanPhoneNumber(rawTitle);
-      if (clean) return clean;
-    }
-    return null;
-  }
-
-  // 3. Sincronizar todos los teléfonos existentes en Supabase a memoria
+  // ─── 2. Sincronizar teléfonos ya guardados en Supabase ───────────────────
   async function syncExistingPhonesFromDB() {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/citas?select=telefono`, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`
-        }
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       });
       if (res.ok) {
         const rows = await res.json();
         rows.forEach(r => {
           if (r.telefono) {
             const clean = cleanPhoneNumber(String(r.telefono));
-            if (clean) {
-              capturedPhonesCache.add(clean);
-            }
+            if (clean) capturedPhonesCache.add(clean);
           }
         });
-        console.log(`[DMF v${VERSION}] Sincronizados ${capturedPhonesCache.size} teléfonos registrados desde Supabase.`);
+        console.log(`[DMF v${VERSION}] ${capturedPhonesCache.size} teléfonos sincronizados desde Supabase.`);
       }
     } catch (e) {
-      console.warn('[DMF] Error sincronizando con Supabase:', e);
+      console.warn('[DMF] Error sincronizando:', e);
     }
   }
   syncExistingPhonesFromDB();
 
-  // Palabras clave de Meta Ads (tanto del prospecto como del bot de bienvenida)
-  const AD_AND_BOT_KEYWORDS = [
+  // ─── 3. Keywords MUY ESPECÍFICAS de Meta Ads ─────────────────────────────
+  // SOLO frases que ÚNICAMENTE aparecen en mensajes de anuncios de Meta/Facebook
+  // NO palabras genéricas como "información", "precio", "costo"
+  const META_ADS_KEYWORDS = [
+    // Frases del prospecto que viene de un anuncio
     'quiero más información',
     'quiero mas informacion',
     'quiero más inf',
     'quiero mas inf',
-    'más información',
-    'mas informacion',
     'me gustaría conseguir más información',
     'me gustaria conseguir mas informacion',
     'me gustaría más información',
     'me gustaria mas informacion',
-    'soluciones dentales',
-    'recupera tus piezas',
-    'facilidades de pago',
     'vi su anuncio',
     'vi este anuncio',
     'vi en facebook',
@@ -93,88 +70,80 @@
     'vi en instagram',
     'anuncio de facebook',
     'anuncio de instagram',
-    'facebook',
-    'instagram',
     'fb.me',
-    'información sobre',
-    'informacion sobre',
-    'informes sobre',
-    'información',
-    'informacion',
-    'informes',
-    'me interesa',
-    'precio',
-    'precios',
-    'costo',
-    'costos',
-    // Mensajes del bot automático de bienvenida de Dental Más Fácil
-    'dental más fácil',
-    'dental mas facil',
-    'dental + fácil',
+    'soluciones dentales',
+    'recupera tus piezas',
+    'facilidades de pago',
+    // Mensajes exclusivos del bot de bienvenida de Dental Más Fácil
     'saludamos de dental',
     'bienvenido a dental',
     'hola! le saludamos',
     '¡hola! le saludamos',
     'asesor dental'
+    // REMOVIDOS por ser demasiado genéricos:
+    // 'información', 'informacion', 'precio', 'precios', 'costo', 'costos',
+    // 'me interesa', 'más información', 'facebook', 'instagram'
   ];
 
-  // Comprobar si el contenido corresponde a un anuncio o lead publicitario
+  // Detectar si un chat es lead real de Meta Ads
   function isMetaAdOrLead(container, text = '') {
-    const t = (text || (container ? container.textContent : '') || '').toLowerCase();
     const html = (container ? container.innerHTML : '').toLowerCase();
 
-    // Iconos de anuncio de Facebook / Meta
+    // Iconos ESPECÍFICOS de anuncio de Meta en el HTML (los más confiables)
     if (html.includes('logo-facebook') ||
         html.includes('wds-ic-logo-facebook-fill') ||
         html.includes('logo-instagram') ||
         html.includes('forward-ad') ||
-        html.includes('ad-bubble') ||
-        html.includes('facebook') ||
-        html.includes('instagram')) {
+        html.includes('ad-bubble')) {
       return true;
     }
-
     if (container && container.querySelector) {
-      if (container.querySelector('[data-icon*="facebook"], [data-icon*="instagram"], [data-testid*="facebook"], [data-testid*="instagram"]')) {
+      if (container.querySelector('[data-icon*="facebook"], [data-icon*="instagram"], [data-testid*="ad-"]')) {
         return true;
       }
     }
 
-    // Texto de anuncio o respuesta del bot
-    return AD_AND_BOT_KEYWORDS.some(kw => t.includes(kw));
+    // Solo frases muy específicas de Meta Ads
+    const t = (text || (container ? container.textContent : '') || '').toLowerCase();
+    return META_ADS_KEYWORDS.some(kw => t.includes(kw));
   }
 
-  // Extraer el texto exclusivo de la hora de la fila de WhatsApp Web
-  function getRowTimestampText(row) {
-    if (!row) return '';
-    const smallLeaves = Array.from(row.querySelectorAll('span, div')).filter(el => {
-      const t = (el.textContent || '').trim();
-      return t.length > 0 && t.length <= 15 && el.children.length === 0;
-    });
-
-    for (const el of smallLeaves) {
-      const t = el.textContent.trim().toLowerCase();
-      if (/:\d{2}/.test(t) || t === 'ayer' || t === 'yesterday' || /\d{1,2}\/\d{1,2}/.test(t) || t === 'ahora') {
-        return t;
+  // ─── 4. Verificar si un chat abierto tiene mensajes de HOY ───────────────
+  function chatIsFromToday() {
+    // Método A: separadores de fecha de WhatsApp ("Hoy" / "Today")
+    const dateSeps = document.querySelectorAll('#main [data-testid="msg-dateseparator"]');
+    if (dateSeps.length > 0) {
+      for (const sep of dateSeps) {
+        const t = (sep.textContent || '').toLowerCase().trim();
+        if (t === 'hoy' || t === 'today') return true;
       }
+      // Hay separadores pero ninguno es "Hoy" → chat de otro día
+      return false;
     }
-    return '';
+
+    // Método B: data-pre-plain-text contiene la fecha de hoy
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const todayFmt = `${dd}/${mm}/${yyyy}`;
+
+    const msgs = document.querySelectorAll('#main .copyable-text[data-pre-plain-text]');
+    if (msgs.length > 0) {
+      // Revisar los últimos 3 mensajes para mayor seguridad
+      const recent = Array.from(msgs).slice(-3);
+      return recent.some(m => (m.getAttribute('data-pre-plain-text') || '').includes(todayFmt));
+    }
+
+    // Sin info de fecha disponible → NO registrar
+    return false;
   }
 
-  // Comprobar si una fila en la bandeja es de HOY
-  function isRowFromToday(row) {
-    const timeStr = getRowTimestampText(row);
-    if (!timeStr) return false; // Sin timestamp claro, descartar por seguridad
-    if (timeStr.includes('ayer') || timeStr.includes('yesterday') || /\d{1,2}\/\d{1,2}/.test(timeStr)) {
-      return false; // Es de ayer o fecha anterior
-    }
-    return /:\d{2}/.test(timeStr) || timeStr.includes('ahora') || timeStr.includes('just now');
-  }
-
-  // Guardar lead directamente en Supabase
+  // ─── 5. Guardar lead en Supabase ─────────────────────────────────────────
   async function saveLeadDirectly(cleanPhone, snippet) {
     if (!cleanPhone || cleanPhone.length < 10) return false;
     if (savingInProgress.has(cleanPhone)) return false;
+    if (capturedPhonesCache.has(cleanPhone)) return false;
 
     savingInProgress.add(cleanPhone);
     capturedPhonesCache.add(cleanPhone);
@@ -214,45 +183,48 @@
       });
 
       if (res.ok) {
-        console.log(`[DMF v${VERSION}] 🔥 ¡LEAD REGISTRADO CON ÉXITO EN SUPABASE!: ${cleanPhone}`);
-        updateHeaderBadge(cleanPhone, true);
+        console.log(`[DMF v${VERSION}] ✅ LEAD GUARDADO: ${cleanPhone}`);
+        updateHeaderBadge(phone, true);
         savingInProgress.delete(cleanPhone);
         return true;
       } else {
-        console.warn(`[DMF v${VERSION}] Supabase respondió status ${res.status}`);
+        console.warn(`[DMF v${VERSION}] Supabase status ${res.status}`);
+        capturedPhonesCache.delete(cleanPhone); // revertir cache si falló
       }
     } catch (e) {
-      console.error(`[DMF v${VERSION}] Error guardando lead en Supabase:`, e);
+      console.error(`[DMF v${VERSION}] Error:`, e);
+      capturedPhonesCache.delete(cleanPhone);
     }
 
     savingInProgress.delete(cleanPhone);
     return false;
   }
 
-  // MODO 1: Auto-captura en la bandeja lateral (#pane-side)
+  // ─── 6. Escaneo MANUAL de bandeja (solo botón popup) ─────────────────────
   async function scanSidebarChats() {
     const chatRows = document.querySelectorAll('#pane-side [role="row"], #pane-side div[data-testid="cell-frame-container"]');
     if (!chatRows || chatRows.length === 0) return 0;
 
     let registeredCount = 0;
-    const topChats = Array.from(chatRows).slice(0, 15);
+    // Solo revisar los primeros 10 chats visibles
+    const topChats = Array.from(chatRows).slice(0, 10);
 
     for (const row of topChats) {
       const phone = extractPhoneFromRow(row);
       if (!phone) continue;
-
-      // Si ya está registrado en Supabase, omitir
       if (capturedPhonesCache.has(phone)) continue;
 
-      // Verificar que sea de hoy
-      if (!isRowFromToday(row)) continue;
+      // Verificar timestamp: SOLO aceptar si hay HH:MM de hoy ("ahora" o "##:##")
+      const timeStr = getRowTimestampText(row);
+      if (!timeStr) continue; // Sin hora visible = descartar
+      const isToday = /^\d{1,2}:\d{2}$/.test(timeStr) || timeStr === 'ahora' || timeStr === 'just now';
+      if (!isToday) continue; // Ayer, fecha, lunes, etc. = descartar
 
-      // Verificar si es de anuncio o trae saludo del bot
+      // Verificar keywords Meta Ads
       const rowText = row.textContent || '';
       if (!isMetaAdOrLead(row, rowText)) continue;
 
-      // ¡CUMPLE TODO! Auto-registrar
-      console.log(`[DMF v${VERSION}] Lead de anuncio detectado en bandeja:`, phone);
+      console.log(`[DMF v${VERSION}] Lead en bandeja:`, phone);
       const ok = await saveLeadDirectly(phone, rowText);
       if (ok) registeredCount++;
     }
@@ -260,12 +232,43 @@
     return registeredCount;
   }
 
-  // MODO 2: Auto-captura al abrir cualquier chat (#main)
+  function extractPhoneFromRow(row) {
+    if (!row) return null;
+    const titleEl = row.querySelector('div[data-testid="cell-frame-title"] span, span[title], span[dir="auto"]');
+    if (titleEl) {
+      const rawTitle = titleEl.getAttribute('title') || titleEl.textContent || '';
+      return cleanPhoneNumber(rawTitle);
+    }
+    return null;
+  }
+
+  function getRowTimestampText(row) {
+    if (!row) return '';
+    const smallLeaves = Array.from(row.querySelectorAll('span, div')).filter(el => {
+      const t = (el.textContent || '').trim();
+      return t.length > 0 && t.length <= 15 && el.children.length === 0;
+    });
+    for (const el of smallLeaves) {
+      const t = el.textContent.trim().toLowerCase();
+      if (/^\d{1,2}:\d{2}$/.test(t) || t === 'ayer' || t === 'yesterday' ||
+          /^\d{1,2}\/\d{1,2}/.test(t) || t === 'ahora' || t === 'just now' ||
+          /^(lunes|martes|miércoles|jueves|viernes|sábado|domingo)$/.test(t)) {
+        return t;
+      }
+    }
+    return '';
+  }
+
+  // ─── 7. Verificar chat ABIERTO (solo al hacer clic, no en intervalo) ─────
+  let lastOpenPhone = null;
+  let lastOpenRegistered = false;
+
   async function checkOpenChat() {
     const mainHeader = document.querySelector('#main header');
     if (!mainHeader) {
       const badge = document.getElementById('dmf-header-badge');
       if (badge) badge.remove();
+      lastOpenPhone = null;
       return;
     }
 
@@ -275,67 +278,49 @@
 
     if (!phone) {
       updateHeaderBadge(null, false);
+      lastOpenPhone = null;
       return;
     }
 
-    // Si ya está registrado en Supabase: mostrar insignia verde
+    // Si ya revisamos este teléfono y lo registramos, solo mostrar badge
     if (capturedPhonesCache.has(phone)) {
       updateHeaderBadge(phone, true);
       return;
     }
 
-    const mainEl = document.querySelector('#main');
-    if (!mainEl) return;
-
-    // Verificar si el chat tiene mensajes de HOY
-    // 1. Buscar separadores de fecha de WhatsApp ("Hoy" / "Today")
-    const dateSeps = document.querySelectorAll('#main [data-testid="msg-dateseparator"]');
-    let hasToday = false;
-    let hasSeps = dateSeps.length > 0;
-    for (const sep of dateSeps) {
-      const t = (sep.textContent || '').toLowerCase().trim();
-      if (t === 'hoy' || t === 'today') { hasToday = true; break; }
-    }
-    // 2. Si hay separadores pero ninguno dice "Hoy", es chat de otro día → saltar
-    if (hasSeps && !hasToday) {
+    // Si es el mismo chat que ya revisamos y no era lead, no volver a intentar
+    if (phone === lastOpenPhone && !lastOpenRegistered) {
       updateHeaderBadge(phone, false);
       return;
     }
-    // 3. Si no hay separadores, verificar data-pre-plain-text con fecha de hoy
-    if (!hasSeps) {
-      const now = new Date();
-      const dd = String(now.getDate()).padStart(2,'0');
-      const mm = String(now.getMonth()+1).padStart(2,'0');
-      const yyyy = now.getFullYear();
-      const todayFmt = `${dd}/${mm}/${yyyy}`;
-      const msgs = document.querySelectorAll('#main .copyable-text[data-pre-plain-text]');
-      if (msgs.length > 0) {
-        const lastPre = msgs[msgs.length-1].getAttribute('data-pre-plain-text') || '';
-        if (!lastPre.includes(todayFmt)) {
-          updateHeaderBadge(phone, false);
-          return;
-        }
-      } else {
-        // Sin mensajes visibles, no registrar
-        updateHeaderBadge(phone, false);
-        return;
-      }
+
+    lastOpenPhone = phone;
+    lastOpenRegistered = false;
+
+    const mainEl = document.querySelector('#main');
+    if (!mainEl) return;
+
+    // PRIMERO: ¿tiene mensajes de HOY?
+    if (!chatIsFromToday()) {
+      updateHeaderBadge(phone, false);
+      return;
     }
 
-    // Verificar si tiene mensajes de anuncio o respuesta del bot
+    // SEGUNDO: ¿tiene keywords de Meta Ads?
     const mainText = (mainEl.textContent || '').toLowerCase();
     if (isMetaAdOrLead(mainEl, mainText)) {
-      console.log(`[DMF v${VERSION}] Lead nuevo de Meta Ads abierto hoy:`, phone);
+      console.log(`[DMF v${VERSION}] Lead Meta Ads detectado:`, phone);
       const firstIn = document.querySelector('#main .message-in, #main div[data-testid="msg-container"]');
       const snippet = firstIn ? (firstIn.textContent || '').slice(0, 250) : 'Lead Meta Ads';
-      await saveLeadDirectly(phone, snippet);
-      updateHeaderBadge(phone, true);
+      const ok = await saveLeadDirectly(phone, snippet);
+      lastOpenRegistered = ok;
+      updateHeaderBadge(phone, ok || capturedPhonesCache.has(phone));
     } else {
       updateHeaderBadge(phone, false);
     }
   }
 
-  // Insignia discreta en la cabecera del chat abierto
+  // ─── 8. Badge en header ───────────────────────────────────────────────────
   function updateHeaderBadge(phone, isRegistered) {
     const mainHeader = document.querySelector('#main header');
     if (!mainHeader || !phone) {
@@ -352,34 +337,24 @@
       mainHeader.appendChild(badge);
     }
 
-    if (isRegistered) {
-      badge.innerHTML = `
-        <span style="font-size:12px;color:#10b981;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35);user-select:none">
-          ✓ Lead en DMF
-        </span>
-      `;
-    } else {
-      badge.innerHTML = '';
-    }
+    badge.innerHTML = isRegistered
+      ? `<span style="font-size:12px;color:#10b981;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35);user-select:none">✓ Lead en DMF</span>`
+      : '';
   }
 
-  // Evento al dar clic en cualquier chat
+  // ─── 9. Solo disparar checkOpenChat al hacer CLIC en un chat ─────────────
+  // NO hay setInterval con checkOpenChat — evita capturas falsas en scroll
   let clickTimeout = null;
   document.addEventListener('click', (e) => {
-    if (e.target && e.target.closest && e.target.closest('#pane-side, [role="row"], [data-testid="cell-frame-container"]')) {
+    const row = e.target && e.target.closest && e.target.closest('[role="row"], [data-testid="cell-frame-container"]');
+    if (row && row.closest('#pane-side')) {
       if (clickTimeout) clearTimeout(clickTimeout);
-      clickTimeout = setTimeout(checkOpenChat, 300);
+      // Esperar 600ms para que WhatsApp cargue el chat antes de analizar
+      clickTimeout = setTimeout(checkOpenChat, 600);
     }
   }, { passive: true });
 
-  // Monitoreo continuo cada 2.5 segundos
-  // NOTA: scanSidebarChats() SOLO se ejecuta con el botón manual del popup
-  // para evitar capturar chats viejos al hacer scroll
-  setInterval(() => {
-    checkOpenChat();
-  }, 2500);
-
-  // Escuchar botón de escaneo forzado desde el Popup de la extensión
+  // ─── 10. Botón manual del popup ───────────────────────────────────────────
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg && msg.action === 'dmf_scan_now') {
       scanSidebarChats().then(count => {
@@ -390,5 +365,5 @@
     }
   });
 
-  console.log(`[DMF v${VERSION}] Listo. Captura de anuncios activada en silencio.`);
+  console.log(`[DMF v${VERSION}] Listo. Solo captura al hacer clic en un chat nuevo de HOY con anuncio de Meta.`);
 })();
