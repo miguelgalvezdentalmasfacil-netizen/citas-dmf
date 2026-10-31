@@ -1,7 +1,7 @@
-// Dental Más Fácil - WhatsApp Web Extension v3.6.0
+﻿// Dental Más Fácil - WhatsApp Web Extension v3.6.1
 // CAMBIO CLAVE: Solo analiza mensajes ENTRANTES (.message-in), ignora mensajes salientes del bot
 (() => {
-  const VERSION = '3.6.0';
+  const VERSION = '3.6.1';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
   const ASSIGNED_ADVISOR = 'Miguel';
@@ -117,7 +117,13 @@
         (m.getAttribute('data-pre-plain-text') || '').includes(todayFmt)
       );
     }
-    return false; // Sin info de fecha → no registrar
+    // Método C: chat muy nuevo (≤3 mensajes total) sin separador aún
+    // Un lead recién llegado puede no tener separador "Hoy" todavía
+    const totalMsgs = document.querySelectorAll('#main .message-in, #main .message-out');
+    if (totalMsgs.length > 0 && totalMsgs.length <= 5) {
+      return true; // Chat muy corto → asumir que es de hoy
+    }
+    return false; // Sin info de fecha y chat largo → no registrar
   }
 
   // ─── 5. Guardar lead en Supabase ──────────────────────────────────────────
@@ -200,12 +206,7 @@
       return;
     }
 
-    // Mismo chat ya revisado sin ser lead → no reintentar
-    if (phone === lastCheckedPhone) {
-      updateHeaderBadge(phone, false);
-      return;
-    }
-    lastCheckedPhone = phone;
+    // (Reintento permitido: el usuario puede hacer clic de nuevo para forzar verificación)
 
     // ¿Tiene mensajes de HOY?
     if (!chatIsFromToday()) {
