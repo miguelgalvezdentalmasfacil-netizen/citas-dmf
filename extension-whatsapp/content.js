@@ -1,7 +1,7 @@
-// Dental Más Fácil - WhatsApp Web Extension v4.0.0
+﻿// Dental Más Fácil - WhatsApp Web Extension v4.0.1
 // MODO MANUAL: Botón "➕ Registrar Lead" en el header del chat
 (() => {
-  const VERSION = '4.0.0';
+  const VERSION = '4.0.1';
   const SUPABASE_URL = 'https://hzdootsarxbawbwtsfyp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vNm3-NzhO_zfBtrIUunSVQ_tD-Giufe';
   const ASSIGNED_ADVISOR = 'Miguel';
@@ -122,40 +122,35 @@
     }
 
     if (isRegistered) {
-      // Badge verde: ya registrado
+      // Círculo verde: ya registrado
       ui.innerHTML = `
-        <span style="font-size:12px;color:#10b981;font-weight:600;padding:4px 12px;
-          border-radius:999px;background:rgba(16,185,129,.12);
-          border:1px solid rgba(16,185,129,.35);user-select:none;white-space:nowrap;">
-          ✓ Lead en DMF
-        </span>`;
+        <div title="Lead registrado en DMF" style="
+          width:14px;height:14px;border-radius:50%;
+          background:#10b981;cursor:default;flex-shrink:0;
+          box-shadow:0 0 0 2px rgba(16,185,129,.25);">
+        </div>`;
     } else {
-      // Botón para registrar manualmente
+      // Círculo gris clicable: registrar
       ui.innerHTML = `
-        <button id="dmf-register-btn" style="
-          font-size:12px;font-weight:600;color:#fff;padding:5px 14px;
-          border-radius:999px;background:#2563eb;border:none;cursor:pointer;
-          white-space:nowrap;transition:background .2s;outline:none;
-          font-family:inherit;line-height:1.4;">
-          ➕ Registrar Lead
-        </button>`;
+        <div id="dmf-register-btn" title="Clic para registrar como Lead" style="
+          width:14px;height:14px;border-radius:50%;
+          background:#9ca3af;cursor:pointer;flex-shrink:0;
+          transition:background .2s;box-shadow:0 0 0 2px rgba(156,163,175,.25);">
+        </div>`;
 
       document.getElementById('dmf-register-btn')?.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const btn = document.getElementById('dmf-register-btn');
-        if (btn) { btn.textContent = '⏳ Guardando...'; btn.disabled = true; }
+        const dot = document.getElementById('dmf-register-btn');
+        if (dot) { dot.style.background = '#f59e0b'; dot.style.cursor = 'wait'; } // Amarillo = guardando
 
-        // Capturar snippet del primer mensaje entrante
         const firstIn = document.querySelector('#main .message-in');
         const snippet = firstIn ? (firstIn.textContent || '').slice(0, 250) : 'Lead registrado manualmente';
 
         const ok = await saveLeadDirectly(phone, snippet);
-        if (ok) {
+        if (ok || capturedPhonesCache.has(phone)) {
           renderHeaderUI(phone, true);
-        } else if (capturedPhonesCache.has(phone)) {
-          renderHeaderUI(phone, true); // Ya existía
         } else {
-          if (btn) { btn.textContent = '❌ Error - reintentar'; btn.disabled = false; }
+          if (dot) { dot.style.background = '#ef4444'; dot.style.cursor = 'pointer'; } // Rojo = error
         }
       });
     }
