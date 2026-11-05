@@ -1269,7 +1269,7 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
 const SUCURSALES=['Tijuana','Mexicali Obregón','Mexicali Villa Verde','Ensenada'];
 const TRATAMIENTOS=['Valoración','Limpieza dental','Ortodoncia (brackets)','Alineadores','Endodoncia','Extracción','Resina','Corona','Implante','Blanqueamiento','Prótesis','Otro'];
 const TIPOS=['Nueva','Reagenda'];
-const ORIGENES=['Facebook Ads','Instagram Ads','TikTok Ads','WhatsApp Directo','Publicidad Externa','Publicidad Interna','Convenio','Recomendaci\u00f3n'];
+const ORIGENES=['Publicidad Externa','Publicidad Interna'];
 const PAQUETES=['Individual','Dual','Familiar'];
 const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
@@ -5448,11 +5448,8 @@ function openLeadModal(id){
       <div class="field">
         <label class="l">Canal Publicitario (Origen)</label>
         <select class="inp" id="l-ori">
-          <option value="Facebook Ads" ${l.origen === 'Facebook Ads' ? 'selected' : ''}>Facebook Ads</option>
-          <option value="Instagram Ads" ${l.origen === 'Instagram Ads' ? 'selected' : ''}>Instagram Ads</option>
-          
-          <option value="WhatsApp Directo" ${l.origen === 'WhatsApp Directo' ? 'selected' : ''}>WhatsApp Directo</option>
-          <option value="Recomendación" ${l.origen === 'Recomendación' ? 'selected' : ''}>Recomendación</option>
+          <option value="Publicidad Externa" ${l.origen !== 'Publicidad Interna' ? 'selected' : ''}>Publicidad Externa</option>
+          <option value="Publicidad Interna" ${l.origen === 'Publicidad Interna' ? 'selected' : ''}>Publicidad Interna</option>
         </select>
       </div>
       <div class="field">
