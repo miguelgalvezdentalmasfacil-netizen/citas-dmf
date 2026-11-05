@@ -543,21 +543,49 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
   }
   .date-filter-group {
     width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     display: flex !important;
-    flex-direction: row !important;
+    flex-direction: column !important;
+    border: none !important;
+    background: transparent !important;
+    gap: 8px !important;
+    height: auto !important;
   }
   .date-filter-group .date-wrap {
-    flex: 1 1 55% !important;
-    width: auto !important;
+    width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+  .date-filter-group .cdp-wrap {
+    width: 100% !important;
+  }
+  .date-filter-group .cdp-trigger {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 42px !important;
+    border: 1px solid var(--border-dark) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--bg-color) !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
   }
   .date-filter-group .c-select-wrap {
-    flex: 1 1 45% !important;
+    width: 100% !important;
     min-width: 0 !important;
-    width: auto !important;
+    border: none !important;
+    flex: 1 1 auto !important;
   }
   .date-filter-group .c-select-trigger {
-    padding: 0 8px !important;
-    font-size: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 42px !important;
+    border: 1px solid var(--border-dark) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--bg-color) !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    box-sizing: border-box !important;
+    justify-content: space-between !important;
   }
   .filters-actions {
     display: flex !important;
