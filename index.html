@@ -3271,8 +3271,8 @@ async function saveStatus(id){
   // Si marcó Asistió y está activo el envío a Google Sheets:
   if(stSel==='Asistió'){
     const paq = c.paquete || 'Individual';
-    const aNombre = nameOf(c.asesorId);
-    const cSucursal = mapClinicaSheets(c.sucursal);
+    let aNombre = nameOf(c.asesorId);
+    if(!aNombre || aNombre === "-" || aNombre === "Sin asignar"){ if(user && user.nombre) aNombre = user.nombre; }
     const cOrigen = mapOrigenSheets(c.origen, aNombre);
     const sheetsId = c.sheetsId || ('dmf_' + c.id);
     const sheetsPayload = {
