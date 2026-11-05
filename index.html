@@ -605,6 +605,36 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
   .f-item {
     margin-bottom: 2px !important;
   }
+  /* Píldoras de filtro en Presupuestos responsivas y elegantes */
+  .bp-filter-toolbar {
+    margin-bottom: 16px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .bp-filter-toolbar::-webkit-scrollbar {
+    display: none !important;
+  }
+  .bp-pill-group {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    width: 100% !important;
+    padding: 2px 2px 6px 2px !important;
+    gap: 6px !important;
+  }
+  .bp-filter-btn {
+    flex: 0 0 auto !important;
+    padding: 7px 12px !important;
+    font-size: 12px !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+  }
+  .bp-count {
+    font-size: 11px !important;
+    padding: 1px 6px !important;
+  }
 }
 @media (max-width:980px){
   .nav{padding:12px 16px}.wrap{padding:24px 16px 80px}
@@ -631,11 +661,11 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
   .date-filter-group .c-select-wrap{flex:0 0 150px}
   .filters-actions{flex-shrink:0}
   .filters-grid{grid-template-columns:1fr 1fr}
-  .bp-pill-group{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+  .bp-pill-group{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:8px}
 }
 @media (max-width:520px){
   .filters-grid{grid-template-columns:1fr}
-  .bp-pill-group{grid-template-columns:1fr 1fr;gap:6px}
+  .bp-pill-group{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:6px}
   .pill-date{display:none}
   .brand img{height:28px}.brand{gap:10px}.brand-tag{padding-left:10px}
   .modal{padding:28px 22px}.grid2{grid-template-columns:1fr}
@@ -718,8 +748,8 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
 .bp-mini-fill{height:100%;background:currentColor;border-radius:3px;transition:width .3s ease}
 
 /* Presupuestos Dashboard Toolbar & Filters */
-.bp-filter-toolbar{display:flex;align-items:center;justify-content:center;margin-bottom:24px;width:100%}
-.bp-pill-group{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%}
+.bp-filter-toolbar{display:flex;align-items:center;justify-content:center;margin-bottom:20px;width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bp-pill-group{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;width:100%}
 .bp-filter-btn{border:1px solid var(--border-dark);background:var(--surface);color:var(--text-muted);padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s ease;white-space:nowrap;min-width:0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
 .bp-filter-btn:hover{background:var(--hover);color:var(--text-main);border-color:var(--text-main)}
 .bp-filter-btn.active{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg);box-shadow:0 2px 8px rgba(0,0,0,.08)}
