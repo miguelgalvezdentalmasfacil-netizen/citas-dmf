@@ -661,11 +661,11 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
   .date-filter-group .c-select-wrap{flex:0 0 150px}
   .filters-actions{flex-shrink:0}
   .filters-grid{grid-template-columns:1fr 1fr}
-  .bp-pill-group{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:8px}
+  
 }
 @media (max-width:520px){
   .filters-grid{grid-template-columns:1fr}
-  .bp-pill-group{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:6px}
+  
   .pill-date{display:none}
   .brand img{height:28px}.brand{gap:10px}.brand-tag{padding-left:10px}
   .modal{padding:28px 22px}.grid2{grid-template-columns:1fr}
@@ -749,7 +749,7 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
 
 /* Presupuestos Dashboard Toolbar & Filters */
 .bp-filter-toolbar{display:flex;align-items:center;justify-content:center;margin-bottom:20px;width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.bp-pill-group{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;width:100%}
+.bp-pill-group{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
 .bp-filter-btn{border:1px solid var(--border-dark);background:var(--surface);color:var(--text-muted);padding:11px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s ease;white-space:nowrap;min-width:0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
 .bp-filter-btn:hover{background:var(--hover);color:var(--text-main);border-color:var(--text-main)}
 .bp-filter-btn.active{background:var(--btn-bg);color:var(--btn-text);border-color:var(--btn-bg);box-shadow:0 2px 8px rgba(0,0,0,.08)}
@@ -932,6 +932,63 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
 .btn-lead-agendar{background:#0097A7!important;color:#fff!important;border:none!important;font-weight:600!important}
 .btn-lead-agendar:hover{background:#00838F!important}
 .lead-status-sel{font-size:12px!important;padding:4px 8px!important;height:30px!important;border-radius:6px!important;background:var(--bg-color)!important}
+
+/* =========================================================
+   PRESUPUESTOS: Mobile Filter Pills (Horizontal smooth scroll)
+   ========================================================= */
+@media (max-width: 768px) {
+  .bp-filter-toolbar {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 6px 2px 14px 2px !important;
+    margin-bottom: 14px !important;
+    justify-content: flex-start !important;
+    scrollbar-width: none !important;
+  }
+  .bp-filter-toolbar::-webkit-scrollbar {
+    display: none !important;
+  }
+  .bp-pill-group {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: max-content !important;
+    min-width: 100% !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+  }
+  .bp-filter-btn {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 8px 14px !important;
+    font-size: 12.5px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+  }
+  .bp-filter-btn .bp-dot {
+    width: 7px !important;
+    height: 7px !important;
+    border-radius: 50% !important;
+    flex: 0 0 auto !important;
+  }
+  .bp-filter-btn .bp-count {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    flex: 0 0 auto !important;
+  }
+}
 
 </style>
 </head>
