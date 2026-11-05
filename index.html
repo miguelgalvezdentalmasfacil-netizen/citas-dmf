@@ -2292,9 +2292,14 @@ function startApp(){
   enhanceAllSelects($('#filters'));
   enhanceAllDatePickers(document);
   enhanceAllTimePickers(document);
-  // Mostrar tab Leads solo para usuarios con whatsapp:true (ej: Miguel)
+  // Permisos de usuario (Miguel es admin y tiene WhatsApp)
+  const isAdmin = user && user.rol === 'admin';
+  const hasWa = user && !!user.whatsapp;
   const tabLeads = $('#tab-btn-leads');
-  if(tabLeads) tabLeads.style.display = user.whatsapp ? '' : 'none';
+  if(tabLeads) { tabLeads.style.display = hasWa ? '' : 'none'; tabLeads.classList.toggle('hidden', !hasWa); }
+  if($('#b-csv')) { $('#b-csv').classList.toggle('hidden', !isAdmin); $('#b-csv').style.display = isAdmin ? '' : 'none'; }
+  if($('#b-pdf')) { $('#b-pdf').classList.toggle('hidden', !isAdmin); $('#b-pdf').style.display = isAdmin ? '' : 'none'; }
+  if(!hasWa && view === 'leads') view = 'hoy';
   render();
 }
 
@@ -2525,6 +2530,13 @@ function renderPeriodNav(){
 }
 
 function render(){
+  const hasWa = user && !!user.whatsapp;
+  const isAdmin = user && user.rol === 'admin';
+  const tabLeads = $('#tab-btn-leads');
+  if(tabLeads) { tabLeads.style.display = hasWa ? '' : 'none'; tabLeads.classList.toggle('hidden', !hasWa); }
+  if($('#b-csv')) { $('#b-csv').classList.toggle('hidden', !isAdmin); $('#b-csv').style.display = isAdmin ? '' : 'none'; }
+  if($('#b-pdf')) { $('#b-pdf').classList.toggle('hidden', !isAdmin); $('#b-pdf').style.display = isAdmin ? '' : 'none'; }
+  if(!hasWa && view === 'leads') view = 'hoy';
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   $('#filters').classList.toggle('hidden',!filtersOpen);
   $('#b-toggle-filters')?.classList.toggle('active',filtersOpen);
