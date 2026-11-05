@@ -2280,7 +2280,9 @@ function startApp(){
   const admin=user.rol==='admin';
   if($('#f-as-wrap')) $('#f-as-wrap').classList.toggle('hidden',!admin);
   $('#f-as').classList.toggle('hidden',!admin);
-  if($('#b-csv')) $('#b-csv').classList.remove('hidden');
+  // Reportes: solo admin (Miguel)
+  if($('#b-csv')) $('#b-csv').classList.toggle('hidden',!admin);
+  if($('#b-pdf')) $('#b-pdf').classList.toggle('hidden',!admin);
   updateSettingsUserInfo();
   $('#f-st').innerHTML=opts(ESTATUS,'','Todos los estatus');
   $('#f-suc').innerHTML=opts(SUCURSALES,'','Todas las sucursales');
