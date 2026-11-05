@@ -845,8 +845,9 @@ const PAQUETES=['Individual','Dual','Familiar'];
 const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
 const USUARIOS=[
-  {id:'u1',nombre:'Miguel',rol:'admin',pin:'1234'},
-  {id:'u2',nombre:'Edgar',rol:'asesor',pin:'4321'}
+  {id:'u1',nombre:'Miguel',rol:'admin',pin:'1234',whatsapp:true},
+  {id:'u2',nombre:'Edgar',rol:'asesor',pin:'4321'},
+  {id:'u3',nombre:'Zoe',rol:'asesor',pin:'1111'}
 ];
 
 function nameOf(id){
@@ -2289,6 +2290,9 @@ function startApp(){
   enhanceAllSelects($('#filters'));
   enhanceAllDatePickers(document);
   enhanceAllTimePickers(document);
+  // Mostrar tab Leads solo para usuarios con whatsapp:true (ej: Miguel)
+  const tabLeads = $('#tab-btn-leads');
+  if(tabLeads) tabLeads.style.display = user.whatsapp ? '' : 'none';
   render();
 }
 
