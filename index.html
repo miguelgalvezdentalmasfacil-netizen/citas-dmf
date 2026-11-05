@@ -5460,7 +5460,7 @@ if(pinTgl&&pinInp){
   };
 }
 if($('#b-out')) $('#b-out').onclick=()=>{sessionStorage.removeItem('dmf_user');user=null;showLogin()};
-if(#b-theme) #b-theme.remove();
+const themeBtn = document.getElementById('b-theme'); if (themeBtn) themeBtn.remove();
 
 // Menú de configuración y perfil
 const bSettings=$('#b-settings'), settingsMenu=$('#settings-menu');
