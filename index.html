@@ -934,9 +934,128 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
 .lead-status-sel{font-size:12px!important;padding:4px 8px!important;height:30px!important;border-radius:6px!important;background:var(--bg-color)!important}
 
 /* =========================================================
-   PRESUPUESTOS: Mobile Filter Pills (Horizontal smooth scroll)
+   RESPONSIVE MODAL & MOBILE OVERRIDES (Bottom Specificity)
    ========================================================= */
 @media (max-width: 768px) {
+  /* Overlay & Modal containers: stay strictly within screen boundaries */
+  .overlay {
+    padding: 10px 8px !important;
+    align-items: flex-end !important; /* Drawer / Bottom-sheet on mobile for easy reach */
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 22px 16px 28px 16px !important;
+    border-radius: 18px 18px 10px 10px !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+  }
+  .modal.modal-budget {
+    max-width: 100% !important;
+    padding: 22px 14px 28px 14px !important;
+  }
+  .modal.modal-report {
+    max-width: 100% !important;
+    padding: 20px 14px !important;
+  }
+
+  /* Form layouts inside modals: stack cleanly into 1 column */
+  .grid2 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .grid3-kpis {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .field {
+    margin-bottom: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .field .inp, .field textarea.inp, .field select.inp {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 16px !important; /* Prevents auto-zoom on iOS */
+  }
+
+  /* Custom dropdowns inside modals */
+  .c-select-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .c-select-trigger {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+  }
+  .c-select-menu {
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Modal action buttons: wrap nicely, fit screen */
+  .m-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 18px !important;
+    box-sizing: border-box !important;
+  }
+  .m-actions .btn {
+    flex: 1 1 calc(50% - 8px) !important;
+    min-width: 110px !important;
+    padding: 12px 10px !important;
+    font-size: 13.5px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+    white-space: normal !important; /* Allow 2-line text if long like 'Guardar Presupuesto' */
+  }
+  .m-actions .btn[data-act="save"],
+  .m-actions .btn[data-act="savebudget"] {
+    flex: 2 1 100% !important; /* Make primary action full width on bottom */
+    order: 4 !important;
+    font-weight: 600 !important;
+  }
+  .m-actions .btn[data-act="close"] {
+    order: 1 !important;
+  }
+  .m-actions .btn[data-act="budget"] {
+    order: 2 !important;
+  }
+  .m-actions .btn[data-act="delete"],
+  .m-actions .btn[data-act="delbudget"] {
+    order: 3 !important;
+  }
+
+  /* WhatsApp banner inside budget modal */
+  .bp-wa-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+  .bp-wa-banner button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Presupuestos: horizontal scroll filters */
   .bp-filter-toolbar {
     display: flex !important;
     width: 100% !important;
@@ -988,9 +1107,7 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
     font-weight: 700 !important;
     flex: 0 0 auto !important;
   }
-}
-
-</style>
+}</style>
 </head>
 <body>
 
