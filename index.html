@@ -3477,6 +3477,7 @@ async function saveStatus(id){
     const paq = c.paquete || 'Individual';
     let aNombre = nameOf(c.asesorId);
     if(!aNombre || aNombre === "-" || aNombre === "Sin asignar"){ if(user && user.nombre) aNombre = user.nombre; }
+    const cSucursal = mapClinicaSheets(c.sucursal);
     const cOrigen = mapOrigenSheets(c.origen, aNombre);
     const sheetsId = c.sheetsId || ('dmf_' + c.id);
     const sheetsPayload = {
