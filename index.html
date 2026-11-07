@@ -1694,10 +1694,18 @@ function getBudgetSemáforo(b){
 
 function getMyBudgets(){
   const all = Object.values(presupuestos);
-  if(!user || user.rol === 'admin') return all;
-  return all.filter(b => nameOf(b.asesorId) === user.nombre || b.asesorId === user.id);
+  if(!user) return all;
+  const selAs = ($('#f-as') && $('#f-as').value) ? $('#f-as').value : '';
+  if(selAs){
+    if(selAs === 'todos') return all;
+    return all.filter(b => citaMatchesAsesor(b, selAs));
+  }
+  if(user.rol === 'admin'){
+    // Por defecto en control personal, solo presupuestos de Miguel
+    return all.filter(b => citaMatchesAsesor(b, user.nombre));
+  }
+  return all.filter(b => citaMatchesAsesor(b, user.id));
 }
-
 function computeAllBudgetsKpis(){
   const list = getMyBudgets();
   let totalPresupuestado = 0;
@@ -2718,7 +2726,7 @@ function startApp(){
   $('#f-suc').innerHTML=opts(SUCURSALES,'','Todas las sucursales');
   if($('#f-tip')) $('#f-tip').innerHTML=opts(TIPOS,'','Todos los tipos');
   if($('#f-ori')) $('#f-ori').innerHTML=opts(ORIGENES,'','Todos los orígenes');
-  $('#f-as').innerHTML='<option value="">Todos los asesores</option>'+USUARIOS.map(u=>`<option value="${esc(u.nombre)}">${esc(u.nombre)}</option>`).join('');
+  $('#f-as').innerHTML='<option value="" selected>Mi control personal (Solo mis citas)</option><option value="todos">Todos los asesores (Consolidado)</option>'+USUARIOS.map(u=>`<option value="${esc(u.nombre)}">${esc(u.nombre)}</option>`).join('');
   enhanceAllSelects($('#filters'));
   enhanceAllDatePickers(document);
   enhanceAllTimePickers(document);
@@ -2796,7 +2804,21 @@ function renderAviso(){
 }
 
 /* ============ RENDER ============ */
-function mine(){const base=(user&&user.rol==='admin')?citas:citas.filter(c=>nameOf(c.asesorId)===user.nombre||c.asesorId===user.id||nameOf(c.creadoPor)===user.nombre);return base.filter(isRealCita);}
+function mine(){
+  const selAs = ($('#f-as') && $('#f-as').value) ? $('#f-as').value : '';
+  let base = citas;
+  if(selAs){
+    if(selAs !== 'todos') {
+      base = base.filter(c => citaMatchesAsesor(c, selAs));
+    }
+  } else if(user && user.rol === 'admin'){
+    // Por defecto en la vista de control personal de Miguel, mostrar exclusivamente sus citas
+    base = base.filter(c => citaMatchesAsesor(c, user.nombre));
+  } else if(user){
+    base = base.filter(c => citaMatchesAsesor(c, user.id));
+  }
+  return base.filter(isRealCita);
+}
 function currentList(){
   const t=iso(new Date());let l=mine();
   const [wStart,wEnd]=getWeekRange(selectedWeekRef), [mStart,mEnd]=getMonthRange(selectedMonthRef);
