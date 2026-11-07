@@ -1274,9 +1274,9 @@ const PAQUETES=['Individual','Dual','Familiar'];
 const ESTATUS=['Pendiente','Confirmada','Asistió','No asistió','Reagendó','Canceló'];
 /* Usuarios de ejemplo — cambia nombres y PIN aquí */
 const USUARIOS=[
-  {id:'u1',nombre:'Miguel',rol:'admin',pin:'1234',whatsapp:true},
-  {id:'u2',nombre:'Edgar',rol:'asesor',pin:'4321'},
-  {id:'u3',nombre:'Zoe',rol:'asesor',pin:'1111'}
+  {id:'u1',nombre:'Miguel',rol:'admin',pin:'1234',whatsapp:true,canReport:true},
+  {id:'u2',nombre:'Edgar',rol:'asesor',pin:'4321',canReport:true},
+  {id:'u3',nombre:'Zoe',rol:'asesor',pin:'1111',canReport:false}
 ];
 
 function nameOf(id){
@@ -2718,9 +2718,10 @@ function startApp(){
   const admin=user.rol==='admin';
   if($('#f-as-wrap')) $('#f-as-wrap').classList.toggle('hidden',!admin);
   $('#f-as').classList.toggle('hidden',!admin);
-  // Reportes: solo admin (Miguel)
-  if($('#b-csv')) $('#b-csv').classList.toggle('hidden',!admin);
-  if($('#b-pdf')) $('#b-pdf').classList.toggle('hidden',!admin);
+  const canReport = user && (user.rol === 'admin' || !!user.canReport);
+  // Reportes
+  if($('#b-csv')) $('#b-csv').classList.toggle('hidden', !canReport);
+  if($('#b-pdf')) $('#b-pdf').classList.toggle('hidden', !canReport);
   updateSettingsUserInfo();
   $('#f-st').innerHTML=opts(ESTATUS,'','Todos los estatus');
   $('#f-suc').innerHTML=opts(SUCURSALES,'','Todas las sucursales');
@@ -2735,8 +2736,9 @@ function startApp(){
   const hasWa = user && !!user.whatsapp;
   const tabLeads = $('#tab-btn-leads');
   if(tabLeads) { tabLeads.style.display = hasWa ? '' : 'none'; tabLeads.classList.toggle('hidden', !hasWa); }
-  if($('#b-csv')) { $('#b-csv').classList.toggle('hidden', !isAdmin); $('#b-csv').style.display = isAdmin ? '' : 'none'; }
-  if($('#b-pdf')) { $('#b-pdf').classList.toggle('hidden', !isAdmin); $('#b-pdf').style.display = isAdmin ? '' : 'none'; }
+  const canRep = user && (user.rol === 'admin' || !!user.canReport);
+  if($('#b-csv')) { $('#b-csv').classList.toggle('hidden', !canRep); $('#b-csv').style.display = canRep ? '' : 'none'; }
+  if($('#b-pdf')) { $('#b-pdf').classList.toggle('hidden', !canRep); $('#b-pdf').style.display = canRep ? '' : 'none'; }
   if(!hasWa && view === 'leads') view = 'hoy';
   render();
 }
@@ -2986,8 +2988,9 @@ function render(){
   const isAdmin = user && user.rol === 'admin';
   const tabLeads = $('#tab-btn-leads');
   if(tabLeads) { tabLeads.style.display = hasWa ? '' : 'none'; tabLeads.classList.toggle('hidden', !hasWa); }
-  if($('#b-csv')) { $('#b-csv').classList.toggle('hidden', !isAdmin); $('#b-csv').style.display = isAdmin ? '' : 'none'; }
-  if($('#b-pdf')) { $('#b-pdf').classList.toggle('hidden', !isAdmin); $('#b-pdf').style.display = isAdmin ? '' : 'none'; }
+  const canRep = user && (user.rol === 'admin' || !!user.canReport);
+  if($('#b-csv')) { $('#b-csv').classList.toggle('hidden', !canRep); $('#b-csv').style.display = canRep ? '' : 'none'; }
+  if($('#b-pdf')) { $('#b-pdf').classList.toggle('hidden', !canRep); $('#b-pdf').style.display = canRep ? '' : 'none'; }
   if(!hasWa && view === 'leads') view = 'hoy';
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.view===view));
   $('#filters').classList.toggle('hidden',!filtersOpen);
@@ -4318,10 +4321,14 @@ function openReportModal(){
         </div>
         <div>
           <label class="rep-field-label">Asesor responsable:</label>
+          ${user.rol==='admin'?`
           <select class="inp" id="rep-asesor-sel" style="width:100%">
             <option value="todos" ${repConfig.asesor==='todos'?'selected':''}>Todos los Asesores (Consolidado general)</option>
-            ${USUARIOS.map(u=>`<option value="${u.id}" ${(repConfig.asesor===u.id||repConfig.asesor===u.nombre)?'selected':''}>${esc(u.nombre)}${user&&user.id===u.id?' — Tú':''}</option>`).join('')}
-          </select>
+            ${USUARIOS.map(u=>`<option value="${u.id}" ${(repConfig.asesor===u.id||repConfig.asesor===u.nombre)?'selected':''}>${esc(u.nombre)}${user&&user.id===u.id?' - Tú':''}</option>`).join('')}
+          </select>`:`
+          <input class="inp" readonly value="${esc(user.nombre)} (Mis datos)" style="width:100%;background:var(--hover);font-weight:600">
+          <input type="hidden" id="rep-asesor-sel" value="${esc(user.id)}">
+          `}
         </div>
       </div>
 
@@ -4621,6 +4628,8 @@ function renderPdfPreview(){
   const basisIsReg=(repConfig.dateBasis==='registro');
   const basisLabel=basisIsReg?'Filtrado por Fecha de Registro':'Filtrado por Fecha de Cita';
 
+  // Si no es admin, forzar repConfig.asesor siempre a su usuario para garantizar privacidad
+  if(user && user.rol !== 'admin') { repConfig.asesor = user.id; }
   let list=citas.filter(c=>{
     const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
     return dVal>=startDate&&dVal<=endDate&&isRealCita(c);
