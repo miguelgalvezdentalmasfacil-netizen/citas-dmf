@@ -92,10 +92,13 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 /* dark disabled */
 
 /* Buttons */
-.btn{border:0;background:var(--btn-bg);color:var(--btn-text);padding:13px 22px;border-radius:var(--radius-md);font-weight:500;cursor:pointer;transition:background .15s ease;white-space:nowrap}
-.btn:hover{background:var(--btn-bg-hover)}
+.btn{border:0;background:var(--btn-bg);color:var(--btn-text);padding:13px 22px;border-radius:var(--radius-md);font-weight:500;cursor:pointer;transition:background .15s ease, border-color .15s ease, opacity .15s ease;white-space:nowrap;-webkit-user-select:none;user-select:none}
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover{background:var(--btn-bg-hover)}
+  .btn.out:hover{transform:translateY(-2px);background:var(--hover);border-color:var(--text-main)}
+}
+.btn:active{opacity:.75}
 .btn.out{background:transparent;border:1px solid var(--border-dark);color:var(--text-main);transition:all .15s ease}
-.btn.out:hover{transform:translateY(-2px);background:var(--hover);border-color:var(--text-main)}
 .btn.sm{padding:9px 14px;font-size:13px}
 .btn.block{width:100%}
 
@@ -518,8 +521,12 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
     flex: 1 1 auto !important;
     text-align: center !important;
     justify-content: center !important;
-    padding: 8px 10px !important;
-    font-size: 12px !important;
+    padding: 10px 14px !important;
+    min-height: 40px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
   }
   /* Adaptación perfecta de Filtros en pantallas móviles */
   .filters-card {
@@ -5733,6 +5740,10 @@ document.addEventListener('click',e=>{
   const t=e.target.closest('[data-act],[data-view]');
   if(e.target.id==='modal')return closeModal();
   if(!t)return;
+  if(t.dataset.act==='status'){
+    e.preventDefault();
+    e.stopPropagation();
+  }
   if(t.dataset.view){
     view=t.dataset.view;
     if(view==='semana') selectedWeekRef=iso(new Date());
