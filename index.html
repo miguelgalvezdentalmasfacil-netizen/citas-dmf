@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -5191,9 +5191,13 @@ function getLeadsList(){
 }
 
 const CAMPAIGN_OCTUBRE_LEADS = 289;
+// Leads de campaña por mes (pre-integración, sin registro en BD)
+const CAMPAIGN_LEADS_BY_MONTH = { '2026-10': 289 };
 
 function getLeadDate(l){
-  return (l.creadoEl ? l.creadoEl.slice(0,10) : (l.fecha || '')).slice(0,10);
+  // Para leads, la fecha que eligió el usuario es la correcta (no creadoEl que es cuando se tecleó)
+  if (l.fecha) return l.fecha.slice(0,10);
+  return (l.creadoEl ? l.creadoEl.slice(0,10) : '').slice(0,10);
 }
 
 function filterLeadsByPeriod(leads, period, refDate){
@@ -5220,7 +5224,16 @@ function filterLeadsByPeriod(leads, period, refDate){
 
 function computeLeadsFunnel(leads, period, refDate){
   const isAllTime = (!period || period === 'todos');
-  const baseTotal = isAllTime ? (CAMPAIGN_OCTUBRE_LEADS + leads.filter(l => l.origen === 'Meta Ads' || l.tipo === 'Lead WhatsApp' || ['Lead', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus)).length) : leads.length;
+  let baseTotal;
+  if(isAllTime){
+    baseTotal = CAMPAIGN_OCTUBRE_LEADS + leads.filter(l => l.origen === 'Meta Ads' || l.tipo === 'Lead WhatsApp' || ['Lead', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus)).length;
+  } else if(period === 'mes'){
+    const monthKey = (refDate || iso(new Date())).slice(0,7);
+    const campaignForMonth = CAMPAIGN_LEADS_BY_MONTH[monthKey] || 0;
+    baseTotal = campaignForMonth + leads.length;
+  } else {
+    baseTotal = leads.length;
+  }
 
   const agendadasList = leads.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus));
   const agendadas = agendadasList.length;
