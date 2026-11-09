@@ -4160,6 +4160,7 @@ let repConfig={
   dateFrom:iso(new Date()),
   dateTo:iso(new Date()),
   asesor:'todos',
+  origen:'todos',
   dateBasis:'cita'
 };
 
@@ -4231,6 +4232,7 @@ function getReportFilename(){
   else if(repConfig.type==='ejecutivo') typeTag='Reporte_Ejecutivo';
   else if(repConfig.type==='presupuestos') typeTag='Presupuestos_Progreso';
   const asesorTag=repConfig.asesor==='todos'?'Todos_Asesores':(nameOf(repConfig.asesor).replace(/\s+/g,'_')||'Asesor');
+  const origenTag=repConfig.origen==='externa'?'_Ext':(repConfig.origen==='interna'?'_Int':'');
   const basisTag=repConfig.dateBasis==='registro'?'Por_Registro':'Por_Cita';
   let periodTag='';
   if(repConfig.period==='semana'){
@@ -4246,7 +4248,7 @@ function getReportFilename(){
   } else {
     periodTag=`Rango_${repConfig.dateFrom}_al_${repConfig.dateTo}`;
   }
-  return `DentalFacil_${typeTag}_${periodTag}_${basisTag}_${asesorTag}.pdf`;
+  return `DentalFacil_${typeTag}_${periodTag}_${basisTag}_${asesorTag}${origenTag}.pdf`;
 }
 
 function openReportModal(){
@@ -4329,6 +4331,15 @@ function openReportModal(){
           <input class="inp" readonly value="${esc(user.nombre)} (Mis datos)" style="width:100%;background:var(--hover);font-weight:600">
           <input type="hidden" id="rep-asesor-sel" value="${esc(user.id)}">
           `}
+        </div>
+      </div>
+
+      <div class="rep-field" style="margin-bottom:14px" id="rep-origen-wrap">
+        <label class="rep-field-label">Origen / Canal Publicitario:</label>
+        <div class="seg seg-sm" id="seg-rep-origen" style="width:100%;display:flex">
+          <button class="${repConfig.origen==='todos'?'on':''}" data-ori="todos" style="flex:1">Todos los Orígenes</button>
+          <button class="${repConfig.origen==='externa'?'on':''}" data-ori="externa" style="flex:1">Publicidad Externa</button>
+          <button class="${repConfig.origen==='interna'?'on':''}" data-ori="interna" style="flex:1">Publicidad Interna</button>
         </div>
       </div>
 
@@ -4581,6 +4592,17 @@ function bindReportModalEvents(){
     };
   }
 
+  const segOrigen=$('#seg-rep-origen');
+  if(segOrigen){
+    segOrigen.onclick=e=>{
+      const b=e.target.closest('button[data-ori]');
+      if(!b)return;
+      repConfig.origen=b.dataset.ori;
+      segOrigen.querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',btn.dataset.ori===repConfig.origen));
+      renderPdfPreview();
+    };
+  }
+
   const segBasis=$('#seg-rep-date-basis');
   if(segBasis){
     segBasis.onclick=e=>{
@@ -4625,6 +4647,7 @@ function renderPdfPreview(){
   const generatedStr=fmtDateLongEs(iso(now));
 
   const asesorName=repConfig.asesor==='todos'?'Todos los Asesores':nameOf(repConfig.asesor);
+  const origenLabel=repConfig.origen==='externa'?'Publicidad Externa':(repConfig.origen==='interna'?'Publicidad Interna':'Todos los Orígenes');
   const basisIsReg=(repConfig.dateBasis==='registro');
   const basisLabel=basisIsReg?'Filtrado por Fecha de Registro':'Filtrado por Fecha de Cita';
 
@@ -4636,6 +4659,11 @@ function renderPdfPreview(){
   });
   if(repConfig.asesor!=='todos'){
     list=list.filter(c=>citaMatchesAsesor(c, repConfig.asesor));
+  }
+  if(repConfig.origen==='externa'){
+    list=list.filter(c=>c.origen&&c.origen.includes('Externa'));
+  } else if(repConfig.origen==='interna'){
+    list=list.filter(c=>c.origen&&c.origen.includes('Interna'));
   }
 
   if(repConfig.type==='presupuestos'){
@@ -4784,7 +4812,7 @@ function renderPdfPreview(){
           <div class="pdf-title">REPORTE DE PRESUPUESTOS Y PROGRESO FINANCIERO</div>
           <div class="pdf-divider"></div>
           <div class="pdf-meta-date">${esc(periodTitle)}</div>
-          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Generado el ${esc(generatedStr)}</div>
+          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Origen: <b>${esc(origenLabel)}</b> · Generado el ${esc(generatedStr)}</div>
         </div>
 
         <div class="pdf-kpi-grid">
@@ -4864,7 +4892,7 @@ function renderPdfPreview(){
           <div class="pdf-title">REPORTE DE PACIENTES ATENDIDOS</div>
           <div class="pdf-divider"></div>
           <div class="pdf-meta-date">${esc(startDate===endDate?fmtDateLongEs(startDate):`Del ${fmtDateLongEs(startDate)} al ${fmtDateLongEs(endDate)}`)}</div>
-          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b></div>
+          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Origen: <b>${esc(origenLabel)}</b></div>
         </div>
 
         <table class="pdf-table">
@@ -4920,7 +4948,7 @@ function renderPdfPreview(){
           <div class="pdf-title">REPORTE DE CONTROL DE CITAS</div>
           <div class="pdf-divider"></div>
           <div class="pdf-meta-date">${esc(startDate===endDate?fmtDateLongEs(startDate):`Del ${fmtDateLongEs(startDate)} al ${fmtDateLongEs(endDate)}`)}</div>
-          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b></div>
+          <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Origen: <b>${esc(origenLabel)}</b></div>
         </div>
 
         <table class="pdf-table">
@@ -4977,7 +5005,10 @@ function renderPdfPreview(){
   const adRows=adList.map(u=>{
     const uCitas=citas.filter(c=>{
       const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
-      return dVal>=startDate && dVal<=endDate && citaMatchesAsesor(c, u.id) && isRealCita(c);
+      const matchesOri = (repConfig.origen==='todos') ||
+        (repConfig.origen==='externa' && c.origen && c.origen.includes('Externa')) ||
+        (repConfig.origen==='interna' && c.origen && c.origen.includes('Interna'));
+      return dVal>=startDate && dVal<=endDate && citaMatchesAsesor(c, u.id) && isRealCita(c) && matchesOri;
     });
     const uT=uCitas.length;
     const uA=uCitas.filter(c=>c.estatus==='Asistió').length;
@@ -5022,7 +5053,7 @@ function renderPdfPreview(){
         <div class="pdf-title">REPORTE EJECUTIVO DE CITAS Y ASISTENCIA</div>
         <div class="pdf-divider"></div>
         <div class="pdf-meta-date">${esc(periodTitle)}</div>
-        <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Generado el ${esc(generatedStr)}</div>
+        <div class="pdf-meta-sub">${esc(periodSub)} · ${basisLabel} · Asesor: <b>${esc(asesorName)}</b> · Origen: <b>${esc(origenLabel)}</b> · Generado el ${esc(generatedStr)}</div>
       </div>
 
       <div class="pdf-kpi-grid">
