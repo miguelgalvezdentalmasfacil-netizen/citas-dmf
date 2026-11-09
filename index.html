@@ -5241,6 +5241,16 @@ let leadPeriodRef = iso(new Date());
 function isAsistio(st){ return !!st && (st === 'Asisti' + '\u00f3' || st.startsWith('Asisti')); }
 function isNoAsistio(st){ return !!st && (st === 'No asisti' + '\u00f3' || st.startsWith('No asisti')); }
 
+function isLeadRecordType(l){
+  if(!l) return false;
+  if(l.origen === 'Meta Ads') return true;
+  if(l.tipo === 'Lead WhatsApp' || l.tipo === 'Lead') return true;
+  const st = String(l.estatus || '').trim();
+  if(['Lead', 'Lead WhatsApp', 'Descartado'].includes(st)) return true;
+  if(st.startsWith('En conversaci')) return true;
+  return false;
+}
+
 function getLeadsList(){
   return (user && user.rol === 'admin')
     ? citas
@@ -5281,15 +5291,16 @@ function filterLeadsByPeriod(leads, period, refDate){
 
 function computeLeadsFunnel(leads, period, refDate){
   const isAllTime = (!period || period === 'todos');
+  const dbLeadsCount = leads.filter(isLeadRecordType).length;
   let baseTotal;
   if(isAllTime){
-    baseTotal = CAMPAIGN_OCTUBRE_LEADS + leads.filter(l => l.origen === 'Meta Ads' || l.tipo === 'Lead WhatsApp' || ['Lead', 'En conversaci' + '\u00f3' + 'n'].includes(l.estatus)).length;
+    baseTotal = CAMPAIGN_OCTUBRE_LEADS + dbLeadsCount;
   } else if(period === 'mes'){
     const monthKey = (refDate || iso(new Date())).slice(0,7);
     const campaignForMonth = CAMPAIGN_LEADS_BY_MONTH[monthKey] || 0;
-    baseTotal = campaignForMonth + leads.length;
+    baseTotal = campaignForMonth + dbLeadsCount;
   } else {
-    baseTotal = leads.length;
+    baseTotal = dbLeadsCount;
   }
 
   const agendadasList = leads.filter(l => !['Lead', 'Lead WhatsApp', 'En conversaci' + '\u00f3' + 'n', 'Descartado'].includes(l.estatus));
