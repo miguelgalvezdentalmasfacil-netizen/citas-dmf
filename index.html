@@ -5696,14 +5696,14 @@ document.addEventListener('click',e=>{
     case'lead-nav-prev':{
       if(leadPeriod==='hoy') leadPeriodRef=addDays(leadPeriodRef,-1);
       else if(leadPeriod==='semana') leadPeriodRef=addDays(leadPeriodRef,-7);
-      else if(leadPeriod==='mes') leadPeriodRef=addDays(leadPeriodRef,-30);
+      else if(leadPeriod==='mes') leadPeriodRef=addMonths(leadPeriodRef,-1);
       renderLeadsView();
       break;
     }
     case'lead-nav-next':{
       if(leadPeriod==='hoy') leadPeriodRef=addDays(leadPeriodRef,1);
       else if(leadPeriod==='semana') leadPeriodRef=addDays(leadPeriodRef,7);
-      else if(leadPeriod==='mes') leadPeriodRef=addDays(leadPeriodRef,30);
+      else if(leadPeriod==='mes') leadPeriodRef=addMonths(leadPeriodRef,1);
       renderLeadsView();
       break;
     }
