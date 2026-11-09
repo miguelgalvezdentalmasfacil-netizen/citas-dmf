@@ -1648,6 +1648,16 @@ function getPatientCitas(tel, name){
               .sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
 }
 
+function getBudgetOrigen(b){
+  if(!b) return '';
+  if(b.origen) return b.origen;
+  const pCitas = getPatientCitas(b.telefono, b.paciente);
+  if(pCitas.length && pCitas[0].origen) return pCitas[0].origen;
+  const key = patientKey(b.telefono, b.paciente);
+  const anyCita = citas.find(c => patientKey(c.telefono, c.paciente) === key && c.origen);
+  return anyCita ? anyCita.origen : '';
+}
+
 function getBudgetSemáforo(b){
   const totals = computeBudgetTotals(b);
   const total = parseFloat(b?.total) || 0;
@@ -3965,6 +3975,7 @@ async function saveBudget(budgetId, citaId){
     telefono: tel || existing.telefono || '',
     paciente: pac || existing.paciente || '',
     asesorId: as || existing.asesorId || (user ? user.nombre : 'Miguel'),
+    origen: existing.origen || (citaId ? (citas.find(x => x.id === citaId)?.origen || '') : '') || '',
     total: total,
     abonoInicial: abonoIni,
     saldo: saldo,
@@ -4673,6 +4684,11 @@ function renderPdfPreview(){
       const target=u?u.nombre.toLowerCase():String(repConfig.asesor).toLowerCase();
       bList=bList.filter(b=>(b.asesorId&&b.asesorId.toLowerCase()===target)||(nameOf(b.asesorId).toLowerCase()===target));
     }
+    if(repConfig.origen==='externa'){
+      bList=bList.filter(b=>{ const o = getBudgetOrigen(b); return o && o.includes('Externa'); });
+    } else if(repConfig.origen==='interna'){
+      bList=bList.filter(b=>{ const o = getBudgetOrigen(b); return o && o.includes('Interna'); });
+    }
 
     bList=bList.filter(b=>{
       const emision=(b.fechaEmision||'').slice(0,10);
@@ -4780,6 +4796,7 @@ function renderPdfPreview(){
         const fol=b.folio?`#${esc(b.folio)}`:'S/F';
         const pFec=b.fechaEmision?fmtDateYY(b.fechaEmision):'—';
         const aName=nameOf(b.asesorId)||'—';
+        const bOri=fmtOrigenShort(getBudgetOrigen(b)) || '—';
         return `
           <tr>
             <td class="col-paciente">
@@ -4788,6 +4805,7 @@ function renderPdfPreview(){
             </td>
             <td style="text-align:center;white-space:nowrap">${pFec}</td>
             <td style="text-align:center">${esc(aName)}</td>
+            <td class="col-origen" style="text-align:center;font-size:11px">${esc(bOri)}</td>
             <td style="text-align:left">
               <div style="display:flex;align-items:center;gap:6px">
                 ${sem.icon}
@@ -4835,13 +4853,14 @@ function renderPdfPreview(){
         <table class="pdf-table">
           <thead>
             <tr>
-              <th style="width:28%;text-align:left">Paciente / Folio</th>
-              <th style="width:12%;text-align:center">Emisión</th>
-              <th style="width:12%;text-align:center">Asesor</th>
-              <th style="width:20%;text-align:left">Estado / Progreso</th>
-              <th style="width:10%;text-align:right">Total</th>
-              <th style="width:9%;text-align:right">Cobrado</th>
-              <th style="width:9%;text-align:right">Saldo</th>
+              <th style="width:25%;text-align:left">Paciente / Folio</th>
+              <th style="width:11%;text-align:center">Emisión</th>
+              <th style="width:11%;text-align:center">Asesor</th>
+              <th style="width:11%;text-align:center">Origen</th>
+              <th style="width:18%;text-align:left">Estado / Progreso</th>
+              <th style="width:8%;text-align:right">Total</th>
+              <th style="width:8%;text-align:right">Cobrado</th>
+              <th style="width:8%;text-align:right">Saldo</th>
             </tr>
           </thead>
           <tbody>
@@ -4849,7 +4868,7 @@ function renderPdfPreview(){
           </tbody>
           <tfoot>
             <tr style="background:#f8fafc;font-weight:700">
-              <td colspan="4" style="text-align:left;border-top:2px solid #0097a7">TOTAL GENERAL (${bList.length} PRESUPUESTOS)</td>
+              <td colspan="5" style="text-align:left;border-top:2px solid #0097a7">TOTAL GENERAL (${bList.length} PRESUPUESTOS)</td>
               <td style="text-align:right;border-top:2px solid #0097a7">${fmtMoney(sumPresupuestado)}</td>
               <td style="text-align:right;border-top:2px solid #0097a7;color:#0097A7">${fmtMoney(sumPagado)}</td>
               <td style="text-align:right;border-top:2px solid #0097a7;color:#E11D48">${fmtMoney(sumSaldo)}</td>
