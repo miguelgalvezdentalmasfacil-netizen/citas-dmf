@@ -5257,9 +5257,12 @@ function getLeadsList(){
     : citas.filter(c => nameOf(c.asesorId) === user.nombre || c.asesorId === user.id || nameOf(c.creadoPor) === user.nombre);
 }
 
-const CAMPAIGN_OCTUBRE_LEADS = 289;
+const CAMPAIGN_OCTUBRE_LEADS = 289; // 70 (Septiembre) + 219 (Octubre)
 // Leads de campaña por mes (pre-integración, sin registro en BD)
-const CAMPAIGN_LEADS_BY_MONTH = { '2026-10': 289 };
+const CAMPAIGN_LEADS_BY_MONTH = {
+  '2026-09': 70,  // Campaña 1 (Septiembre)
+  '2026-10': 219  // Campañas 2, 3, 4 y 5 (Octubre: 81 + 52 + 72 + 14 = 219)
+};
 
 function getLeadDate(l){
   // Para leads, la fecha que eligió el usuario es la correcta (no creadoEl que es cuando se tecleó)
