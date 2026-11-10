@@ -151,35 +151,25 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 /* Seguimiento view */
 .seg-section{margin-bottom:24px}
 .seg-section-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.seg-section-title{font-size:14px;font-weight:700;letter-spacing:.01em}
-.seg-section-title.postventa{color:#0097a7}
-.seg-section-title.seguimiento{color:#f59e0b}
-.seg-section-count{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:#fff}
-.seg-section-count.postventa{background:#0097a7}
-.seg-section-count.seguimiento{background:#f59e0b}
+.seg-section-title{font-size:14px;font-weight:700;letter-spacing:.01em;color:var(--text-main)}
+.seg-section-count{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:#fff;background:var(--text-muted)}
 .seg-row{display:flex;flex-direction:column;gap:0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border-dark);background:var(--surface)}
 .seg-card{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-dark);transition:background .12s}
 .seg-card:last-child{border-bottom:none}
 .seg-card:hover{background:var(--hover)}
 .seg-card-left{display:flex;flex-direction:column;align-items:center;min-width:52px;padding-top:2px}
-.seg-card-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:4px;flex-shrink:0}
-.seg-card-icon.postventa{background:rgba(0,151,167,.12)}
-.seg-card-icon.seguimiento{background:rgba(245,158,11,.12)}
-.seg-card-icon svg{width:16px;height:16px}
-.seg-card-icon.postventa svg{stroke:#0097a7}
-.seg-card-icon.seguimiento svg{stroke:#f59e0b}
+.seg-card-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:4px;flex-shrink:0;background:rgba(0,151,167,.1)}
+.seg-card-icon svg{width:16px;height:16px;stroke:#0097a7}
 .seg-card-date{font-size:11px;color:var(--text-muted);font-weight:600;white-space:nowrap}
 .seg-card-body{flex:1;min-width:0}
 .seg-card-name{font-size:14px;font-weight:700;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .seg-card-sub{font-size:12px;color:var(--text-muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.seg-card-tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px}
-.seg-card-tag.postventa{background:rgba(0,151,167,.1);color:#0097a7;border:1px solid rgba(0,151,167,.2)}
-.seg-card-tag.seguimiento{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.seg-card-tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:rgba(0,151,167,.1);color:#0097a7;border:1px solid rgba(0,151,167,.2)}
 .seg-card-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
-.seg-wa-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:#25d366;color:#fff;border-radius:var(--radius-md);font-size:11.5px;font-weight:600;text-decoration:none;border:none;cursor:pointer;white-space:nowrap}
-.seg-wa-btn:hover{background:#128c3e}
+.seg-check-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#10b981;color:#fff;border-radius:var(--radius-md);font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:background .15s}
+.seg-check-btn:hover{background:#059669}
+.seg-check-btn.done{background:var(--hover);color:var(--text-muted);border:1px solid var(--border-dark);cursor:default}
 .seg-empty{padding:28px 20px;text-align:center;color:var(--text-muted);font-size:13.5px;background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-md)}
-.seg-kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
 
 /* Filters Card */
 .filters-card{background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;position:relative;z-index:15}
@@ -5525,32 +5515,36 @@ function renderSeguimientoView(){
   // KPIs
   $('#stats').innerHTML = `
     <div class="card stat"><label>Postventa</label><b class="ok">${listPostventa.length}</b></div>
-    <div class="card stat"><label>Seguimiento</label><b style="color:#f59e0b">${listSeguimiento.length}</b></div>`;
+    <div class="card stat"><label>Seguimiento</label><b>${listSeguimiento.length}</b></div>`;
 
-  function waBtn(c, tipo){
-    if(!c.telefono) return '';
-    const cleanTel = c.telefono.replace(/\D/g,'');
-    let msg = '';
-    if(tipo === 'postventa'){
-      msg = `Hola ${c.paciente.split(' ')[0]}, somos Dental Más Fácil 😊 Queremos saber cómo te encuentras después de tu tratamiento del ${fmtShort(c.fecha)}. ¿Tienes alguna duda o molestia? Estamos para ayudarte.`;
-    } else {
-      msg = `Hola ${c.paciente.split(' ')[0]}, somos Dental Más Fácil. Notamos que no pudiste asistir a tu cita del ${fmtShort(c.fecha)}. ¿Te gustaría reagendarla? Con gusto te ayudamos 😊`;
+  // Seguimientos ya marcados como contactados
+  const SEG_KEY = 'seg_checked';
+  let segChecked = {};
+  try { segChecked = JSON.parse(localStorage.getItem(SEG_KEY)) || {}; } catch(e){ segChecked = {}; }
+
+  function checkBtn(c){
+    const done = !!segChecked[c.id];
+    if(done){
+      return `<button class="seg-check-btn done" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Contactado
+      </button>`;
     }
-    return `<a class="seg-wa-btn" href="https://wa.me/52${cleanTel}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.998 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.012L2.01 22l5.139-1.325A9.945 9.945 0 0 0 12 22c5.523 0 10-4.477 10-10S17.521 2 11.998 2zm.002 18a7.946 7.946 0 0 1-4.051-1.112l-.29-.173-3.052.787.806-2.981-.19-.307A7.964 7.964 0 0 1 4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8z"/></svg>
-      WhatsApp
-    </a>`;
+    return `<button class="seg-check-btn" data-act="seg-check" data-id="${c.id}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Marcar contactado
+    </button>`;
   }
 
   function segCardHTML(c, tipo){
-    const cleanTel = c.telefono ? c.telefono.replace(/\D/g,'') : '';
     const asesorName = c.asesorId ? nameOf(c.asesorId) : '';
     const iconPostventa = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
     const iconSeguimiento = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    const tagLabel = tipo === 'postventa' ? 'Asistio' : esc(c.estatus);
     return `
     <div class="seg-card">
       <div class="seg-card-left">
-        <div class="seg-card-icon ${tipo}">${tipo==='postventa'?iconPostventa:iconSeguimiento}</div>
+        <div class="seg-card-icon">${tipo==='postventa'?iconPostventa:iconSeguimiento}</div>
         <div class="seg-card-date">${fmtShort(c.fecha)}</div>
       </div>
       <div class="seg-card-body">
@@ -5561,10 +5555,10 @@ function renderSeguimientoView(){
           ${c.sucursal?`<span>· ${esc(c.sucursal)}</span>`:''}
           ${asesorName?`<span>· Asesor: <b>${esc(asesorName)}</b></span>`:''}
         </div>
-        <div style="margin-top:6px"><span class="seg-card-tag ${tipo}">${tipo==='postventa'?'✓ Asistió':esc(c.estatus)}</span></div>
+        <div style="margin-top:6px"><span class="seg-card-tag">${tagLabel}</span></div>
       </div>
       <div class="seg-card-actions">
-        ${waBtn(c, tipo)}
+        ${checkBtn(c)}
         <button class="btn out sm" data-act="status" data-id="${c.id}">Estatus</button>
       </div>
     </div>`;
@@ -5572,31 +5566,31 @@ function renderSeguimientoView(){
 
   let html = '';
 
-  // Sección Postventa (Asistió)
+  // Seccion Postventa
   html += `<div class="seg-section">
     <div class="seg-section-header">
-      <span class="seg-section-title postventa">🦷 Seguimiento Postventa</span>
-      <span class="seg-section-count postventa">${listPostventa.length}</span>
-      <span style="font-size:12px;color:var(--text-muted)">· Pacientes que asistieron hace 2 días (${fmtShort(fechaSeg)})</span>
+      <span class="seg-section-title">Seguimiento Postventa</span>
+      <span class="seg-section-count">${listPostventa.length}</span>
+      <span style="font-size:12px;color:var(--text-muted)">· Asistieron hace 2 dias (${fmtShort(fechaSeg)})</span>
     </div>`;
   if(listPostventa.length){
     html += `<div class="seg-row">${listPostventa.map(c=>segCardHTML(c,'postventa')).join('')}</div>`;
   } else {
-    html += `<div class="seg-empty">Sin pacientes postventa para el ${fmtShort(fechaSeg)}. ✅</div>`;
+    html += `<div class="seg-empty">Sin pacientes postventa para el ${fmtShort(fechaSeg)}.</div>`;
   }
   html += '</div>';
 
-  // Sección Seguimiento (No asistió / Canceló)
+  // Seccion Seguimiento
   html += `<div class="seg-section">
     <div class="seg-section-header">
-      <span class="seg-section-title seguimiento">🔔 Seguimiento</span>
-      <span class="seg-section-count seguimiento">${listSeguimiento.length}</span>
-      <span style="font-size:12px;color:var(--text-muted)">· Pacientes que no asistieron hace 2 días (${fmtShort(fechaSeg)})</span>
+      <span class="seg-section-title">Seguimiento</span>
+      <span class="seg-section-count">${listSeguimiento.length}</span>
+      <span style="font-size:12px;color:var(--text-muted)">· No asistieron hace 2 dias (${fmtShort(fechaSeg)})</span>
     </div>`;
   if(listSeguimiento.length){
     html += `<div class="seg-row">${listSeguimiento.map(c=>segCardHTML(c,'seguimiento')).join('')}</div>`;
   } else {
-    html += `<div class="seg-empty">Sin pacientes pendientes de seguimiento para el ${fmtShort(fechaSeg)}. ✅</div>`;
+    html += `<div class="seg-empty">Sin pacientes pendientes de seguimiento para el ${fmtShort(fechaSeg)}.</div>`;
   }
   html += '</div>';
 
@@ -6067,6 +6061,15 @@ document.addEventListener('click',e=>{
     case'status':statusForm(id);break;
     case'save':saveCita(id);break;
     case'savest':saveStatus(id);break;
+    case'seg-check':{
+      const segId=t.dataset.id;
+      const SEG_KEY='seg_checked';
+      let segChecked={};
+      try{ segChecked=JSON.parse(localStorage.getItem(SEG_KEY))||{}; }catch(e){}
+      segChecked[segId]=true;
+      localStorage.setItem(SEG_KEY,JSON.stringify(segChecked));
+      renderSeguimientoView();
+    }break;
     case'budget':openBudgetModal(id, t.dataset.key);break;
     case'savebudget':saveBudget(id, t.dataset.cid);break;
     case'delbudget':deleteBudget(id);break;
