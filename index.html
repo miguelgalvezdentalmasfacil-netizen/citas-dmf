@@ -1387,7 +1387,7 @@ function syncPresupuestosFromCitas(loadedCitas){
   loadedCitas.forEach(c=>{
     if(c&&c.historial&&Array.isArray(c.historial)){
       c.historial.forEach(h=>{
-        if(h&&h.tipo==='presupuesto_sync'&&h.data&&h.data.folio){
+        if(h&&h.tipo==='presupuesto_sync'&&h.data&&(h.data.folio || h.data.total || h.data.id || h.data.paciente)){
           const tel=cleanTel(h.data.telefono||c.telefono);
           const key=tel||patientKey(c.telefono,c.paciente);
           if(key){
@@ -1407,6 +1407,54 @@ function syncPresupuestosFromCitas(loadedCitas){
   });
   sanitizeAllExistingPresupuestos();
   savePresupuestosLocal();
+}
+
+async function syncLocalPresupuestosToSupabase(loadedCitas){
+  if(!presupuestos) return;
+  const list = Object.values(presupuestos);
+  for(const b of list){
+    if(!b || !b.paciente) continue;
+    const key = patientKey(b.telefono, b.paciente);
+    let targetCita = (loadedCitas || citas).find(c => patientKey(c.telefono, c.paciente) === key);
+    if(!targetCita){
+      const now = new Date().toISOString();
+      const cleanP = cleanTel(b.telefono) || b.telefono || '';
+      targetCita = {
+        id: 'c_pres_' + Date.now() + '_' + (cleanP ? cleanP.slice(-6) : uid()),
+        paciente: b.paciente,
+        telefono: b.telefono || '',
+        fecha: b.fechaEmision || iso(new Date()),
+        hora: '10:00',
+        sucursal: 'Plaza San Pedro',
+        tratamiento: 'Plan de Tratamiento #' + (b.folio || 'S/N'),
+        paquete: 'Individual',
+        tipo: 'Presupuesto',
+        origen: b.origen || 'Publicidad Externa',
+        estatus: 'Pendiente',
+        motivo: 'Presupuesto creado',
+        asesorId: b.asesorId || (user ? user.nombre : 'Miguel'),
+        creadoEl: b.actualizadoEl || now,
+        creadoPor: user ? user.nombre : (b.asesorId || 'Miguel'),
+        historial: []
+      };
+      citas.push(targetCita);
+    }
+    if(!Array.isArray(targetCita.historial)) targetCita.historial = [];
+    const syncIdx = targetCita.historial.findIndex(h => h && h.tipo === 'presupuesto_sync');
+    const syncItem = { f: b.actualizadoEl || new Date().toISOString(), e: 'Presupuesto #' + (b.folio || 'S/N'), tipo: 'presupuesto_sync', data: b };
+    if(syncIdx >= 0){
+      const existingF = targetCita.historial[syncIdx].f || '';
+      if(!existingF || (b.actualizadoEl && b.actualizadoEl > existingF)){
+        targetCita.historial[syncIdx] = syncItem;
+        persist();
+        await DB.upsert(targetCita);
+      }
+    } else {
+      targetCita.historial.push(syncItem);
+      persist();
+      await DB.upsert(targetCita);
+    }
+  }
 }
 
 function toRow(c){
@@ -1503,6 +1551,7 @@ const DB={
         const loaded=rows.map(fromRow);
         localStorage.setItem(KEY,JSON.stringify(loaded));
         syncPresupuestosFromCitas(loaded);
+        await syncLocalPresupuestosToSupabase(loaded);
         setSyncState('ok','En la nube (Sincronizado)');
         return loaded;
       }
@@ -1627,9 +1676,9 @@ function isLeadRecord(c){
   if(!c) return false;
   const s = String(c.estatus || '').trim().toLowerCase();
   const t = String(c.tipo || '').trim().toLowerCase();
-  if(s === 'lead' || s === 'lead whatsapp' || s === 'descartado') return true;
+  if(s === 'lead' || s === 'lead whatsapp' || s === 'descartado' || s === 'presupuesto') return true;
   if(s.startsWith('en conversaci')) return true;
-  if(t === 'lead whatsapp' || t === 'lead') return true;
+  if(t === 'lead whatsapp' || t === 'lead' || t === 'presupuesto') return true;
   return false;
 }
 function isRealCita(c){
@@ -4004,6 +4053,29 @@ async function saveBudget(budgetId, citaId){
   if(!targetCita){
     targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === key);
   }
+  if(!targetCita){
+    const now = new Date().toISOString();
+    const cleanP = cleanTel(tel) || tel || '';
+    targetCita = {
+      id: 'c_pres_' + Date.now() + '_' + (cleanP ? cleanP.slice(-6) : uid()),
+      paciente: pac,
+      telefono: tel,
+      fecha: fecha,
+      hora: '10:00',
+      sucursal: 'Plaza San Pedro',
+      tratamiento: 'Plan de Tratamiento #' + (folio || 'S/N'),
+      paquete: 'Individual',
+      tipo: 'Presupuesto',
+      origen: budgetObj.origen || 'Publicidad Externa',
+      estatus: 'Pendiente',
+      motivo: 'Presupuesto creado',
+      asesorId: as || (user ? user.nombre : 'Miguel'),
+      creadoEl: now,
+      creadoPor: user ? user.nombre : as,
+      historial: []
+    };
+    citas.push(targetCita);
+  }
 
   closeModal();
   render();
@@ -4011,7 +4083,7 @@ async function saveBudget(budgetId, citaId){
   if(targetCita){
     if(!Array.isArray(targetCita.historial)) targetCita.historial = [];
     const syncIdx = targetCita.historial.findIndex(h => h && h.tipo === 'presupuesto_sync');
-    const syncItem = { f: budgetObj.actualizadoEl, e: 'Presupuesto #' + budgetObj.folio, tipo: 'presupuesto_sync', data: budgetObj };
+    const syncItem = { f: budgetObj.actualizadoEl, e: 'Presupuesto #' + (budgetObj.folio || 'S/N'), tipo: 'presupuesto_sync', data: budgetObj };
     if(syncIdx >= 0) targetCita.historial[syncIdx] = syncItem;
     else targetCita.historial.push(syncItem);
     persist();
@@ -4027,12 +4099,15 @@ async function deleteBudget(budgetId){
     delete presupuestos[key];
     savePresupuestosLocal();
     const targetCitas = citas.filter(c => patientKey(c.telefono, c.paciente) === key);
-    targetCitas.forEach(c => {
-      if(Array.isArray(c.historial)){
+    for(const c of targetCitas){
+      if(c.tipo === 'Presupuesto'){
+        await DB.delete(c.id);
+      } else if(Array.isArray(c.historial)){
         c.historial = c.historial.filter(h => h?.tipo !== 'presupuesto_sync');
-        DB.upsert(c);
+        persist();
+        await DB.upsert(c);
       }
-    });
+    }
   }
   closeModal();
   render();
@@ -4120,14 +4195,38 @@ async function saveAbono(pKey){
   presupuestos[pKey] = b;
   savePresupuestosLocal();
 
-  const targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === pKey);
+  let targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === pKey);
+  if(!targetCita){
+    const now = new Date().toISOString();
+    const cleanP = cleanTel(b.telefono) || b.telefono || '';
+    targetCita = {
+      id: 'c_pres_' + Date.now() + '_' + (cleanP ? cleanP.slice(-6) : uid()),
+      paciente: b.paciente,
+      telefono: b.telefono || '',
+      fecha: iso(new Date()),
+      hora: '10:00',
+      sucursal: 'Plaza San Pedro',
+      tratamiento: 'Plan de Tratamiento #' + (b.folio || 'S/N'),
+      paquete: 'Individual',
+      tipo: 'Presupuesto',
+      origen: b.origen || 'Publicidad Externa',
+      estatus: 'Pendiente',
+      motivo: 'Presupuesto con abono',
+      asesorId: b.asesorId || (user ? user.nombre : 'Miguel'),
+      creadoEl: now,
+      creadoPor: user ? user.nombre : (b.asesorId || 'Miguel'),
+      historial: []
+    };
+    citas.push(targetCita);
+  }
+
   closeModal();
   render();
 
   if(targetCita){
     if(!Array.isArray(targetCita.historial)) targetCita.historial = [];
     const syncIdx = targetCita.historial.findIndex(h => h && h.tipo === 'presupuesto_sync');
-    const syncItem = { f: b.actualizadoEl, e: `Abono de ${fmtMoney(monto)} a Presupuesto #${b.folio}`, tipo: 'presupuesto_sync', data: b };
+    const syncItem = { f: b.actualizadoEl, e: `Abono de ${fmtMoney(monto)} a Presupuesto #${b.folio || 'S/N'}`, tipo: 'presupuesto_sync', data: b };
     if(syncIdx >= 0) targetCita.historial[syncIdx] = syncItem;
     else targetCita.historial.push(syncItem);
     persist();
@@ -5247,6 +5346,9 @@ function isNoAsistio(st){ return !!st && (st === 'No asisti' + '\u00f3' || st.st
 
 function isLeadRecordType(l){
   if(!l) return false;
+  const t = String(l.tipo || '').trim().toLowerCase();
+  const s = String(l.estatus || '').trim().toLowerCase();
+  if(t === 'presupuesto' || s === 'presupuesto') return false;
   if(l.origen === 'Meta Ads') return true;
   if(l.tipo === 'Lead WhatsApp' || l.tipo === 'Lead') return true;
   const st = String(l.estatus || '').trim();
