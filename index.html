@@ -1476,6 +1476,7 @@ function fromRow(r){
     motivo: r.motivo||'',
     creadoEl: r.creado_el?new Date(r.creado_el).toISOString():new Date().toISOString(),
     creadoPor: creador,
+    agendadaEl: (sInfo && sInfo.agendadaEl) ? sInfo.agendadaEl : ((Array.isArray(r.historial) && (r.historial.find(h => h && h.tipo === 'cita_agendada') || {}).f) || (r.creado_el ? new Date(r.creado_el).toISOString() : null)),
     paquete: (Array.isArray(r.historial)?(r.historial.find(h=>h&&(h.tipo==='paquete_info'||h.paquete))||{}).paquete:null) || r.paquete || 'Individual',
     sheetsId: (sInfo ? sInfo.sheetsId : null) || r.sheetsId || (r.estatus === 'Asistió' ? ('dmf_' + r.id) : null),
     sheetsAsistenciaEnviada: (sInfo ? sInfo.sent : false) || (r.estatus === 'Asistió'),
@@ -3379,9 +3380,12 @@ async function saveCita(id){
       Object.assign(target,d,{asesorId:asesorNombre});
       if(!target.creadoEl) target.creadoEl=now;
       if(!target.creadoPor) target.creadoPor=creadorNombre;
+      if(!target.agendadaEl) target.agendadaEl=now;
+      if(!Array.isArray(target.historial)) target.historial=[];
+      target.historial.push({ tipo: 'cita_agendada', f: now, e: 'Cita agendada para el ' + d.fecha + ' a las ' + d.hora, por: creadorNombre });
     }
   } else {
-    target={id:uid(),...d,asesorId:asesorNombre,creadoEl:now,creadoPor:creadorNombre,estatus:'Pendiente',motivo:'',historial:[{f:now,e:'Pendiente'}]};
+    target={id:uid(),...d,asesorId:asesorNombre,creadoEl:now,creadoPor:creadorNombre,agendadaEl:now,estatus:'Pendiente',motivo:'',historial:[{f:now,e:'Pendiente'},{tipo:'cita_agendada',f:now,e:'Cita agendada para el '+d.fecha+' a las '+d.hora,por:creadorNombre}]};
     citas.push(target);
   }
   persist();closeModal();render();
@@ -5265,7 +5269,15 @@ const CAMPAIGN_LEADS_BY_MONTH = {
 };
 
 function getLeadDate(l){
-  // Para leads, la fecha que eligió el usuario es la correcta (no creadoEl que es cuando se tecleó)
+  if (!l) return '';
+  // Para citas agendadas, la fecha de medición en el embudo es el momento en que se AGENDÓ (agendadaEl / creadoEl),
+  // para reflejar la productividad del día/semana/mes de ventas y no la fecha programada en la agenda clínica
+  if (!isLeadRecordType(l)) {
+    if (l.agendadaEl) return l.agendadaEl.slice(0,10);
+    if (l.creadoEl) return l.creadoEl.slice(0,10);
+    return (l.fecha || '').slice(0,10);
+  }
+  // Para prospectos/leads recibidos, la fecha en que ingresó el lead
   if (l.fecha) return l.fecha.slice(0,10);
   return (l.creadoEl ? l.creadoEl.slice(0,10) : '').slice(0,10);
 }
@@ -5568,7 +5580,12 @@ function leadCardHTML(l){
           ` : `<span>Sin tel\u00e9fono registrado</span>`}
         </div>
         ${l.tratamiento ? `<div><b>Tratamiento:</b> ${esc(l.tratamiento)}</div>` : ''}
-        <div><b>Fecha:</b> ${esc(fmtShort(l.fecha))} ${esc(l.hora || '')}</div>
+        ${!isLeadRecordType(l) ? `
+          <div><b>Cita programada para:</b> ${esc(fmtShort(l.fecha))} ${esc(l.hora || '')}</div>
+          <div style="font-size:11.5px;color:var(--text-muted)"><b>Agendada el:</b> ${esc(l.agendadaEl ? fmtShort(l.agendadaEl) : (l.creadoEl ? fmtShort(l.creadoEl) : ''))}</div>
+        ` : `
+          <div><b>Recibido:</b> ${esc(fmtShort(l.fecha))} ${esc(l.hora || '')}</div>
+        `}
       </div>
 
 
