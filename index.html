@@ -165,10 +165,10 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 .seg-card-name{font-size:14px;font-weight:700;color:var(--text-main);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .seg-card-sub{font-size:12px;color:var(--text-muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .seg-card-tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:rgba(0,151,167,.1);color:#0097a7;border:1px solid rgba(0,151,167,.2)}
-.seg-card-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
-.seg-check-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#10b981;color:#fff;border-radius:var(--radius-md);font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:background .15s}
-.seg-check-btn:hover{background:#059669}
-.seg-check-btn.done{background:var(--hover);color:var(--text-muted);border:1px solid var(--border-dark);cursor:default}
+.seg-card-actions{display:flex;flex-direction:row;gap:8px;align-items:center;flex-shrink:0}
+.seg-check-btn{display:inline-flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.seg-check-btn.done{background:var(--hover);color:var(--text-muted);border-color:var(--border-dark);cursor:default;opacity:.85}
+.seg-check-btn.done svg{stroke:var(--text-muted)}
 .seg-empty{padding:28px 20px;text-align:center;color:var(--text-muted);font-size:13.5px;background:var(--surface);border:1px solid var(--border-dark);border-radius:var(--radius-md)}
 
 /* Filters Card */
@@ -1727,6 +1727,16 @@ function getPatientCitas(tel, name){
   const key = patientKey(tel, name);
   return citas.filter(c => isRealCita(c) && patientKey(c.telefono, c.paciente) === key)
               .sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+}
+
+function getBudgetCreatedDate(b){
+  if(!b) return '';
+  if(b.fechaEmision) return b.fechaEmision.slice(0,10);
+  const pCitas = getPatientCitas(b.telefono, b.paciente);
+  if(pCitas.length && pCitas[0].creadoEl) return pCitas[0].creadoEl.slice(0,10);
+  if(pCitas.length && pCitas[0].fecha) return pCitas[0].fecha;
+  if(b.actualizadoEl) return b.actualizadoEl.slice(0,10);
+  return '';
 }
 
 function getBudgetOrigen(b){
@@ -4841,26 +4851,15 @@ function renderPdfPreview(){
     }
 
     bList=bList.filter(b=>{
-      const emision=(b.fechaEmision||'').slice(0,10);
-      const updated=(b.actualizadoEl||'').slice(0,10);
-      const hasAbonoInPeriod=(b.abonos||[]).some(a=>{
-        const aFec=(a.fecha||'').slice(0,10);
-        return aFec>=startDate&&aFec<=endDate;
-      });
-
-      if(basisIsReg){
-        if(updated && updated>=startDate && updated<=endDate) return true;
-        if(hasAbonoInPeriod) return true;
-        if(!updated && emision && emision>=startDate && emision<=endDate) return true;
-      } else {
-        if(emision && emision>=startDate && emision<=endDate) return true;
-        if(!emision && updated && updated>=startDate && updated<=endDate) return true;
-        if(hasAbonoInPeriod) return true;
-      }
-      return false;
+      const fBase = getBudgetCreatedDate(b);
+      return fBase && fBase >= startDate && fBase <= endDate;
     });
 
-    bList.sort((a,b)=>(b.actualizadoEl||b.fechaEmision||'').localeCompare(a.actualizadoEl||a.fechaEmision||''));
+    bList.sort((a,b)=>{
+      const da = getBudgetCreatedDate(a);
+      const db = getBudgetCreatedDate(b);
+      return db.localeCompare(da);
+    });
 
     let sumPresupuestado=0, sumPagado=0, sumSaldo=0;
     let countTratamiento=0, countCompletados=0, countPendientes=0;
@@ -5525,13 +5524,13 @@ function renderSeguimientoView(){
   function checkBtn(c){
     const done = !!segChecked[c.id];
     if(done){
-      return `<button class="seg-check-btn done" disabled>
+      return `<button class="btn out sm seg-check-btn done" disabled title="Paciente contactado">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         Contactado
       </button>`;
     }
-    return `<button class="seg-check-btn" data-act="seg-check" data-id="${c.id}">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    return `<button class="btn out sm seg-check-btn" data-act="seg-check" data-id="${c.id}" title="Marcar que ya se le dio seguimiento">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       Marcar contactado
     </button>`;
   }
