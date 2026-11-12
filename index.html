@@ -5040,19 +5040,29 @@ function renderPdfPreview(){
 
     // Función oficial de cálculo de comisión por cita
     const getComision = (c) => {
-      const paq = String(c.paquete || 'Individual').toLowerCase();
+      const paqRaw = String(c.paquete || 'Individual').trim().toLowerCase();
       const aName = nameOf(c.asesorId || '').toLowerCase();
       const cPor = nameOf(c.creadoPor || '').toLowerCase();
       const isMiguel = aName.includes('miguel') || cPor.includes('miguel');
 
+      // Determinar paquete de forma estricta (para que 'individual' no coincida con 'dual')
+      let tipoPaq = 'individual';
+      if(paqRaw.includes('familiar')){
+        tipoPaq = 'familiar';
+      } else if(paqRaw === 'dual' || paqRaw.startsWith('dual') || /\bdual\b/.test(paqRaw)){
+        tipoPaq = 'dual';
+      } else {
+        tipoPaq = 'individual';
+      }
+
       if(isMiguel){
-        if(paq.includes('familiar')) return 650;
-        if(paq.includes('dual')) return 450;
+        if(tipoPaq === 'familiar') return 650;
+        if(tipoPaq === 'dual') return 450;
         return 250; // Individual
       } else {
         // Edgar y otros asesores
-        if(paq.includes('familiar')) return 450;
-        if(paq.includes('dual')) return 350;
+        if(tipoPaq === 'familiar') return 450;
+        if(tipoPaq === 'dual') return 350;
         return 150; // Individual
       }
     };
