@@ -5038,8 +5038,19 @@ function renderPdfPreview(){
     list=list.filter(c=>c.estatus==='Asistió');
     list.sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
 
+    // Función para detectar si una cita es de Convenio (sin comisión)
+    const isConvenioCita = (c) => {
+      const paqRaw = String(c.paquete || '').trim().toLowerCase();
+      const oriRaw = String(c.origen || '').trim().toLowerCase();
+      const tipRaw = String(c.tipo || '').trim().toLowerCase();
+      const traRaw = String(c.tratamiento || '').trim().toLowerCase();
+      return oriRaw.includes('convenio') || paqRaw.includes('convenio') || tipRaw.includes('convenio') || traRaw.includes('convenio');
+    };
+
     // Función oficial de cálculo de comisión por cita
     const getComision = (c) => {
+      if(isConvenioCita(c)) return 0; // En convenios no hay comisión
+
       const paqRaw = String(c.paquete || 'Individual').trim().toLowerCase();
       const aName = nameOf(c.asesorId || '').toLowerCase();
       const cPor = nameOf(c.creadoPor || '').toLowerCase();
