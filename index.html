@@ -2789,32 +2789,19 @@ function doLogin(){
   let selId=selEl?selEl.value:'';
   let u=USUARIOS.find(x=>x.id===selId);
 
-  // ValidaciÃ³n de PIN para cada asesor
-  // Edgar: PIN oficial 4321 (con tolerancia de transiciÃ³n a 1234 si el navegador tiene versiÃ³n previa en cachÃ©)
-  // Miguel: PIN 1234
-  const checkPin=(usr,p)=>{
-    if(!usr||!p) return false;
-    if(usr.id==='u2') return p==='4321'||p==='1234';
-    return usr.pin===p;
-  };
-
-  // Si el usuario seleccionado en el dropdown no coincide con el PIN ingresado:
-  // Auto-detectar si el PIN corresponde a otro usuario (ej: dejaron seleccionado Miguel pero teclearon el 4321 de Edgar)
-  if(!checkPin(u,pin)){
-    const autoUser=USUARIOS.find(x=>checkPin(x,pin));
-    if(autoUser){
-      u=autoUser;
-      if(selEl){
-        selEl.value=u.id;
-        selEl._syncCustomSelect?.();
-      }
-    }
+  if(!u){
+    $('#lg-err').textContent='Selecciona un usuario';
+    return;
   }
 
-  if(checkPin(u,pin)){
+  // Validación estricta: el PIN debe coincidir EXACTAMENTE con el usuario seleccionado
+  if(String(pin) === String(u.pin)){
+    $('#lg-err').textContent='';
     user=u;sessionStorage.setItem('dmf_user',u.id);localStorage.setItem('dmf_last_user',u.id);startApp();
   }else{
-    $('#lg-err').textContent='PIN incorrecto';
+    $('#lg-err').textContent='PIN incorrecto para ' + u.nombre;
+    $('#lg-pin').value='';
+    $('#lg-pin').focus();
   }
 }
 function updateSettingsUserInfo(){
