@@ -351,14 +351,15 @@ textarea.inp{resize:vertical;min-height:80px}
 /* List */
 .day{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin:28px 4px 12px}
 .list{overflow:hidden}
-.row{display:grid;grid-template-columns:95px minmax(180px, 1.2fr) minmax(240px, 1.6fr) 120px auto;gap:20px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);transition:background .15s ease}
+.row{display:grid;grid-template-columns:95px minmax(200px, 1.4fr) minmax(220px, 1.4fr) 120px auto;gap:20px;align-items:center;padding:16px 22px;border-bottom:1px solid var(--border);transition:background .15s ease}
 .row:last-child{border-bottom:0}
 .row:hover{background:var(--hover)}
 .row .time{display:flex;flex-direction:column;gap:3px;min-width:0}
 .row-hora{font-size:19px;font-weight:600;letter-spacing:-.5px;color:var(--text-main);line-height:1.1}
 .row-cita-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#0097a7;background:rgba(0,151,167,.12);padding:2px 7px;border-radius:4px;width:fit-content;margin-top:2px;white-space:nowrap}
-.row .who,.row .what{min-width:0}
-.row .who > b, .row .what > b, .row .what-title{font-weight:600;font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-main);line-height:1.3}
+.row .who,.row .what{min-width:0;overflow:hidden}
+.row .who > b{font-weight:600;font-size:15px;display:block;white-space:normal;word-break:break-word;overflow-wrap:break-word;color:var(--text-main);line-height:1.3}
+.row .what > b, .row .what-title{font-weight:600;font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-main);line-height:1.3}
 .row b{font-weight:600;color:var(--text-main)}
 .row span.m{display:block;font-size:13px;color:var(--text-muted);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
 .row .who span.m{white-space:normal}
