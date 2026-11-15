@@ -1404,13 +1404,20 @@ function sanitizeAllExistingPresupuestos(){
   let modified = false;
   Object.keys(presupuestos).forEach(k => {
     const b = presupuestos[k];
-    if(b && Array.isArray(b.pasos) && b.pasos.some(p => p.descripcion && (p.descripcion.includes('Subtotal Dcto') || p.descripcion.includes('Estado paso') || p.descripcion.includes('Pieza(s)')))){
+    if(!b) return;
+    if(Array.isArray(b.pasos) && b.pasos.some(p => p.descripcion && (p.descripcion.includes('Subtotal Dcto') || p.descripcion.includes('Estado paso') || p.descripcion.includes('Pieza(s)')))){
       const rawJoined = b.pasos.map(p => (p.estado || 'Pendiente') + ' ' + p.descripcion + ' ' + fmtMoney(p.monto)).join(' ');
       const fixed = extractDentalinkData(rawJoined);
       if(fixed && fixed.pasos && fixed.pasos.length > b.pasos.length){
         b.pasos = fixed.pasos;
         modified = true;
       }
+    }
+    // Si la fecha de emisión del presupuesto difiere de la fecha real de la cita del paciente, sincronizarla
+    const pCitas = getPatientCitas(b.telefono, b.paciente);
+    if(pCitas.length && pCitas[0].fecha && b.fechaEmision !== pCitas[0].fecha){
+      b.fechaEmision = pCitas[0].fecha;
+      modified = true;
     }
   });
   if(modified){
@@ -1742,12 +1749,18 @@ function getPatientCitas(tel, name){
               .sort((a,b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
 }
 
-function getBudgetCreatedDate(b){
+function getBudgetCreatedDate(b, basis){
   if(!b) return '';
-  if(b.fechaEmision) return b.fechaEmision.slice(0,10);
   const pCitas = getPatientCitas(b.telefono, b.paciente);
-  if(pCitas.length && pCitas[0].creadoEl) return pCitas[0].creadoEl.slice(0,10);
+  if(basis === 'registro'){
+    if(pCitas.length && pCitas[0].creadoEl) return pCitas[0].creadoEl.slice(0,10);
+    if(b.creadoEl) return b.creadoEl.slice(0,10);
+    if(b.actualizadoEl) return b.actualizadoEl.slice(0,10);
+  }
+  // Criterio por defecto o por fecha de cita:
   if(pCitas.length && pCitas[0].fecha) return pCitas[0].fecha;
+  if(b.fechaEmision) return b.fechaEmision.slice(0,10);
+  if(pCitas.length && pCitas[0].creadoEl) return pCitas[0].creadoEl.slice(0,10);
   if(b.actualizadoEl) return b.actualizadoEl.slice(0,10);
   return '';
 }
@@ -4078,6 +4091,14 @@ async function saveBudget(budgetId, citaId){
   const totalPagado = abonoIni + sumAbonos;
   const saldo = Math.max(0, total - totalPagado);
 
+  let targetCita = citaId ? citas.find(c => c.id === citaId) : null;
+  if(!targetCita){
+    targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === key);
+  }
+
+  // Si el paciente tiene una cita registrada, usar la fecha de esa cita como fecha de emisión
+  const citaFec = targetCita && targetCita.fecha ? targetCita.fecha : null;
+
   const budgetObj = {
     ...existing,
     id: budgetId || existing.id || ('pres_' + uid()),
@@ -4089,7 +4110,7 @@ async function saveBudget(budgetId, citaId){
     total: total,
     abonoInicial: abonoIni,
     saldo: saldo,
-    fechaEmision: existing.fechaEmision || fecha,
+    fechaEmision: citaFec || existing.fechaEmision || fecha,
     pasos: currentModalPasos || existing.pasos || [],
     abonos: currentModalAbonos || existing.abonos || [],
     notas: notas,
@@ -4098,11 +4119,6 @@ async function saveBudget(budgetId, citaId){
 
   presupuestos[key] = budgetObj;
   savePresupuestosLocal();
-
-  let targetCita = citaId ? citas.find(c => c.id === citaId) : null;
-  if(!targetCita){
-    targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === key);
-  }
   if(!targetCita){
     const now = new Date().toISOString();
     const cleanP = cleanTel(tel) || tel || '';
@@ -4851,13 +4867,13 @@ function renderPdfPreview(){
     }
 
     bList=bList.filter(b=>{
-      const fBase = getBudgetCreatedDate(b);
+      const fBase = getBudgetCreatedDate(b, repConfig.dateBasis);
       return fBase && fBase >= startDate && fBase <= endDate;
     });
 
     bList.sort((a,b)=>{
-      const da = getBudgetCreatedDate(a);
-      const db = getBudgetCreatedDate(b);
+      const da = getBudgetCreatedDate(a, repConfig.dateBasis);
+      const db = getBudgetCreatedDate(b, repConfig.dateBasis);
       return db.localeCompare(da);
     });
 
@@ -4943,7 +4959,8 @@ function renderPdfPreview(){
         const t=computeBudgetTotals(b);
         const sem=getBudgetSemáforo(b);
         const fol=b.folio?`#${esc(b.folio)}`:'S/F';
-        const pFec=b.fechaEmision?fmtDateYY(b.fechaEmision):'—';
+        const rawFec=getBudgetCreatedDate(b, repConfig.dateBasis) || b.fechaEmision;
+        const pFec=rawFec?fmtDateYY(rawFec):'—';
         const aName=nameOf(b.asesorId)||'—';
         const bOri=fmtOrigenShort(getBudgetOrigen(b)) || '—';
         return `
