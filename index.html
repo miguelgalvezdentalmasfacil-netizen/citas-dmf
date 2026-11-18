@@ -729,7 +729,13 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
 .pdf-divider{width:100%;height:1.5px;background:#0097a7;margin:0 auto 10px}
 .pdf-meta-date{font-family:Georgia,serif;font-style:italic;font-size:13px;color:#64748b;margin-bottom:4px}
 .pdf-meta-sub{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.pdf-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12.5px}
+.pdf-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12.5px;page-break-inside:auto}
+.pdf-table tr{page-break-inside:avoid;page-break-after:auto;break-inside:avoid}
+.pdf-table thead{display:table-header-group}
+.pdf-table tfoot{display:table-footer-group}
+.pdf-section-title{page-break-after:avoid;break-after:avoid}
+.pdf-kpi-grid{page-break-inside:avoid;break-inside:avoid}
+.pdf-header{page-break-inside:avoid;break-inside:avoid}
 .pdf-table th{color:#0097a7;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:10px 8px;border-bottom:2px solid #0097a7;text-align:left}
 .pdf-table td{padding:11px 8px;border-bottom:1px solid #e2e8f0;color:#334155;vertical-align:middle}
 .col-paciente{font-weight:500;color:#0f172a}
@@ -5621,11 +5627,12 @@ function downloadReportPDF(){
       btn.disabled=true;
     }
     const opt={
-      margin:[10,8,12,8],
+      margin:[12,8,12,8],
       filename:fname,
       image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,useCORS:true,logging:false},
-      jsPDF:{unit:'mm',format:'letter',orientation:'portrait'}
+      html2canvas:{scale:2,useCORS:true,logging:false,scrollY:0},
+      jsPDF:{unit:'mm',format:'letter',orientation:'portrait'},
+      pagebreak:{mode:['avoid-all','css','legacy']}
     };
     html2pdf().set(opt).from(element).save().then(()=>{
       if(btn){
@@ -5667,7 +5674,13 @@ function printReport(){
   .pdf-divider{width:100%;height:1.5px;background:#0097a7;margin:0 auto 10px}
   .pdf-meta-date{font-family:Georgia,serif;font-style:italic;font-size:13px;color:#64748b;margin-bottom:3px}
   .pdf-meta-sub{font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-  .pdf-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}
+  .pdf-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px;page-break-inside:auto}
+  .pdf-table tr{page-break-inside:avoid;page-break-after:auto;break-inside:avoid}
+  .pdf-table thead{display:table-header-group}
+  .pdf-table tfoot{display:table-footer-group}
+  .pdf-section-title{page-break-after:avoid;break-after:avoid}
+  .pdf-kpi-grid{page-break-inside:avoid;break-inside:avoid}
+  .pdf-header{page-break-inside:avoid;break-inside:avoid}
   .pdf-table th{color:#0097a7;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:9px 6px;border-bottom:2px solid #0097a7;text-align:left}
   .pdf-table td{padding:10px 6px;border-bottom:1px solid #e2e8f0;color:#334155}
   .col-paciente{font-weight:600;color:#0f172a}
