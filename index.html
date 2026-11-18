@@ -743,9 +743,9 @@ button, a, input, select, textarea, .seg button, .card, .row, .btn, .icon-btn {
 .pdf-footer-total{text-align:right;margin-top:28px;font-size:13px;font-weight:600;color:#64748b;letter-spacing:1.5px;text-transform:uppercase}
 .pdf-total-number{color:#0097a7;font-size:20px;font-weight:800;margin-left:8px}
 .pdf-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:18px 0 24px}
-.pdf-kpi{border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;background:#f8fafc}
-.pdf-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;letter-spacing:.5px}
-.pdf-kpi-val{font-size:20px;font-weight:700;margin-top:4px;color:#0f172a}
+.pdf-kpi{border:1px solid #e2e8f0;border-radius:8px;padding:12px 6px;text-align:center;background:#f8fafc;display:flex;flex-direction:column;justify-content:space-between;min-height:76px;box-sizing:border-box}
+.pdf-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;letter-spacing:.5px;min-height:26px;display:flex;align-items:center;justify-content:center;line-height:1.2}
+.pdf-kpi-val{font-size:20px;font-weight:700;margin-top:auto;color:#0f172a}
 .pdf-section-title{font-size:13px;font-weight:700;color:#0f172a;margin:22px 0 10px;text-transform:uppercase;letter-spacing:.5px}
 .text-ok{color:#0097a7!important}
 .text-bad{color:#e11d48!important}
@@ -5688,9 +5688,9 @@ function printReport(){
   .pdf-footer-total{text-align:right;margin-top:28px;font-size:12px;font-weight:600;color:#64748b;letter-spacing:1.5px;text-transform:uppercase}
   .pdf-total-number{color:#0097a7;font-size:19px;font-weight:800;margin-left:6px}
   .pdf-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:16px 0 24px}
-  .pdf-kpi{border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px;text-align:center;background:#f8fafc}
-  .pdf-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;letter-spacing:.5px}
-  .pdf-kpi-val{font-size:18px;font-weight:700;margin-top:3px}
+  .pdf-kpi{border:1px solid #e2e8f0;border-radius:6px;padding:10px 6px;text-align:center;background:#f8fafc;display:flex;flex-direction:column;justify-content:space-between;min-height:72px;box-sizing:border-box}
+  .pdf-kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;color:#64748b;letter-spacing:.5px;min-height:26px;display:flex;align-items:center;justify-content:center;line-height:1.2}
+  .pdf-kpi-val{font-size:18px;font-weight:700;margin-top:auto}
   .pdf-section-title{font-size:13px;font-weight:700;color:#0f172a;margin:20px 0 8px;text-transform:uppercase;letter-spacing:.5px}
   .text-ok{color:#0097a7!important}.text-bad{color:#e11d48!important}.text-pend{color:#d97706!important}
   .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600}
