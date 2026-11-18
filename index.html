@@ -5467,7 +5467,6 @@ function renderPdfPreview(){
     <tr>
       <td class="col-paciente"><b>${esc(c.paciente)}</b></td>
       <td style="text-align:center;white-space:nowrap"><b>${esc(fmtDateYY(c.fecha))}</b> ${esc(c.hora)}</td>
-      <td style="text-align:center;white-space:nowrap;font-size:11px;color:#64748b">${esc(fmtDateYY((c.creadoEl||'').slice(0,10)))}</td>
       <td style="text-align:center">${esc(c.sucursal)}</td>
       <td style="text-align:center">${esc(c.tratamiento)}</td>
       <td class="col-origen" style="text-align:center">${esc(fmtOrigenShort(c.origen))}</td>
@@ -5476,7 +5475,7 @@ function renderPdfPreview(){
         <span class="pill ${pillCls(c.estatus)}" style="font-size:11px;padding:3px 8px">${esc(c.estatus)}</span>
       </td>
     </tr>
-  `).join(''):`<tr><td colspan="8" style="text-align:center;padding:28px;color:#94a3b8;font-style:italic">No hay citas en este período.</td></tr>`;
+  `).join(''):`<tr><td colspan="7" style="text-align:center;padding:28px;color:#94a3b8;font-style:italic">No hay citas en este período.</td></tr>`;
 
   box.innerHTML=`
     <div class="dmf-pdf-document">
