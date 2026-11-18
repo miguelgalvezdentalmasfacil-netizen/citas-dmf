@@ -4872,9 +4872,31 @@ function renderPdfPreview(){
       bList=bList.filter(b=>{ const o = getBudgetOrigen(b); return o && o.includes('Interna'); });
     }
 
+    // Helper para calcular lo cobrado/abonado estrictamente dentro del período del reporte
+    const getPeriodPagado = (b) => {
+      let pag = 0;
+      // Abono inicial: se considera parte del período si la emisión/creación cae en el rango
+      const rawFec = getBudgetCreatedDate(b, repConfig.dateBasis) || b.fechaEmision || '';
+      if(rawFec && rawFec.slice(0,10) >= startDate && rawFec.slice(0,10) <= endDate){
+        pag += (parseFloat(b.abonoInicial) || 0);
+      }
+      // Abonos registrados dentro de las fechas seleccionadas
+      (b.abonos || []).forEach(a => {
+        if(a.id === 'ab_ini' || a.concepto === 'Cita de Valoración inicial') return;
+        const aFec = (a.fecha || '').slice(0,10);
+        if(aFec >= startDate && aFec <= endDate){
+          pag += (parseFloat(a.monto) || 0);
+        }
+      });
+      return pag;
+    };
+
     bList=bList.filter(b=>{
       const fBase = getBudgetCreatedDate(b, repConfig.dateBasis);
-      return fBase && fBase >= startDate && fBase <= endDate;
+      const isCreatedInPeriod = fBase && fBase >= startDate && fBase <= endDate;
+      const pagadoInPeriod = getPeriodPagado(b);
+      // Incluir si el presupuesto fue creado en este período O si tuvo abonos/cobros en este período
+      return isCreatedInPeriod || pagadoInPeriod > 0;
     });
 
     bList.sort((a,b)=>{
@@ -4888,9 +4910,10 @@ function renderPdfPreview(){
 
     bList.forEach(b=>{
       const t=computeBudgetTotals(b);
+      const pPag = getPeriodPagado(b);
       sumPresupuestado+=(parseFloat(b.total)||0);
-      sumPagado+=t.totalPagado;
-      sumSaldo+=t.saldo;
+      sumPagado+=pPag;
+      sumSaldo+=Math.max(0, (parseFloat(b.total)||0) - pPag);
       const sem=getBudgetSemáforo(b);
       if(sem.status==='completado') countCompletados++;
       else if(sem.status==='en_tratamiento') countTratamiento++;
@@ -4909,10 +4932,10 @@ function renderPdfPreview(){
         });
         let uPres=0, uPag=0, uSal=0;
         uBudgets.forEach(b=>{
-          const t=computeBudgetTotals(b);
+          const pPag = getPeriodPagado(b);
           uPres+=(parseFloat(b.total)||0);
-          uPag+=t.totalPagado;
-          uSal+=t.saldo;
+          uPag+=pPag;
+          uSal+=Math.max(0, (parseFloat(b.total)||0) - pPag);
         });
         const uPct=uPres>0?Math.round((uPag/uPres)*100)+'%':'0%';
         return `
@@ -4962,13 +4985,16 @@ function renderPdfPreview(){
       detailBudgetsHtml=`<tr><td colspan="7" style="text-align:center;padding:36px;color:#94a3b8;font-style:italic">No hay presupuestos con actividad registrados en este período.</td></tr>`;
     } else {
       detailBudgetsHtml=bList.map(b=>{
-        const t=computeBudgetTotals(b);
         const sem=getBudgetSemáforo(b);
         const fol=b.folio?`#${esc(b.folio)}`:'S/F';
         const rawFec=getBudgetCreatedDate(b, repConfig.dateBasis) || b.fechaEmision;
         const pFec=rawFec?fmtDateYY(rawFec):'—';
         const aName=nameOf(b.asesorId)||'—';
         const bOri=fmtOrigenShort(getBudgetOrigen(b)) || '—';
+        const bTot = parseFloat(b.total) || 0;
+        const pCobrado = getPeriodPagado(b);
+        const pSaldo = Math.max(0, bTot - pCobrado);
+        const pProgreso = (bTot > 0) ? Math.min(100, Math.round((pCobrado / bTot) * 1000) / 10) : 0;
         return `
           <tr>
             <td class="col-paciente">
@@ -4984,12 +5010,12 @@ function renderPdfPreview(){
                 <span style="font-size:11px;font-weight:600">${esc(sem.label)}</span>
               </div>
               <div style="background:#e2e8f0;height:4px;border-radius:2px;overflow:hidden;margin-top:4px;width:100%">
-                <div style="background:#0097a7;height:100%;width:${t.progreso}%"></div>
+                <div style="background:#0097a7;height:100%;width:${pProgreso}%"></div>
               </div>
             </td>
             <td style="text-align:right;font-weight:600">${fmtMoney(b.total)}</td>
-            <td style="text-align:right;font-weight:600;color:#0097A7">${fmtMoney(t.totalPagado)}</td>
-            <td style="text-align:right;font-weight:600;color:${t.saldo>0?'#e11d48':'#10b981'}">${fmtMoney(t.saldo)}</td>
+            <td style="text-align:right;font-weight:600;color:#0097A7">${fmtMoney(pCobrado)}</td>
+            <td style="text-align:right;font-weight:600;color:${pSaldo>0?'#e11d48':'#10b981'}">${fmtMoney(pSaldo)}</td>
           </tr>
         `;
       }).join('');
