@@ -5460,11 +5460,11 @@ function renderPdfPreview(){
       <tr>
         <td style="text-align:left;font-weight:600;padding:8px 4px">${esc(u.nombre)}</td>
         <td style="text-align:center;padding:8px 4px"><b>${uT}</b></td>
-        <td style="text-align:center;font-weight:600;color:#0097A7;padding:8px 4px">${uA}</td>
-        <td style="text-align:center;color:#E11D48;padding:8px 4px">${uN}</td>
-        <td style="text-align:center;color:#D97706;padding:8px 4px">${uP}</td>
+        <td style="text-align:center;font-weight:600;padding:8px 4px">${uA}</td>
+        <td style="text-align:center;padding:8px 4px">${uN}</td>
+        <td style="text-align:center;padding:8px 4px">${uP}</td>
         <td style="text-align:center;padding:8px 4px">${uO}</td>
-        <td style="text-align:center;font-weight:700;color:#0097A7;padding:8px 4px">${uPct}</td>
+        <td style="text-align:center;font-weight:700;color:#0097a7;padding:8px 4px">${uPct}</td>
       </tr>
     `;
   }).join('');
@@ -5495,9 +5495,9 @@ function renderPdfPreview(){
 
       <div class="pdf-kpi-grid">
         <div class="pdf-kpi"><div class="pdf-kpi-label">Citas Agendadas</div><div class="pdf-kpi-val">${tot}</div></div>
-        <div class="pdf-kpi"><div class="pdf-kpi-label">Pacientes Atendidos</div><div class="pdf-kpi-val text-ok">${asis}</div></div>
-        <div class="pdf-kpi"><div class="pdf-kpi-label">No Asistieron</div><div class="pdf-kpi-val text-bad">${no}</div></div>
-        <div class="pdf-kpi"><div class="pdf-kpi-label">Citas Pendientes</div><div class="pdf-kpi-val text-pend">${pend}</div></div>
+        <div class="pdf-kpi"><div class="pdf-kpi-label">Pacientes Atendidos</div><div class="pdf-kpi-val">${asis}</div></div>
+        <div class="pdf-kpi"><div class="pdf-kpi-label">No Asistieron</div><div class="pdf-kpi-val">${no}</div></div>
+        <div class="pdf-kpi"><div class="pdf-kpi-label">Citas Pendientes</div><div class="pdf-kpi-val">${pend}</div></div>
         <div class="pdf-kpi"><div class="pdf-kpi-label">% Asistencia</div><div class="pdf-kpi-val text-ok">${tasa}</div></div>
       </div>
 
@@ -5545,11 +5545,11 @@ function renderPdfPreview(){
           <tr style="background:#f8fafc;font-weight:700">
             <td style="text-align:left;border-top:2px solid #0097a7;padding:8px 4px">TOTAL</td>
             <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${sumT}</td>
-            <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7;padding:8px 4px">${sumA}</td>
-            <td style="text-align:center;border-top:2px solid #0097a7;color:#E11D48;padding:8px 4px">${sumN}</td>
-            <td style="text-align:center;border-top:2px solid #0097a7;color:#D97706;padding:8px 4px">${sumP}</td>
+            <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${sumA}</td>
+            <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${sumN}</td>
+            <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${sumP}</td>
             <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${sumO}</td>
-            <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7;padding:8px 4px">${tasa}</td>
+            <td style="text-align:center;border-top:2px solid #0097a7;color:#0097a7;padding:8px 4px">${tasa}</td>
           </tr>
         </tfoot>` : ''}
       </table>
@@ -5569,22 +5569,22 @@ function renderPdfPreview(){
           <tr>
             <td style="text-align:left;font-weight:600;padding:8px 4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#0284c7;margin-right:6px"></span>Publicidad Externa</td>
             <td style="text-align:center;padding:8px 4px"><b>${totExt}</b></td>
-            <td style="text-align:center;font-weight:700;color:#0097A7;padding:8px 4px">${asisExt}</td>
-            <td style="text-align:center;font-weight:700;color:#0097A7;padding:8px 4px">${totExt > 0 ? Math.round((asisExt / totExt) * 100) + '%' : '0%'}</td>
+            <td style="text-align:center;font-weight:600;padding:8px 4px">${asisExt}</td>
+            <td style="text-align:center;font-weight:700;color:#0097a7;padding:8px 4px">${totExt > 0 ? Math.round((asisExt / totExt) * 100) + '%' : '0%'}</td>
           </tr>
           <tr>
             <td style="text-align:left;font-weight:600;padding:8px 4px"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;margin-right:6px"></span>Publicidad Interna</td>
             <td style="text-align:center;padding:8px 4px"><b>${totInt}</b></td>
-            <td style="text-align:center;font-weight:700;color:#0097A7;padding:8px 4px">${asisInt}</td>
-            <td style="text-align:center;font-weight:700;color:#0097A7;padding:8px 4px">${totInt > 0 ? Math.round((asisInt / totInt) * 100) + '%' : '0%'}</td>
+            <td style="text-align:center;font-weight:600;padding:8px 4px">${asisInt}</td>
+            <td style="text-align:center;font-weight:700;color:#0097a7;padding:8px 4px">${totInt > 0 ? Math.round((asisInt / totInt) * 100) + '%' : '0%'}</td>
           </tr>
         </tbody>
         <tfoot>
           <tr style="background:#f8fafc;font-weight:700">
             <td style="text-align:left;border-top:2px solid #0097a7;padding:8px 4px">TOTAL</td>
             <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${totExt + totInt}</td>
-            <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7;padding:8px 4px">${asisExt + asisInt}</td>
-            <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7;padding:8px 4px">${(totExt + totInt) > 0 ? Math.round(((asisExt + asisInt) / (totExt + totInt)) * 100) + '%' : '0%'}</td>
+            <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${asisExt + asisInt}</td>
+            <td style="text-align:center;border-top:2px solid #0097a7;color:#0097a7;padding:8px 4px">${(totExt + totInt) > 0 ? Math.round(((asisExt + asisInt) / (totExt + totInt)) * 100) + '%' : '0%'}</td>
           </tr>
         </tfoot>
       </table>
