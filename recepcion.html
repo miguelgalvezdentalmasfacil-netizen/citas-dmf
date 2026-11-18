@@ -1425,12 +1425,12 @@ function construirHtmlPolizaBeneficios(p){
   return `
     <div id="poliza-talonario-impresion" style="width:720px;margin:0 auto;background:#ffffff;padding:28px 32px;font-family:'Inter',system-ui,-apple-system,sans-serif;box-sizing:border-box;color:#0f172a;position:relative;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);">
       
-      <!-- ENCABEZADO: LOGO + FOLIO -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;">
-          <img src="logo-dental-facil.png" alt="Dental Fácil" style="height:48px;width:auto;display:block;object-fit:contain;" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAggAAABRCAYAAAC34l51...'">
+      <!-- ENCABEZADO: LOGO EN EL CENTRO + FOLIO A LA DERECHA -->
+      <div style="position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:14px;min-height:56px;">
+        <div style="text-align:center;">
+          <img src="logo-dental-facil.png" alt="Dental Fácil" style="height:52px;width:auto;display:inline-block;object-fit:contain;" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAggAAABRCAYAAAC34l51...'">
         </div>
-        <div style="text-align:right;">
+        <div style="position:absolute;right:0;top:50%;transform:translateY(-50%);text-align:right;">
           <div style="font-size:15px;font-weight:700;color:#ef4444;letter-spacing:0.5px;">
             ${esc(folioTxt)}
           </div>

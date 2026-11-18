@@ -5406,6 +5406,12 @@ function renderPdfPreview(){
   const concl=asis+no;
   const tasa=concl>0?Math.round((asis/concl)*100)+'%':(tot>0?'0%':'—');
 
+  // Conteo por origen (Externo e Interno) tanto global de citas como de asistidos
+  const totExt=list.filter(c=>c.origen&&c.origen.includes('Externa')).length;
+  const totInt=list.filter(c=>c.origen&&c.origen.includes('Interna')).length;
+  const asisExt=list.filter(c=>c.estatus==='Asistió'&&c.origen&&c.origen.includes('Externa')).length;
+  const asisInt=list.filter(c=>c.estatus==='Asistió'&&c.origen&&c.origen.includes('Interna')).length;
+
   const allKnownUsers = [...USUARIOS];
   const knownNames = new Set(allKnownUsers.map(u => u.nombre.toLowerCase()));
   citas.forEach(c => {
@@ -5420,7 +5426,7 @@ function renderPdfPreview(){
     ? allKnownUsers
     : allKnownUsers.filter(u => u.id === repConfig.asesor || u.nombre.toLowerCase() === String(repConfig.asesor).toLowerCase());
 
-  let sumT=0,sumA=0,sumN=0,sumP=0,sumO=0;
+  let sumT=0,sumA=0,sumN=0,sumP=0,sumO=0,sumExtT=0,sumExtA=0,sumIntT=0,sumIntA=0;
   const adRows=adList.map(u=>{
     const uCitas=citas.filter(c=>{
       const dVal=basisIsReg?(c.creadoEl||'').slice(0,10):c.fecha;
@@ -5434,13 +5440,22 @@ function renderPdfPreview(){
     const uN=uCitas.filter(c=>c.estatus==='No asistió').length;
     const uP=uCitas.filter(c=>c.estatus==='Pendiente'||c.estatus==='Confirmada'||c.estatus==='Confirmó'||c.estatus==='Confirma').length;
     const uO=uCitas.filter(c=>c.estatus==='Reagendó'||c.estatus==='Canceló').length;
+    const uExtT=uCitas.filter(c=>c.origen&&c.origen.includes('Externa')).length;
+    const uExtA=uCitas.filter(c=>c.estatus==='Asistió'&&c.origen&&c.origen.includes('Externa')).length;
+    const uIntT=uCitas.filter(c=>c.origen&&c.origen.includes('Interna')).length;
+    const uIntA=uCitas.filter(c=>c.estatus==='Asistió'&&c.origen&&c.origen.includes('Interna')).length;
+
     sumT+=uT;sumA+=uA;sumN+=uN;sumP+=uP;sumO+=uO;
+    sumExtT+=uExtT;sumExtA+=uExtA;sumIntT+=uIntT;sumIntA+=uIntA;
+
     const uC=uA+uN;
     const uPct=uC>0?Math.round((uA/uC)*100)+'%':'—';
     return `
       <tr>
         <td style="text-align:left;font-weight:600">${esc(u.nombre)}</td>
         <td style="text-align:center"><b>${uT}</b></td>
+        <td style="text-align:center;font-size:11.5px"><b>${uExtT}</b> <span style="color:#64748b">/</span> <span style="font-weight:700;color:#0097A7">${uExtA}</span></td>
+        <td style="text-align:center;font-size:11.5px"><b>${uIntT}</b> <span style="color:#64748b">/</span> <span style="font-weight:700;color:#0097A7">${uIntA}</span></td>
         <td style="text-align:center;font-weight:600;color:#0097A7">${uA}</td>
         <td style="text-align:center;color:#E11D48">${uN}</td>
         <td style="text-align:center;color:#D97706">${uP}</td>
@@ -5483,12 +5498,37 @@ function renderPdfPreview(){
         <div class="pdf-kpi"><div class="pdf-kpi-label">% Asistencia</div><div class="pdf-kpi-val text-ok">${tasa}</div></div>
       </div>
 
+      <!-- DESGLOSE EXTERNO / INTERNO -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:-14px 0 22px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0284c7;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#0284c7;text-transform:uppercase;letter-spacing:0.5px;">Publicidad Externa</div>
+            <div style="font-size:11.5px;color:#64748b;margin-top:2px;">Citas: <b style="font-size:14px;color:#0f172a;">${totExt}</b> · Asistieron: <b style="font-size:14px;color:#0097a7;">${asisExt}</b></div>
+          </div>
+          <div style="font-size:13px;font-weight:800;color:#0097a7;background:#e0f2fe;padding:4px 10px;border-radius:6px;">
+            ${totExt > 0 ? Math.round((asisExt / totExt) * 100) + '%' : '0%'}
+          </div>
+        </div>
+
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #8b5cf6;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:0.5px;">Publicidad Interna</div>
+            <div style="font-size:11.5px;color:#64748b;margin-top:2px;">Citas: <b style="font-size:14px;color:#0f172a;">${totInt}</b> · Asistieron: <b style="font-size:14px;color:#0097a7;">${asisInt}</b></div>
+          </div>
+          <div style="font-size:13px;font-weight:800;color:#0097a7;background:#ede9fe;padding:4px 10px;border-radius:6px;">
+            ${totInt > 0 ? Math.round((asisInt / totInt) * 100) + '%' : '0%'}
+          </div>
+        </div>
+      </div>
+
       <div class="pdf-section-title">Resumen de Rendimiento por Asesor</div>
       <table class="pdf-table">
         <thead>
           <tr>
             <th style="text-align:left">Asesor</th>
             <th style="text-align:center">Citas Agendadas</th>
+            <th style="text-align:center">Externo (Citas / Asist)</th>
+            <th style="text-align:center">Interno (Citas / Asist)</th>
             <th style="text-align:center">Pacientes Atendidos</th>
             <th style="text-align:center">No Asistieron</th>
             <th style="text-align:center">Pendientes</th>
@@ -5503,6 +5543,8 @@ function renderPdfPreview(){
           <tr style="background:#f8fafc;font-weight:700">
             <td style="text-align:left;border-top:2px solid #0097a7">TOTAL</td>
             <td style="text-align:center;border-top:2px solid #0097a7">${sumT}</td>
+            <td style="text-align:center;border-top:2px solid #0097a7;font-size:11.5px"><b>${sumExtT}</b> / <b style="color:#0097A7">${sumExtA}</b></td>
+            <td style="text-align:center;border-top:2px solid #0097a7;font-size:11.5px"><b>${sumIntT}</b> / <b style="color:#0097A7">${sumIntA}</b></td>
             <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7">${sumA}</td>
             <td style="text-align:center;border-top:2px solid #0097a7;color:#E11D48">${sumN}</td>
             <td style="text-align:center;border-top:2px solid #0097a7;color:#D97706">${sumP}</td>
