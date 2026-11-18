@@ -5535,6 +5535,7 @@ function renderPdfPreview(){
         <tbody>
           ${adRows}
         </tbody>
+        ${adList.length > 1 ? `
         <tfoot>
           <tr style="background:#f8fafc;font-weight:700">
             <td style="text-align:left;border-top:2px solid #0097a7;padding:8px 4px">TOTAL</td>
@@ -5545,7 +5546,7 @@ function renderPdfPreview(){
             <td style="text-align:center;border-top:2px solid #0097a7;padding:8px 4px">${sumO}</td>
             <td style="text-align:center;border-top:2px solid #0097a7;color:#0097A7;padding:8px 4px">${tasa}</td>
           </tr>
-        </tfoot>
+        </tfoot>` : ''}
       </table>
 
       <!-- TABLA RESUMEN POR ORIGEN (EXTERNO E INTERNO) -->
