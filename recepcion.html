@@ -1491,6 +1491,17 @@ function construirHtmlPolizaBeneficios(p){
   const sucursal = (p.sucursal || 'Mexicali Villa Verde').toUpperCase();
   const paqueteSel = (p.paquete || 'Individual').toLowerCase();
 
+  // Sello dinámico por sucursal
+  function getSelloClinica(suc) {
+    const s = (suc || '').toLowerCase();
+    if(s.includes('obregón') || s.includes('obregon')) return { dir: 'Av. Álvaro Obregón #771, Col. Primera', ciudad: 'Mexicali, B.C. / C.P. 21100' };
+    if(s.includes('villa verde') || s.includes('villaverde')) return { dir: 'Río Verde #850, Villa Verde', ciudad: 'Mexicali, B.C. / C.P. 21395' };
+    if(s.includes('tijuana')) return { dir: 'Erasmo Castellanos Q. 9450-Q, Zona Río', ciudad: 'Tijuana, B.C. / C.P. 22320' };
+    if(s.includes('ensenada')) return { dir: 'Av. Ruiz #631, Zona Centro', ciudad: 'Ensenada, B.C. / C.P. 22800' };
+    return { dir: 'Río Verde #850, Villa Verde', ciudad: 'Mexicali, B.C. / C.P. 21395' };
+  }
+  const selloInfo = getSelloClinica(p.sucursal);
+
   const isInd = paqueteSel.includes('individual') || paqueteSel.includes('350') || (!paqueteSel.includes('dual') && !paqueteSel.includes('familiar'));
   const isDual = !isInd && (paqueteSel.includes('dual') || paqueteSel.includes('550') || paqueteSel.includes('3 personas'));
   const isFam = !isInd && !isDual && (paqueteSel.includes('familiar') || paqueteSel.includes('850') || paqueteSel.includes('7 personas'));
@@ -1664,8 +1675,8 @@ function construirHtmlPolizaBeneficios(p){
         <div style="text-align:center;width:240px;">
           <div style="border:1px dashed #cbd5e1;border-radius:8px;padding:6px 8px;margin-bottom:6px;background:#f8fafc;font-size:9px;color:#64748b;line-height:1.35;">
             <b style="color:#0284c7;font-size:10px;">Dental Fácil · Conexión a la Salud</b><br>
-            Río Verde #850, Villa Verde<br>
-            Mexicali, B.C. / C.P. 21395<br>
+            ${selloInfo.dir}<br>
+            ${selloInfo.ciudad}<br>
             R.F.C. DEN-220630-R17
           </div>
           <div style="border-top:1px solid #475569;margin-top:10px;padding-top:4px;font-size:11px;font-weight:700;color:#0f172a;">
