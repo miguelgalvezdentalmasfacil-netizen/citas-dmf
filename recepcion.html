@@ -1509,26 +1509,26 @@ function construirHtmlPolizaBeneficios(p){
     const bFec = b.fecNac ? esc(b.fecNac) : '&nbsp;';
 
     filasBeneficiariosHtml += `
-      <div style="margin-bottom:8px;font-size:11.5px;color:#1e293b;">
-        <div style="display:flex;align-items:flex-end;margin-bottom:4px;">
-          <span style="font-size:13.5px;font-weight:700;color:#0284c7;width:22px;flex-shrink:0;">${num}</span>
-          <span style="font-weight:700;color:#0284c7;margin-right:8px;font-size:11.5px;letter-spacing:0.3px;">Nombre:</span>
-          <div style="flex:1;border-bottom:1px solid #94a3b8;font-weight:600;font-size:12px;padding-left:4px;min-height:16px;color:#0f172a;">
+      <div style="margin-bottom:10px;font-size:11.5px;color:#1e293b;">
+        <div style="display:flex;align-items:baseline;margin-bottom:5px;border-bottom:1px solid #e2e8f0;padding-bottom:3px;">
+          <span style="font-size:13px;font-weight:700;color:#0284c7;width:22px;flex-shrink:0;">${num}</span>
+          <span style="font-weight:700;color:#0284c7;margin-right:8px;font-size:11px;letter-spacing:0.4px;">Nombre:</span>
+          <div style="flex:1;font-weight:600;font-size:12.5px;padding-left:4px;color:#0f172a;">
             ${bNom}
           </div>
         </div>
-        <div style="display:flex;align-items:flex-end;padding-left:22px;gap:16px;">
-          <div style="display:flex;align-items:flex-end;flex:1.2;">
-            <span style="font-weight:700;color:#0284c7;margin-right:5px;font-size:11px;">Parentesco:</span>
-            <div style="flex:1;border-bottom:1px solid #94a3b8;padding-left:2px;min-height:15px;font-size:11.5px;color:#334155;">${bPar}</div>
+        <div style="display:flex;align-items:baseline;padding-left:22px;gap:16px;">
+          <div style="display:flex;align-items:baseline;flex:1.2;border-bottom:1px solid #e2e8f0;padding-bottom:3px;">
+            <span style="font-weight:700;color:#0284c7;margin-right:6px;font-size:10.5px;">Parentesco:</span>
+            <div style="flex:1;padding-left:2px;font-size:12px;font-weight:500;color:#334155;">${bPar}</div>
           </div>
-          <div style="display:flex;align-items:flex-end;flex:1;">
-            <span style="font-weight:700;color:#0284c7;margin-right:5px;font-size:11px;">Tel:</span>
-            <div style="flex:1;border-bottom:1px solid #94a3b8;padding-left:2px;min-height:15px;font-size:11.5px;color:#334155;">${bTel}</div>
+          <div style="display:flex;align-items:baseline;flex:1;border-bottom:1px solid #e2e8f0;padding-bottom:3px;">
+            <span style="font-weight:700;color:#0284c7;margin-right:6px;font-size:10.5px;">Tel:</span>
+            <div style="flex:1;padding-left:2px;font-size:12px;font-weight:500;color:#334155;">${bTel}</div>
           </div>
-          <div style="display:flex;align-items:flex-end;flex:1.2;">
-            <span style="font-weight:700;color:#0284c7;margin-right:5px;font-size:11px;">Fecha Nacimiento:</span>
-            <div style="flex:1;border-bottom:1px solid #94a3b8;padding-left:2px;min-height:15px;font-size:11.5px;color:#334155;">${bFec}</div>
+          <div style="display:flex;align-items:baseline;flex:1.2;border-bottom:1px solid #e2e8f0;padding-bottom:3px;">
+            <span style="font-weight:700;color:#0284c7;margin-right:6px;font-size:10.5px;">Fecha Nacimiento:</span>
+            <div style="flex:1;padding-left:2px;font-size:12px;font-weight:500;color:#334155;">${bFec}</div>
           </div>
         </div>
       </div>
@@ -1557,44 +1557,44 @@ function construirHtmlPolizaBeneficios(p){
         </h1>
       </div>
 
-      <!-- MARCO TITULAR (IDÉNTICO EN DISTRIBUCIÓN AL TALONARIO OFICIAL) -->
-      <div style="border:1.5px solid #0284c7;border-radius:14px;padding:18px 24px 14px;margin-bottom:16px;background:#ffffff;">
+      <!-- MARCO TITULAR (DISEÑO PROFESIONAL, ELEGANTE Y NATURAL) -->
+      <div style="border:1.5px solid #0284c7;border-radius:14px;padding:20px 24px 16px;margin-bottom:16px;background:#ffffff;">
         
         <!-- Fila 1: TITULAR -->
-        <div style="display:flex;align-items:flex-end;margin-bottom:14px;">
-          <span style="font-weight:800;color:#0284c7;font-size:12px;letter-spacing:0.8px;width:75px;flex-shrink:0;">TITULAR:</span>
-          <div style="flex:1;border-bottom:1px solid #94a3b8;font-weight:700;font-size:13.5px;color:#0f172a;padding-left:6px;padding-bottom:1px;min-height:19px;letter-spacing:0.3px;">
+        <div style="display:flex;align-items:baseline;margin-bottom:14px;border-bottom:1px solid #e2e8f0;padding-bottom:5px;">
+          <span style="font-weight:700;color:#0284c7;font-size:11.5px;letter-spacing:0.8px;width:75px;flex-shrink:0;">TITULAR:</span>
+          <div style="flex:1;font-weight:600;font-size:14px;color:#0f172a;padding-left:8px;letter-spacing:0.4px;">
             ${esc(titular)}
           </div>
         </div>
 
         <!-- Fila 2: FECHA NACIMIENTO + TEL -->
-        <div style="display:flex;align-items:flex-end;gap:24px;margin-bottom:14px;">
-          <div style="display:flex;align-items:flex-end;flex:1.2;">
-            <span style="font-weight:800;color:#0284c7;font-size:11.5px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">FECHA NACIMIENTO:</span>
-            <div style="flex:1;border-bottom:1px solid #94a3b8;font-weight:600;font-size:12.5px;padding-left:4px;padding-bottom:1px;min-height:19px;color:#0f172a;">
+        <div style="display:flex;align-items:baseline;gap:24px;margin-bottom:14px;">
+          <div style="display:flex;align-items:baseline;flex:1.2;border-bottom:1px solid #e2e8f0;padding-bottom:5px;">
+            <span style="font-weight:700;color:#0284c7;font-size:11px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">FECHA NACIMIENTO:</span>
+            <div style="flex:1;font-weight:600;font-size:13px;padding-left:4px;color:#0f172a;">
               ${esc(fecNac)}
             </div>
           </div>
-          <div style="display:flex;align-items:flex-end;flex:1;">
-            <span style="font-weight:800;color:#0284c7;font-size:11.5px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">TEL:</span>
-            <div style="flex:1;border-bottom:1px solid #94a3b8;font-weight:600;font-size:12.5px;padding-left:4px;padding-bottom:1px;min-height:19px;color:#0f172a;">
+          <div style="display:flex;align-items:baseline;flex:1;border-bottom:1px solid #e2e8f0;padding-bottom:5px;">
+            <span style="font-weight:700;color:#0284c7;font-size:11px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">TEL:</span>
+            <div style="flex:1;font-weight:600;font-size:13px;padding-left:4px;color:#0f172a;">
               ${esc(tel)}
             </div>
           </div>
         </div>
 
         <!-- Fila 3: VIGENCIA INICIA EN / FINALIZA EN -->
-        <div style="display:flex;align-items:flex-end;gap:24px;margin-bottom:18px;">
-          <div style="display:flex;align-items:flex-end;flex:1;">
-            <span style="font-weight:800;color:#0284c7;font-size:11.5px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">INICIA EN:</span>
-            <div style="flex:1;border-bottom:1px solid #94a3b8;font-weight:700;font-size:12.5px;padding-left:4px;padding-bottom:1px;min-height:19px;color:#0f172a;">
+        <div style="display:flex;align-items:baseline;gap:24px;margin-bottom:18px;">
+          <div style="display:flex;align-items:baseline;flex:1;border-bottom:1px solid #e2e8f0;padding-bottom:5px;">
+            <span style="font-weight:700;color:#0284c7;font-size:11px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">INICIA EN:</span>
+            <div style="flex:1;font-weight:600;font-size:13px;padding-left:4px;color:#0f172a;">
               ${esc(inicia)}
             </div>
           </div>
-          <div style="display:flex;align-items:flex-end;flex:1;">
-            <span style="font-weight:800;color:#0284c7;font-size:11.5px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">FINALIZA EN:</span>
-            <div style="flex:1;border-bottom:1px solid #94a3b8;font-weight:700;font-size:12.5px;padding-left:4px;padding-bottom:1px;min-height:19px;color:#0f172a;">
+          <div style="display:flex;align-items:baseline;flex:1;border-bottom:1px solid #e2e8f0;padding-bottom:5px;">
+            <span style="font-weight:700;color:#0284c7;font-size:11px;margin-right:8px;letter-spacing:0.6px;white-space:nowrap;">FINALIZA EN:</span>
+            <div style="flex:1;font-weight:600;font-size:13px;padding-left:4px;color:#0f172a;">
               ${esc(finaliza)}
             </div>
           </div>
