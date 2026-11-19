@@ -405,6 +405,30 @@ input, select, textarea, .inp, #lg-pin { font-size: 16px !important; }
       </button>
     </div>
 
+    <!-- SECCIÓN FIRMA DIGITAL DEL TITULAR -->
+    <div style="margin:20px 0 16px;padding:18px 20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="font-size:12.5px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.6px;display:flex;align-items:center;gap:7px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          Firma Digital del Paciente / Titular
+        </div>
+        <button type="button" class="btn sm out" id="btn-limpiar-firma" style="background:#ffffff;font-size:11.5px;padding:3px 10px;border-color:#cbd5e1;color:#64748b;">
+          Borrar / Limpiar
+        </button>
+      </div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px;line-height:1.4;">
+        El paciente puede firmar directamente en este recuadro con el dedo, lápiz táctil o mouse para plasmar su firma en la póliza PDF oficial.
+      </div>
+
+      <div style="position:relative;background:#ffffff;border:1.5px dashed #0284c7;border-radius:10px;overflow:hidden;box-shadow:inset 0 1px 4px rgba(0,0,0,0.03);">
+        <canvas id="canvas-firma" width="600" height="150" style="width:100%;height:150px;display:block;touch-action:none;cursor:crosshair;"></canvas>
+        <div id="firma-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;color:#94a3b8;font-size:12.5px;gap:4px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.6"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <span>Firme aquí con el dedo o pluma</span>
+        </div>
+      </div>
+    </div>
+
     <div class="field">
       <label class="l">Notas (Opcional)</label>
       <textarea class="inp" id="reg-notas" placeholder="Observaciones adicionales"></textarea>
@@ -1124,6 +1148,91 @@ $('btn-add-beneficiario').onclick = () => {
   renderBeneficiariosInputs();
 };
 
+/* ============ FIRMA DIGITAL CANVAS ============ */
+let signaturePadActive = false;
+let hasSignatureDrawn = false;
+let canvasFirma = null;
+let ctxFirma = null;
+
+function initSignaturePad(){
+  canvasFirma = $('canvas-firma');
+  if(!canvasFirma) return;
+  ctxFirma = canvasFirma.getContext('2d');
+  ctxFirma.lineWidth = 2.4;
+  ctxFirma.lineCap = 'round';
+  ctxFirma.lineJoin = 'round';
+  ctxFirma.strokeStyle = '#0284c7';
+
+  let drawing = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  function getPos(e){
+    const rect = canvasFirma.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const scaleX = canvasFirma.width / rect.width;
+    const scaleY = canvasFirma.height / rect.height;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  }
+
+  function startDrawing(e){
+    e.preventDefault();
+    drawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    $('firma-placeholder').style.display = 'none';
+  }
+
+  function draw(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctxFirma.beginPath();
+    ctxFirma.moveTo(lastX, lastY);
+    ctxFirma.lineTo(pos.x, pos.y);
+    ctxFirma.stroke();
+    lastX = pos.x;
+    lastY = pos.y;
+    hasSignatureDrawn = true;
+  }
+
+  function stopDrawing(e){
+    if(!drawing) return;
+    e.preventDefault();
+    drawing = false;
+  }
+
+  canvasFirma.addEventListener('mousedown', startDrawing);
+  canvasFirma.addEventListener('mousemove', draw);
+  window.addEventListener('mouseup', stopDrawing);
+
+  canvasFirma.addEventListener('touchstart', startDrawing, { passive: false });
+  canvasFirma.addEventListener('touchmove', draw, { passive: false });
+  window.addEventListener('touchend', stopDrawing, { passive: false });
+
+  $('btn-limpiar-firma').onclick = (e) => {
+    e.preventDefault();
+    limpiarFirmaDigital();
+  };
+}
+
+function limpiarFirmaDigital(){
+  if(!canvasFirma || !ctxFirma) return;
+  ctxFirma.clearRect(0, 0, canvasFirma.width, canvasFirma.height);
+  hasSignatureDrawn = false;
+  $('firma-placeholder').style.display = 'flex';
+}
+
+function obtenerFirmaBase64(){
+  if(!hasSignatureDrawn || !canvasFirma) return '';
+  return canvasFirma.toDataURL('image/png');
+}
+
 /* ============ REGISTRO NUEVO PACIENTE (CUENTA PROPIA) ============ */
 $('btn-nuevo-paciente').onclick = () => {
   $('reg-paciente').value = '';
@@ -1139,6 +1248,7 @@ $('btn-nuevo-paciente').onclick = () => {
 
   beneficiariosList = [];
   renderBeneficiariosInputs();
+  limpiarFirmaDigital();
 
   const userSuc = (currentUser && currentUser.sucursal !== 'Todas') ? currentUser.sucursal : 'Tijuana';
   $('reg-sucursal').value = userSuc;
@@ -1192,6 +1302,7 @@ async function procesarGuardadoPaciente(descargarPdfAlTerminar = false){
 
   // Folio de póliza: si no se especifica, tomar últimos 3-4 dígitos numéricos de timestamp
   const folioFinal = folioInp || String(Date.now()).slice(-4);
+  const firmaDigital = obtenerFirmaBase64();
 
   const polizaData = {
     folio: folioFinal,
@@ -1203,6 +1314,7 @@ async function procesarGuardadoPaciente(descargarPdfAlTerminar = false){
     iniciaEn: fec,
     finalizaEn: fechaFin,
     beneficiarios: beneficiariosValidos,
+    firmaBase64: firmaDigital,
     creadoPor: currentUser ? currentUser.nombre : 'Recepción'
   };
 
@@ -1559,8 +1671,12 @@ function construirHtmlPolizaBeneficios(p){
 
         <!-- Lado derecho: Firma del titular -->
         <div style="text-align:center;width:240px;">
-          <div style="height:46px;display:flex;align-items:flex-end;justify-content:center;">
-            <span style="font-family:cursive;font-size:17px;color:#0284c7;opacity:0.85;">${esc(titular.split(' ')[0] || '')}</span>
+          <div style="height:48px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:2px;">
+            ${(pData && pData.firmaBase64) ? `
+              <img src="${pData.firmaBase64}" style="max-height:46px;max-width:200px;object-fit:contain;display:block;" alt="Firma del titular">
+            ` : `
+              <span style="font-family:cursive;font-size:17px;color:#0284c7;opacity:0.85;">${esc(titular.split(' ')[0] || '')}</span>
+            `}
           </div>
           <div style="border-top:1px solid #475569;padding-top:4px;font-size:11px;font-weight:700;color:#0f172a;">
             Firma del titular conforme
@@ -1657,6 +1773,7 @@ $('btn-cerrar-poliza-x').onclick = () => {
 };
 
 /* Inicializar */
+initSignaturePad();
 initLogin();
 </script>
 </body>
