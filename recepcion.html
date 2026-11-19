@@ -1481,9 +1481,10 @@ function formatFechaPoliza(fStr){
 }
 
 function construirHtmlPolizaBeneficios(p){
-  const folioTxt = p.folio ? `No. ${p.folio}` : 'No. 187';
-  const titular = (p.titular || p.paciente || '').toUpperCase();
-  const fecNac = p.fecNac || '—';
+  const pData = p || {};
+  const folioTxt = pData.folio ? `No. ${pData.folio}` : 'No. 187';
+  const titular = (pData.titular || pData.paciente || '').toUpperCase();
+  const fecNac = pData.fecNac || '—';
   const tel = p.telefono || '—';
   const inicia = formatFechaPoliza(p.iniciaEn || p.fecha);
   const finaliza = formatFechaPoliza(p.finalizaEn);
@@ -1710,23 +1711,99 @@ function abrirModalPoliza(pData, autoDescargar = false){
   if(autoDescargar){
     setTimeout(() => {
       ejecutarDescargaPdfPoliza();
-    }, 450);
+    }, 600);
   }
+}
+
+function imprimirPolizaDirecta(){
+  const el = document.getElementById('poliza-talonario-impresion');
+  if(!el) return;
+  const pacName = ((currentPolizaActiva && (currentPolizaActiva.titular || currentPolizaActiva.paciente)) || 'Paciente');
+  const printWindow = window.open('', '_blank');
+  if(!printWindow){
+    window.print();
+    return;
+  }
+  printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Póliza de Beneficios - ${esc(pacName)}</title>
+  <style>
+    body{margin:0;padding:12px;background:#fff;font-family:'Inter',system-ui,sans-serif;}
+    @page{size:letter portrait;margin:8mm;}
+    @media print{body{padding:0;}}
+  </style>
+</head>
+<body>
+  ${el.outerHTML}
+  <script>
+    window.onload = function(){
+      setTimeout(function(){ window.print(); }, 250);
+    };
+  <\/script>
+</body>
+</html>`);
+  printWindow.document.close();
 }
 
 function ejecutarDescargaPdfPoliza(){
   const el = document.getElementById('poliza-talonario-impresion');
   if(!el) return;
-  const pacName = ((currentPolizaActiva && currentPolizaActiva.titular) || 'Paciente').replace(/\s+/g,'_');
+  const pacName = ((currentPolizaActiva && (currentPolizaActiva.titular || currentPolizaActiva.paciente)) || 'Paciente').replace(/\s+/g,'_');
   const folNum = (currentPolizaActiva && currentPolizaActiva.folio) || 'Poliza';
+  const fname = `Poliza_Beneficios_Dental_Facil_${folNum}_${pacName}.pdf`;
 
-  html2pdf().set({
+  const btn = $('btn-descargar-poliza-pdf');
+  const origHtml = btn ? btn.innerHTML : '';
+  if(btn){
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg> Generando PDF...`;
+  }
+
+  const opt = {
     margin: [6, 6, 6, 6],
-    filename: `Poliza_Beneficios_Dental_Facil_${folNum}_${pacName}.pdf`,
+    filename: fname,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+    html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, scrollY: 0 },
     jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
-  }).from(el).save();
+  };
+
+  if(typeof html2pdf !== 'undefined'){
+    html2pdf().set(opt).from(el).toPdf().get('pdf').then(function(pdf){
+      const blob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Enlace de descarga forzada compatible con iPads, iPhones y Android
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }, 2000);
+
+      if(btn){
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+      }
+    }).catch(function(err){
+      console.error('Error generando póliza PDF:', err);
+      if(btn){
+        btn.innerHTML = origHtml;
+        btn.disabled = false;
+      }
+      imprimirPolizaDirecta();
+    });
+  } else {
+    if(btn){
+      btn.innerHTML = origHtml;
+      btn.disabled = false;
+    }
+    imprimirPolizaDirecta();
+  }
 }
 
 window.verDescargarPoliza = function(citaId){
