@@ -11,56 +11,85 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg-color:#F8FAFC;
-      --surface:#FFFFFF;
-      --text-main:#0F172A;
-      --text-muted:#64748B;
-      --text-light:#94A3B8;
-      --border:#F1F5F9;
-      --border-dark:#E2E8F0;
-      --hover:#F8FAFC;
-      --btn-bg:#0F172A;
-      --btn-bg-hover:#1E293B;
-      --btn-text:#FFFFFF;
-      --ok:#10B981;
-      --ok-bg:#ECFDF5;
-      --bad:#EF4444;
-      --bad-bg:#FEF2F2;
-      --neutral:#64748B;
-      --neutral-bg:#F1F5F9;
-      --radius-lg:24px;
-      --radius-md:12px;
-      --shadow:0 4px 20px rgba(0,0,0,.02);
-    }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg-color);color:var(--text-main);font-weight:400;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;}
-    .nav{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:14px 24px;gap:12px;}
-    .brand{display:flex;align-items:center;gap:12px;}
-    .brand img{height:34px;width:auto;display:block;flex-shrink:0;}
-    .brand-name{font-size:15px;font-weight:500;color:var(--text-main);}
-    .content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:16px;}
-    .btn{border:0;background:var(--btn-bg);color:var(--btn-text);padding:13px 32px;border-radius:var(--radius-md);font-weight:500;font-size:15px;cursor:pointer;transition:background .15s ease;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;min-width:200px;}
-    @media (hover: hover) and (pointer: fine){
-      .btn:hover{background:var(--btn-bg-hover);}
+    body{
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+      background:#F0F2F8;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      -webkit-font-smoothing:antialiased;
     }
-    @media (max-width:600px){
-      .nav{padding:12px 16px;}
-      .brand img{height:28px;}
-      .btn{width:100%;max-width:320px;}
+    .card{
+      background:#FFFFFF;
+      border-radius:24px;
+      box-shadow:0 8px 40px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      padding:40px 36px;
+      width:100%;
+      max-width:420px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:32px;
+    }
+    .logo-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .logo-wrap img{
+      height:48px;
+      width:auto;
+      display:block;
+    }
+    .btn-group{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      width:100%;
+    }
+    .btn{
+      display:block;
+      width:100%;
+      padding:16px 24px;
+      background:#0F172A;
+      color:#FFFFFF;
+      border:none;
+      border-radius:999px;
+      font-family:inherit;
+      font-size:16px;
+      font-weight:600;
+      text-align:center;
+      text-decoration:none;
+      cursor:pointer;
+      transition:background .15s ease, transform .1s ease;
+      letter-spacing:0.01em;
+    }
+    .btn:hover{
+      background:#1E293B;
+    }
+    .btn:active{
+      transform:scale(0.98);
+      opacity:0.9;
+    }
+    @media (max-width:480px){
+      .card{padding:32px 20px; border-radius:20px;}
+      .logo-wrap img{height:40px;}
+      .btn{font-size:15px; padding:14px 20px;}
     }
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="brand">
+  <div class="card">
+    <div class="logo-wrap">
       <img src="logo-dental-facil.png" alt="Dental MÁS FÁCIL">
-      <span class="brand-name">Dental MÁS FÁCIL</span>
     </div>
-  </nav>
-  <div class="content">
-    <a class="btn" href="recepcion.html">Recepción</a>
-    <a class="btn" href="citas.html">Citas</a>
+    <div class="btn-group">
+      <a class="btn" href="recepcion.html">Recepción</a>
+      <a class="btn" href="citas.html">Citas</a>
+    </div>
   </div>
 </body>
 </html>
