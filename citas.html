@@ -4958,9 +4958,13 @@ function renderPdfPreview(){
     bList.forEach(b=>{
       const t=computeBudgetTotals(b);
       const pPag = getPeriodPagado(b);
-      sumPresupuestado+=(parseFloat(b.total)||0);
-      sumPagado+=pPag;
-      sumSaldo+=Math.max(0, (parseFloat(b.total)||0) - pPag);
+      const fBase = getBudgetCreatedDate(b, repConfig.dateBasis);
+      const isCreatedInPeriod = fBase && fBase >= startDate && fBase <= endDate;
+      // Si el presupuesto se emitió en este período, cuenta el total presupuestado; si viene de un mes anterior y solo abonó, no infla el total presupuestado del mes
+      const repTotal = isCreatedInPeriod ? (parseFloat(b.total)||0) : 0;
+      sumPresupuestado += repTotal;
+      sumPagado += pPag;
+      sumSaldo += Math.max(0, repTotal - pPag);
       const sem=getBudgetSemáforo(b);
       if(sem.status==='completado') countCompletados++;
       else if(sem.status==='en_tratamiento') countTratamiento++;
@@ -4980,9 +4984,12 @@ function renderPdfPreview(){
         let uPres=0, uPag=0, uSal=0;
         uBudgets.forEach(b=>{
           const pPag = getPeriodPagado(b);
-          uPres+=(parseFloat(b.total)||0);
-          uPag+=pPag;
-          uSal+=Math.max(0, (parseFloat(b.total)||0) - pPag);
+          const fBase = getBudgetCreatedDate(b, repConfig.dateBasis);
+          const isCreatedInPeriod = fBase && fBase >= startDate && fBase <= endDate;
+          const repTotal = isCreatedInPeriod ? (parseFloat(b.total)||0) : 0;
+          uPres += repTotal;
+          uPag += pPag;
+          uSal += Math.max(0, repTotal - pPag);
         });
         const uPct=uPres>0?Math.round((uPag/uPres)*100)+'%':'0%';
         return `
