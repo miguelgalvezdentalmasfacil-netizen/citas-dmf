@@ -812,8 +812,9 @@ updateClock();
 
 /* ============ LOGIN ============ */
 function initLogin(){
+  try{ localStorage.removeItem('dmf_recepcion_user'); }catch(e){}
   enhanceAllSelects();
-  const saved = localStorage.getItem('dmf_recepcion_user');
+  const saved = sessionStorage.getItem('dmf_recepcion_user');
   if(saved){
     try{
       currentUser = JSON.parse(saved);
@@ -859,7 +860,7 @@ $('lg-btn').onclick = () => {
 
   if(u && String(pin) === String(u.pin)){
     currentUser = u;
-    localStorage.setItem('dmf_recepcion_user', JSON.stringify(currentUser));
+    sessionStorage.setItem('dmf_recepcion_user', JSON.stringify(currentUser));
     $('lg-err').textContent = '';
     showApp();
   } else {
@@ -893,6 +894,7 @@ if(bSettings && settingsMenu){
 
 $('b-out').onclick = () => {
   if(confirm('¿Deseas cerrar sesión de Recepción?')){
+    sessionStorage.removeItem('dmf_recepcion_user');
     localStorage.removeItem('dmf_recepcion_user');
     currentUser = null;
     $('app').classList.add('hidden');
