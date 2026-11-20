@@ -19,94 +19,87 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:20px;
+      padding:24px;
       -webkit-font-smoothing:antialiased;
     }
     .card{
       background:#FFFFFF;
-      border-radius:24px;
-      box-shadow:0 8px 40px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.04);
-      padding:36px 32px 36px;
+      border-radius:28px;
+      box-shadow:0 10px 50px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.04);
+      padding:52px 48px;
       width:100%;
-      max-width:400px;
+      max-width:520px;
       display:flex;
       flex-direction:column;
-      gap:22px;
+      gap:30px;
     }
 
     /* ---- Header ---- */
     .card-header{
       display:flex;
       align-items:center;
-      gap:0;
-      flex-wrap:nowrap;
-      overflow:hidden;
-    }
-    .logo-wrap{
-      flex-shrink:0;
     }
     .logo-wrap img{
-      height:30px;
+      height:40px;
       width:auto;
       display:block;
     }
     .divider{
       width:1px;
-      height:28px;
+      height:32px;
       background:#CBD5E1;
-      margin:0 14px;
+      margin:0 18px;
       flex-shrink:0;
     }
     .header-labels{
       display:flex;
       align-items:center;
-      gap:8px;
-      flex-shrink:0;
+      gap:10px;
     }
     .label-tag{
-      font-size:13px;
+      font-size:15px;
       font-weight:600;
       color:#0097a7;
     }
     .label-sep{
-      font-size:12px;
+      font-size:13px;
       color:#CBD5E1;
     }
 
     /* ---- Title block ---- */
     .card-title{
-      font-size:22px;
+      font-size:28px;
       font-weight:700;
       color:#0F172A;
-      letter-spacing:-0.3px;
+      letter-spacing:-0.4px;
       line-height:1.2;
     }
     .card-subtitle{
-      font-size:13px;
+      font-size:15px;
       font-weight:400;
       color:#64748B;
-      line-height:1.55;
-      margin-top:6px;
+      line-height:1.6;
+      margin-top:8px;
     }
 
     /* ---- Buttons ---- */
     .btn-group{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:14px;
     }
     .btn{
       display:flex;
       align-items:center;
       justify-content:space-between;
       width:100%;
-      padding:14px 16px;
+      padding:18px 20px;
       background:#F0FAFA;
       color:#0F172A;
       border:1.5px solid #0097a7;
-      border-radius:12px;
+      border-radius:14px;
       font-family:inherit;
-      font-size:14px;
+      font-size:16px;
       font-weight:500;
       text-decoration:none;
       cursor:pointer;
@@ -118,8 +111,15 @@
     }
     .btn-arrow{
       color:#0097a7;
-      font-size:18px;
+      font-size:20px;
       flex-shrink:0;
+    }
+
+    @media (max-width:560px){
+      .card{ padding:36px 24px; border-radius:20px; }
+      .logo-wrap img{ height:32px; }
+      .card-title{ font-size:22px; }
+      .btn{ font-size:15px; padding:15px 16px; }
     }
   </style>
 </head>
@@ -127,7 +127,7 @@
   <div class="card">
     <div class="card-header">
       <div class="logo-wrap">
-        <img src="logo-dental-facil.png" alt="Dental MÁS FÁCIL">
+        <img src="logo-dental-facil.png" alt="Dental Más Fácil">
       </div>
       <div class="divider"></div>
       <div class="header-labels">
