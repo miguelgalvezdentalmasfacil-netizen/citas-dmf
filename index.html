@@ -24,15 +24,15 @@
     }
     .card{
       background:#FFFFFF;
-      border-radius:24px;
-      box-shadow:0 8px 40px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-      padding:40px 36px;
+      border-radius:28px;
+      box-shadow:0 8px 48px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.04);
+      padding:52px 48px;
       width:100%;
-      max-width:420px;
+      max-width:560px;
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:32px;
+      gap:40px;
     }
     .logo-wrap{
       display:flex;
@@ -40,44 +40,50 @@
       justify-content:center;
     }
     .logo-wrap img{
-      height:48px;
+      height:52px;
       width:auto;
       display:block;
     }
     .btn-group{
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:16px;
       width:100%;
     }
     .btn{
-      display:block;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       width:100%;
-      padding:16px 24px;
-      background:#0F172A;
-      color:#FFFFFF;
-      border:none;
-      border-radius:999px;
+      padding:16px 20px;
+      background:#F0FAFA;
+      color:#0F172A;
+      border:1.5px solid #0097a7;
+      border-radius:14px;
       font-family:inherit;
       font-size:16px;
-      font-weight:600;
-      text-align:center;
+      font-weight:500;
+      text-align:left;
       text-decoration:none;
       cursor:pointer;
-      transition:background .15s ease, transform .1s ease;
-      letter-spacing:0.01em;
+      transition:background .15s ease, border-color .15s ease;
     }
     .btn:hover{
-      background:#1E293B;
+      background:#E0F5F7;
+      border-color:#007a8a;
     }
     .btn:active{
-      transform:scale(0.98);
       opacity:0.9;
     }
+    .btn-arrow{
+      color:#0097a7;
+      font-size:18px;
+      flex-shrink:0;
+    }
     @media (max-width:480px){
-      .card{padding:32px 20px; border-radius:20px;}
-      .logo-wrap img{height:40px;}
-      .btn{font-size:15px; padding:14px 20px;}
+      .card{padding:36px 20px; border-radius:20px; max-width:100%;}
+      .logo-wrap img{height:42px;}
+      .btn{font-size:15px; padding:14px 16px;}
     }
   </style>
 </head>
@@ -87,8 +93,14 @@
       <img src="logo-dental-facil.png" alt="Dental MÁS FÁCIL">
     </div>
     <div class="btn-group">
-      <a class="btn" href="recepcion.html">Recepción</a>
-      <a class="btn" href="citas.html">Citas</a>
+      <a class="btn" href="recepcion.html">
+        <span>Recepción</span>
+        <span class="btn-arrow">›</span>
+      </a>
+      <a class="btn" href="citas.html">
+        <span>Citas</span>
+        <span class="btn-arrow">›</span>
+      </a>
     </div>
   </div>
 </body>
