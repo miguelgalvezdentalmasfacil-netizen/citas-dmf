@@ -1419,9 +1419,9 @@ function sanitizeAllExistingPresupuestos(){
         modified = true;
       }
     }
-    // Si la fecha de emisión del presupuesto difiere de la fecha real de la cita del paciente, sincronizarla
+    // Solo sincronizar fecha de emisión si no tiene fechaEmision establecida
     const pCitas = getPatientCitas(b.telefono, b.paciente);
-    if(pCitas.length && pCitas[0].fecha && b.fechaEmision !== pCitas[0].fecha){
+    if(!b.fechaEmision && pCitas.length && pCitas[0].fecha){
       b.fechaEmision = pCitas[0].fecha;
       modified = true;
     }
@@ -1757,15 +1757,18 @@ function getPatientCitas(tel, name){
 
 function getBudgetCreatedDate(b, basis){
   if(!b) return '';
+  // Si tiene fechaEmision explícita y se pide base por cita o emision, respetarla
+  if(basis !== 'registro' && b.fechaEmision) return b.fechaEmision.slice(0,10);
   const pCitas = getPatientCitas(b.telefono, b.paciente);
   if(basis === 'registro'){
     if(pCitas.length && pCitas[0].creadoEl) return pCitas[0].creadoEl.slice(0,10);
     if(b.creadoEl) return b.creadoEl.slice(0,10);
     if(b.actualizadoEl) return b.actualizadoEl.slice(0,10);
+    if(b.fechaEmision) return b.fechaEmision.slice(0,10);
   }
   // Criterio por defecto o por fecha de cita:
-  if(pCitas.length && pCitas[0].fecha) return pCitas[0].fecha;
   if(b.fechaEmision) return b.fechaEmision.slice(0,10);
+  if(pCitas.length && pCitas[0].fecha) return pCitas[0].fecha;
   if(pCitas.length && pCitas[0].creadoEl) return pCitas[0].creadoEl.slice(0,10);
   if(b.actualizadoEl) return b.actualizadoEl.slice(0,10);
   return '';
@@ -3755,10 +3758,14 @@ function openBudgetModal(citaId, pKey){
       </div>
     </div>
 
-    <div class="grid2">
+    <div class="grid3-kpis">
       <div class="field">
         <label class="l">N.° de Presupuesto (Folio Dentalink)</label>
         <input class="inp" id="bp-folio" value="${esc(b.folio)}" placeholder="ej. 4319">
+      </div>
+      <div class="field">
+        <label class="l">Fecha de Emisión / Cita</label>
+        <input class="inp" id="bp-fecha-emision" type="date" value="${(b.fechaEmision || '').slice(0,10) || (c && c.fecha) || iso(new Date())}">
       </div>
       <div class="field">
         <label class="l">Asesor Dental Responsable</label>
@@ -4078,6 +4085,7 @@ async function saveBudget(budgetId, citaId){
   const pac = $('#bp-pac') ? $('#bp-pac').value.trim() : '';
   const tel = $('#bp-tel') ? $('#bp-tel').value.trim() : '';
   const as = $('#bp-as') ? $('#bp-as').value.trim() : (user ? user.nombre : 'Miguel');
+  const customFecha = $('#bp-fecha-emision') ? $('#bp-fecha-emision').value : '';
   const notas = $('#bp-notas')?.value.trim() || '';
   const fecha = iso(new Date());
 
@@ -4102,8 +4110,8 @@ async function saveBudget(budgetId, citaId){
     targetCita = citas.find(c => patientKey(c.telefono, c.paciente) === key);
   }
 
-  // Si el paciente tiene una cita registrada, usar la fecha de esa cita como fecha de emisión
-  const citaFec = targetCita && targetCita.fecha ? targetCita.fecha : null;
+  // Priorizar fecha explícita del formulario, o de la cita asociada, o de emisión previa
+  const citaFec = customFecha || (targetCita && targetCita.fecha ? targetCita.fecha : null);
 
   const budgetObj = {
     ...existing,
@@ -4132,7 +4140,7 @@ async function saveBudget(budgetId, citaId){
       id: 'c_pres_' + Date.now() + '_' + (cleanP ? cleanP.slice(-6) : uid()),
       paciente: pac,
       telefono: tel,
-      fecha: fecha,
+      fecha: citaFec || fecha,
       hora: '10:00',
       sucursal: 'Plaza San Pedro',
       tratamiento: 'Plan de Tratamiento #' + (folio || 'S/N'),
