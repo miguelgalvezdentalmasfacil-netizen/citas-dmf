@@ -2,8 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Dental MÁS FÁCIL – Inicio</title>
+  <link rel="icon" type="image/png" href="logo-dental-facil.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg:#F8FAFC;
@@ -15,47 +21,18 @@
       --radius:12px;
       --shadow:0 4px 20px rgba(0,0,0,.02);
     }
-    body {
-      margin:0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-height:100vh;
-    }
-    .card {
-      background: var(--surface);
-      border:1px solid #E2E8F0;
-      border-radius: var(--radius);
-      padding:32px;
-      text-align:center;
-      box-shadow: var(--shadow);
-    }
-    h1 {
-      margin:0 0 24px;
-      font-size:1.8rem;
-    }
-    .btn {
-      display:inline-block;
-      margin:12px 0;
-      padding:14px 28px;
-      font-size:1rem;
-      font-weight:500;
-      color: var(--btn-text);
-      background: var(--btn-bg);
-      border:none;
-      border-radius: var(--radius);
-      cursor:pointer;
-      text-decoration:none;
-      transition:background .15s ease;
-    }
-    .btn:hover {background: var(--btn-bg-hover);}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;min-height:100vh;}
+    .card{background:var(--surface);border:1px solid #E2E8F0;border-radius:var(--radius);padding:32px;text-align:center;box-shadow:var(--shadow);width:90%;max-width:360px;}
+    .logo{height:80px;margin-bottom:24px;}
+    h1{margin:0 0 24px;font-size:1.8rem;font-weight:500;}
+    .btn{display:inline-block;margin:12px 0;padding:14px 28px;font-size:1rem;font-weight:500;color:var(--btn-text);background:var(--btn-bg);border:none;border-radius:var(--radius);cursor:pointer;text-decoration:none;transition:background .15s ease;}
+    .btn:hover{background:var(--btn-bg-hover);}
   </style>
 </head>
 <body>
   <div class="card">
+    <img src="logo-dental-facil.png" alt="Dental MÁS FÁCIL" class="logo">
     <h1>Dental MÁS FÁCIL</h1>
     <a class="btn" href="recepcion-pwa/index.html">Recepción</a>
     <a class="btn" href="citas.html">Citas</a>
