@@ -1419,11 +1419,25 @@ function sanitizeAllExistingPresupuestos(){
         modified = true;
       }
     }
-    // Solo sincronizar fecha de emisión si no tiene fechaEmision establecida
+    // Si la fecha de emisión del presupuesto difiere de su cita o cae en fecha posterior, corregir con fecha de cita
     const pCitas = getPatientCitas(b.telefono, b.paciente);
-    if(!b.fechaEmision && pCitas.length && pCitas[0].fecha){
-      b.fechaEmision = pCitas[0].fecha;
-      modified = true;
+    if(pCitas.length && pCitas[0].fecha){
+      const citaF = pCitas[0].fecha;
+      // Si la fechaEmisión actual es de noviembre (2026-11) y la cita es de octubre (2026-10), restaurar a la fecha de la cita
+      if(!b.fechaEmision || (b.fechaEmision > citaF && b.fechaEmision.slice(0,7) !== citaF.slice(0,7))){
+        b.fechaEmision = citaF;
+        modified = true;
+      }
+    }
+    // Corregir abonos automáticos que se hayan sellado con fecha de noviembre si el presupuesto es de mes anterior
+    if(b.fechaEmision && Array.isArray(b.abonos)){
+      const emMonth = b.fechaEmision.slice(0,7);
+      b.abonos.forEach(a => {
+        if(a.pasoKey && a.fecha && a.fecha.slice(0,7) > emMonth){
+          a.fecha = b.fechaEmision + 'T12:00:00Z';
+          modified = true;
+        }
+      });
     }
   });
   if(modified){
@@ -4076,7 +4090,7 @@ async function handleBudgetPDF(file){
         if(!hasAbono){
           currentModalAbonos.push({
             id: 'ab_' + uid(),
-            fecha: new Date().toISOString(),
+            fecha: (data.fecha ? data.fecha + 'T12:00:00Z' : new Date().toISOString()),
             monto: p.monto,
             concepto: `${p.descripcion}`,
             asesor: user ? user.nombre : 'Miguel',
