@@ -26,28 +26,74 @@
       background:#FFFFFF;
       border-radius:28px;
       box-shadow:0 8px 48px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.04);
-      padding:52px 48px;
+      padding:48px 48px 44px;
       width:100%;
-      max-width:560px;
+      max-width:600px;
       display:flex;
       flex-direction:column;
-      align-items:center;
-      gap:40px;
+      gap:28px;
     }
-    .logo-wrap{
+
+    /* ---- Header: Logo | Recepción  Citas ---- */
+    .card-header{
       display:flex;
       align-items:center;
-      justify-content:center;
+      gap:0;
     }
     .logo-wrap img{
-      height:52px;
+      height:44px;
       width:auto;
       display:block;
     }
+    .divider{
+      width:1px;
+      height:36px;
+      background:#CBD5E1;
+      margin:0 18px;
+      flex-shrink:0;
+    }
+    .header-labels{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .label-tag{
+      font-size:14px;
+      font-weight:600;
+      color:#0097a7;
+      letter-spacing:0.01em;
+    }
+    .label-sep{
+      font-size:13px;
+      color:#CBD5E1;
+      font-weight:400;
+    }
+
+    /* ---- Title block ---- */
+    .card-title-block{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .card-title{
+      font-size:26px;
+      font-weight:700;
+      color:#0F172A;
+      letter-spacing:-0.3px;
+      line-height:1.2;
+    }
+    .card-subtitle{
+      font-size:14px;
+      font-weight:400;
+      color:#64748B;
+      line-height:1.5;
+    }
+
+    /* ---- Buttons ---- */
     .btn-group{
       display:flex;
       flex-direction:column;
-      gap:16px;
+      gap:14px;
       width:100%;
     }
     .btn{
@@ -72,26 +118,46 @@
       background:#E0F5F7;
       border-color:#007a8a;
     }
-    .btn:active{
-      opacity:0.9;
-    }
+    .btn:active{ opacity:0.9; }
     .btn-arrow{
       color:#0097a7;
-      font-size:18px;
+      font-size:20px;
       flex-shrink:0;
+      line-height:1;
     }
-    @media (max-width:480px){
-      .card{padding:36px 20px; border-radius:20px; max-width:100%;}
-      .logo-wrap img{height:42px;}
-      .btn{font-size:15px; padding:14px 16px;}
+
+    @media (max-width:520px){
+      .card{ padding:36px 20px 32px; border-radius:20px; }
+      .logo-wrap img{ height:36px; }
+      .card-title{ font-size:22px; }
+      .btn{ font-size:15px; padding:14px 16px; }
+      .divider{ margin:0 12px; }
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="logo-wrap">
-      <img src="logo-dental-facil.png" alt="Dental MÁS FÁCIL">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo-wrap">
+        <img src="logo-dental-facil.png" alt="Dental MÁS FÁCIL">
+      </div>
+      <div class="divider"></div>
+      <div class="header-labels">
+        <span class="label-tag">Recepción</span>
+        <span class="label-sep">·</span>
+        <span class="label-tag">Citas</span>
+      </div>
     </div>
+
+    <!-- Title -->
+    <div class="card-title-block">
+      <h1 class="card-title">Bienvenido al sistema</h1>
+      <p class="card-subtitle">Esta es la app de recepción y citas de Dental MÁS FÁCIL.<br>Elige el módulo al que quieres acceder.</p>
+    </div>
+
+    <!-- Buttons -->
     <div class="btn-group">
       <a class="btn" href="recepcion.html">
         <span>Recepción</span>
@@ -102,6 +168,7 @@
         <span class="btn-arrow">›</span>
       </a>
     </div>
+
   </div>
 </body>
 </html>
