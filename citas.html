@@ -1887,6 +1887,30 @@ function extractDentalinkData(text){
                 || clean.match(/Paciente\s*:\s*([A-Za-zÁÉÍÓÚáéíóúñÑüÜ\s]+?)(?=\s*(?:Fecha|RUT|CURP|Edad|Tel|Email|Doctor|Convenio|Tratamiento|$))/i);
   const paciente = pacMatch ? pacMatch[1].trim() : '';
 
+  // Fecha del presupuesto en PDF Dentalink: ej. "Fecha: 15/10/2026" o "Fecha emisión: 2026-10-15"
+  let fecha = '';
+  const dateMatch = clean.match(/(?:Fecha(?:\s+emisi[óo]n)?\s*:\s*)(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/i);
+  if(dateMatch){
+    const rawD = dateMatch[1].trim();
+    if(rawD.includes('/')){
+      const parts = rawD.split('/');
+      if(parts.length === 3){
+        const y = parts[2].length === 2 ? ('20' + parts[2]) : parts[2];
+        const m = parts[1].padStart(2, '0');
+        const d = parts[0].padStart(2, '0');
+        fecha = `${y}-${m}-${d}`;
+      }
+    } else if(rawD.includes('-')){
+      const parts = rawD.split('-');
+      if(parts[0].length === 4){
+        fecha = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      } else if(parts.length === 3){
+        const y = parts[2].length === 2 ? ('20' + parts[2]) : parts[2];
+        fecha = `${y}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+    }
+  }
+
   // Total presupuesto: Total del presupuesto $ 17,750.00
   const totalMatch = clean.match(/Total\s+del\s+presupuesto\s+\$?\s*([\d,]+(?:\.\d{2})?)/i)
                   || clean.match(/Total\s+\$?\s*([\d,]+(?:\.\d{2})?)/i);
@@ -1991,7 +2015,7 @@ function extractDentalinkData(text){
     }
   }
 
-  return { folio, paciente, total, abono, saldo, pasos };
+  return { folio, paciente, fecha, total, abono, saldo, pasos };
 }
 
 async function parseDentalinkPDFFile(file){
@@ -4036,6 +4060,7 @@ async function handleBudgetPDF(file){
 
     if(data.folio && $('#bp-folio')) $('#bp-folio').value = data.folio;
     if(data.paciente && $('#bp-pac') && !$('#bp-pac').value) $('#bp-pac').value = data.paciente;
+    if(data.fecha && $('#bp-fecha-emision')) $('#bp-fecha-emision').value = data.fecha;
     if(data.total > 0 && $('#bp-total')) $('#bp-total').value = data.total;
 
     currentModalPasos = data.pasos || [];
