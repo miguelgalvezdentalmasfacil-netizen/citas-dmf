@@ -19,97 +19,95 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:24px;
+      padding:20px;
       -webkit-font-smoothing:antialiased;
     }
     .card{
       background:#FFFFFF;
-      border-radius:28px;
-      box-shadow:0 8px 48px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.04);
-      padding:48px 48px 44px;
+      border-radius:24px;
+      box-shadow:0 8px 40px rgba(0,0,0,0.09), 0 1px 4px rgba(0,0,0,0.04);
+      padding:36px 32px 36px;
       width:100%;
-      max-width:420px;
+      max-width:400px;
       display:flex;
       flex-direction:column;
-      gap:28px;
+      gap:22px;
     }
 
-    /* ---- Header: Logo | Recepción  Citas ---- */
+    /* ---- Header ---- */
     .card-header{
       display:flex;
       align-items:center;
       gap:0;
+      flex-wrap:nowrap;
+      overflow:hidden;
+    }
+    .logo-wrap{
+      flex-shrink:0;
     }
     .logo-wrap img{
-      height:44px;
+      height:30px;
       width:auto;
       display:block;
     }
     .divider{
       width:1px;
-      height:36px;
+      height:28px;
       background:#CBD5E1;
-      margin:0 18px;
+      margin:0 14px;
       flex-shrink:0;
     }
     .header-labels{
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:8px;
+      flex-shrink:0;
     }
     .label-tag{
-      font-size:14px;
+      font-size:13px;
       font-weight:600;
       color:#0097a7;
-      letter-spacing:0.01em;
     }
     .label-sep{
-      font-size:13px;
+      font-size:12px;
       color:#CBD5E1;
-      font-weight:400;
     }
 
     /* ---- Title block ---- */
-    .card-title-block{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
     .card-title{
-      font-size:26px;
+      font-size:22px;
       font-weight:700;
       color:#0F172A;
       letter-spacing:-0.3px;
       line-height:1.2;
     }
     .card-subtitle{
-      font-size:14px;
+      font-size:13px;
       font-weight:400;
       color:#64748B;
-      line-height:1.5;
+      line-height:1.55;
+      margin-top:6px;
     }
 
     /* ---- Buttons ---- */
     .btn-group{
       display:flex;
       flex-direction:column;
-      gap:14px;
-      width:100%;
+      gap:12px;
     }
     .btn{
       display:flex;
       align-items:center;
       justify-content:space-between;
       width:100%;
-      padding:16px 20px;
+      padding:14px 16px;
       background:#F0FAFA;
       color:#0F172A;
       border:1.5px solid #0097a7;
-      border-radius:14px;
+      border-radius:12px;
       font-family:inherit;
-      font-size:16px;
+      font-size:14px;
       font-weight:500;
-      text-align:left;
       text-decoration:none;
       cursor:pointer;
       transition:background .15s ease, border-color .15s ease;
@@ -118,27 +116,15 @@
       background:#E0F5F7;
       border-color:#007a8a;
     }
-    .btn:active{ opacity:0.9; }
     .btn-arrow{
       color:#0097a7;
-      font-size:20px;
+      font-size:18px;
       flex-shrink:0;
-      line-height:1;
-    }
-
-    @media (max-width:520px){
-      .card{ padding:36px 20px 32px; border-radius:20px; }
-      .logo-wrap img{ height:36px; }
-      .card-title{ font-size:22px; }
-      .btn{ font-size:15px; padding:14px 16px; }
-      .divider{ margin:0 12px; }
     }
   </style>
 </head>
 <body>
   <div class="card">
-
-    <!-- Header -->
     <div class="card-header">
       <div class="logo-wrap">
         <img src="logo-dental-facil.png" alt="Dental MÁS FÁCIL">
@@ -151,13 +137,11 @@
       </div>
     </div>
 
-    <!-- Title -->
-    <div class="card-title-block">
+    <div>
       <h1 class="card-title">Bienvenido al sistema</h1>
       <p class="card-subtitle">Esta es la app de recepción y citas de Dental MÁS FÁCIL.<br>Elige el módulo al que quieres acceder.</p>
     </div>
 
-    <!-- Buttons -->
     <div class="btn-group">
       <a class="btn" href="recepcion.html">
         <span>Recepción</span>
@@ -168,7 +152,6 @@
         <span class="btn-arrow">›</span>
       </a>
     </div>
-
   </div>
 </body>
 </html>
