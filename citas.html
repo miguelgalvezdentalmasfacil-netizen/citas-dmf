@@ -96,6 +96,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-.5px}
 @media (hover: hover) and (pointer: fine) {
   .btn:hover{background:var(--btn-bg-hover)}
   .btn.out:hover{transform:translateY(-2px);background:var(--hover);border-color:var(--text-main)}
+  .row .btn.out:hover{transform:none}
 }
 .btn:active{opacity:.75}
 .btn.out{background:transparent;border:1px solid var(--border-dark);color:var(--text-main);transition:all .15s ease}
@@ -3507,8 +3508,8 @@ function rowHTML(c){
       ${c.motivo?`<span class="m" style="margin-top:4px">${esc(c.motivo)}</span>`:''}
     </div>
     <div class="act">
-      <button class="btn out sm" data-act="status" data-id="${c.id}">Estatus</button>
-      <button class="btn out sm" data-act="edit" data-id="${c.id}">Editar</button>
+      <button type="button" class="btn out sm" data-act="status" data-id="${c.id}">Estatus</button>
+      <button type="button" class="btn out sm" data-act="edit" data-id="${c.id}">Editar</button>
     </div>
   </div>`;
 }
@@ -6660,13 +6661,15 @@ $('#b-clear-q')?.addEventListener('click', ()=>{
   render();
 });
 
-['f-q','f-date','f-date-type','f-st','f-suc','f-as','f-sort','f-tip','f-ori'].forEach(i=>{
+if($('#f-q')){
+  $('#f-q').addEventListener('input', ()=>{
+    checkFiltersActive();
+    render();
+  });
+}
+['f-date','f-date-type','f-st','f-suc','f-as','f-sort','f-tip','f-ori'].forEach(i=>{
   const el=$('#'+i);
   if(el){
-    el.addEventListener('input', ()=>{
-      checkFiltersActive();
-      render();
-    });
     el.addEventListener('change', ()=>{
       checkFiltersActive();
       render();
