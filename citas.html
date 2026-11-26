@@ -1823,6 +1823,17 @@ function getBudgetOrigen(b){
   return anyCita ? anyCita.origen : '';
 }
 
+function getBudgetSucursal(b){
+  if(!b) return '';
+  if(b.sucursal) return b.sucursal;
+  if(b.clinica) return b.clinica;
+  const pCitas = typeof getPatientCitas === 'function' ? getPatientCitas(b.telefono, b.paciente) : [];
+  if(pCitas.length && pCitas[0].sucursal) return pCitas[0].sucursal;
+  const key = typeof patientKey === 'function' ? patientKey(b.telefono, b.paciente) : '';
+  const anyCita = (typeof citas !== 'undefined') ? citas.find(c => patientKey(c.telefono, c.paciente) === key && c.sucursal) : null;
+  return anyCita ? anyCita.sucursal : '';
+}
+
 function getBudgetSemáforo(b){
   const totals = computeBudgetTotals(b);
   const total = parseFloat(b?.total) || 0;
@@ -3346,6 +3357,7 @@ function budgetCardHTML(b){
   const totals = computeBudgetTotals(b);
   const sem = getBudgetSemáforo(b);
   const pKey = patientKey(b.telefono, b.paciente);
+  const sucursal = getBudgetSucursal(b);
 
   return `
     <div class="card bp-card ${sem.status}">
@@ -3353,6 +3365,7 @@ function budgetCardHTML(b){
         <div class="bp-patient-name">${esc(b.paciente)}</div>
         <div class="bp-meta-line">
           <span class="bp-meta-tel">${esc(b.telefono)}</span>
+          ${sucursal ? `<span class="bp-meta-sep">·</span><span class="bp-meta-branch">Clínica: <b>${esc(sucursal)}</b></span>` : ''}
           <span class="bp-meta-sep">·</span>
           <span class="bp-meta-asesor">Asesor: <b>${esc(nameOf(b.asesorId))}</b></span>
         </div>
@@ -3789,6 +3802,7 @@ function openBudgetModal(citaId, pKey){
   }
   currentModalAbonos = (Array.isArray(b.abonos) ? JSON.parse(JSON.stringify(b.abonos)) : []).filter(a => a.id !== 'ab_ini' && a.concepto !== 'Cita de Valoración inicial');
   const totals = computeBudgetTotals(b);
+  const bSuc = getBudgetSucursal(b) || (c && c.sucursal) || '';
 
   openModal(`
     <div class="m-icon" style="background:rgba(0,151,167,.12);color:#0097a7">
@@ -3814,7 +3828,7 @@ function openBudgetModal(citaId, pKey){
     <div id="budget-pdf-status" class="hidden"></div>
 
     <!-- Datos del Paciente y Presupuesto -->
-    <div class="grid2" style="margin-top:16px">
+    <div class="grid3-kpis" style="margin-top:16px">
       <div class="field">
         <label class="l">Paciente</label>
         <input class="inp" id="bp-pac" value="${esc(b.paciente)}" placeholder="Nombre completo del paciente">
@@ -3822,6 +3836,13 @@ function openBudgetModal(citaId, pKey){
       <div class="field">
         <label class="l">Teléfono</label>
         <input class="inp" id="bp-tel" inputmode="tel" value="${esc(b.telefono)}" placeholder="664 000 0000">
+      </div>
+      <div class="field">
+        <label class="l">Clínica / Sucursal</label>
+        <select class="inp" id="bp-suc">
+          <option value="">Seleccionar clínica</option>
+          ${SUCURSALES.map(s => `<option value="${esc(s)}" ${(bSuc===s)?'selected':''}>${esc(s)}</option>`).join('')}
+        </select>
       </div>
     </div>
 
@@ -4153,6 +4174,7 @@ async function saveBudget(budgetId, citaId){
   const pac = $('#bp-pac') ? $('#bp-pac').value.trim() : '';
   const tel = $('#bp-tel') ? $('#bp-tel').value.trim() : '';
   const as = $('#bp-as') ? $('#bp-as').value.trim() : (user ? user.nombre : 'Miguel');
+  const sucursalInput = $('#bp-suc') ? $('#bp-suc').value.trim() : '';
   const customFecha = $('#bp-fecha-emision') ? $('#bp-fecha-emision').value : '';
   const notas = $('#bp-notas')?.value.trim() || '';
   const fecha = iso(new Date());
@@ -4188,6 +4210,7 @@ async function saveBudget(budgetId, citaId){
     telefono: tel || existing.telefono || '',
     paciente: pac || existing.paciente || '',
     asesorId: as || existing.asesorId || (user ? user.nombre : 'Miguel'),
+    sucursal: sucursalInput || existing.sucursal || (targetCita && targetCita.sucursal) || '',
     origen: existing.origen || (citaId ? (citas.find(x => x.id === citaId)?.origen || '') : '') || '',
     total: total,
     abonoInicial: abonoIni,
@@ -4265,6 +4288,7 @@ function openAddAbonoModal(pKey){
   const b = presupuestos[pKey];
   if(!b) return;
   const totals = computeBudgetTotals(b);
+  const bSuc = getBudgetSucursal(b) || '';
 
   openModal(`
     <div class="m-icon" style="background:rgba(16,185,129,.12);color:#10b981">
@@ -4273,7 +4297,7 @@ function openAddAbonoModal(pKey){
       </svg>
     </div>
     <h2>Registrar Abono a Presupuesto</h2>
-    <div class="sub nocap">Paciente: <b>${esc(b.paciente)}</b> · Presupuesto <b>#${esc(b.folio || 'S/N')}</b></div>
+    <div class="sub nocap">Paciente: <b>${esc(b.paciente)}</b> · Presupuesto <b>#${esc(b.folio || 'S/N')}</b>${bSuc ? ` · Clínica: <b>${esc(bSuc)}</b>` : ''}</div>
 
     <div class="field" style="margin-top:14px">
       <div style="background:var(--hover);border-radius:10px;padding:12px;display:flex;justify-content:space-around;font-size:13px;border:1px solid var(--border)">
@@ -5074,6 +5098,7 @@ function renderPdfPreview(){
         const pFec=rawFec?fmtDateYY(rawFec):'—';
         const aName=nameOf(b.asesorId)||'—';
         const bOri=fmtOrigenShort(getBudgetOrigen(b)) || '—';
+        const bSuc=getBudgetSucursal(b);
         const bTot = parseFloat(b.total) || 0;
         const pCobrado = getPeriodPagado(b);
         const pSaldo = Math.max(0, bTot - pCobrado);
@@ -5082,7 +5107,7 @@ function renderPdfPreview(){
           <tr>
             <td class="col-paciente">
               <div style="font-weight:700;color:#0f172a">${esc(b.paciente||'Paciente sin nombre')}</div>
-              <div style="font-size:11px;color:#64748b">${fol} · Tel: ${esc(b.telefono||'—')}</div>
+              <div style="font-size:11px;color:#64748b">${fol} · Tel: ${esc(b.telefono||'—')}${bSuc ? ' · ' + esc(bSuc) : ''}</div>
             </td>
             <td style="text-align:center;white-space:nowrap">${pFec}</td>
             <td style="text-align:center">${esc(aName)}</td>
