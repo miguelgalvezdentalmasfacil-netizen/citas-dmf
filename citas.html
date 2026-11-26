@@ -1734,6 +1734,31 @@ const fmtReg=s=>{
   h=h%12||12;
   return `${day} ${mon}, ${h}:${m}${ampm}`;
 };
+const fmtOrigenShort=o=>{
+  if(!o) return '';
+  const s = String(o).trim();
+  const lower = s.toLowerCase();
+  if(lower.includes('extern') || lower.includes('meta')) return 'Externo';
+  if(lower.includes('intern')) return 'Interno';
+  if(lower.includes('convenio')) return 'Convenio';
+  if(lower.includes('cuenta')) return 'Cuenta propia';
+  return s;
+};
+function getCitaOrigenLabel(c){
+  if(!c) return '';
+  let ori = c.origen;
+  if(!ori){
+    const pKey = typeof patientKey === 'function' ? patientKey(c.telefono, c.paciente) : '';
+    const b = (pKey && typeof presupuestos !== 'undefined') ? presupuestos[pKey] : null;
+    if(b && b.origen) ori = b.origen;
+    else if(typeof getPatientCitas === 'function'){
+      const pCitas = getPatientCitas(c.telefono, c.paciente);
+      const withOri = pCitas && pCitas.find(x => x && x.origen);
+      if(withOri) ori = withOri.origen;
+    }
+  }
+  return fmtOrigenShort(ori);
+}
 
 /* ============ BUDGET & TREATMENT PLAN HELPERS ============ */
 function isLeadRecord(c){
@@ -3438,12 +3463,20 @@ function rowHTML(c){
 
   const whatParts = [];
   if(c.sucursal) whatParts.push(`<span class="what-branch">${esc(c.sucursal)}</span>`);
+  const oriLabel = getCitaOrigenLabel(c);
+  if(oriLabel){
+    const isInt = (oriLabel === 'Interno');
+    const oriStyle = isInt
+      ? 'background:rgba(124,58,237,.08);color:#7c3aed;border:1px solid rgba(124,58,237,.22);padding:1px 6px;border-radius:4px;font-size:11.5px;font-weight:600;'
+      : 'background:rgba(2,132,199,.08);color:#0284c7;border:1px solid rgba(2,132,199,.22);padding:1px 6px;border-radius:4px;font-size:11.5px;font-weight:600;';
+    whatParts.push(`<span class="what-origin" style="${oriStyle}">${esc(oriLabel)}</span>`);
+  }
   if(c.paquete && c.paquete !== 'Individual') whatParts.push(`<span class="reg-meta" style="color:#0ea5e9!important;border-color:rgba(14,165,233,.3);background:rgba(14,165,233,.08);padding:1px 6px"><b>${esc(c.paquete)}</b></span>`);
   if(visitText) whatParts.push(`<span class="what-type">${esc(visitText)}</span>`);
   const asesorName = c.asesorId ? nameOf(c.asesorId) : '';
   if(asesorName) whatParts.push(`<span class="what-advisor">Asesor: <b>${esc(asesorName)}</b></span>`);
   const whatMetaHtml = whatParts.join('<span class="what-sep">·</span>');
-  const fullMetaTitle = [c.sucursal, visitText, asesorName ? `Asesor: ${asesorName}` : ''].filter(Boolean).join(' · ');
+  const fullMetaTitle = [c.sucursal, oriLabel, visitText, asesorName ? `Asesor: ${asesorName}` : ''].filter(Boolean).join(' · ');
 
   return `<div class="row">
     <div class="time">
@@ -4387,7 +4420,7 @@ function exportCSV(){
 /* ============ REPORTES PDF ============ */
 const fmtDateYY=s=>{if(!s)return'—';const p=s.split('-');return p.length===3?`${p[2]}/${p[1]}/${p[0].slice(-2)}`:s};
 const fmtDateLongEs=s=>{if(!s)return'—';const d=new Date(s+'T12:00:00');return isNaN(d.getTime())?s:d.toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})};
-const fmtOrigenShort=o=>{if(!o)return'';if(o.includes('Externa'))return'Externo';if(o.includes('Interna'))return'Interno';if(o.includes('Convenio'))return'Convenio';return o};
+// fmtOrigenShort is defined in HELPERS
 
 let repConfig={
   type:'atendidos',

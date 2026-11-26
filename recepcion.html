@@ -1006,6 +1006,7 @@ function renderApp(){
   box.innerHTML = list.map(c => {
     const isAsistio = (c.estatus === 'Asistió');
     const isCP = (c.origen === 'Cuenta propia' || (c.origen && c.origen.includes('Cuenta propia')));
+    const oriLabel = (c.origen && !isCP) ? (c.origen.includes('Intern') ? 'Interno' : (c.origen.includes('Extern') || c.origen.includes('Meta') ? 'Externo' : c.origen)) : '';
     return `
       <div class="row">
         <div class="time">
@@ -1020,6 +1021,7 @@ function renderApp(){
           <b class="what-title">${esc(c.tratamiento || 'Valoración')}</b>
           <div class="what-meta">
             <span class="what-branch">${esc(c.sucursal)}</span>
+            ${oriLabel ? `<span class="what-sep">·</span><span style="font-weight:600;font-size:11.5px;padding:1px 6px;border-radius:4px;${oriLabel==='Interno'?'background:rgba(124,58,237,.08);color:#7c3aed;border:1px solid rgba(124,58,237,.22);':'background:rgba(2,132,199,.08);color:#0284c7;border:1px solid rgba(2,132,199,.22);'}">${esc(oriLabel)}</span>` : ''}
             <span class="what-sep">·</span>
             <span>Paquete: <b>${esc(c.paquete || 'Individual')}</b></span>
           </div>
